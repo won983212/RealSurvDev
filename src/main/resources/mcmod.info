@@ -1,0 +1,16 @@
+[
+{
+  "modid": "realsurvmod",
+  "name": "realsurvmod",
+  "description": "서버 전용 모드",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["won983212", ""],
+  "credits": "서버 전용 모드",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
