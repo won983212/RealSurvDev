@@ -16,6 +16,7 @@ public class RealSurvMod
     
     private static Logger logger;
 
+    
     @EventHandler
     public void preInit(FMLPreInitializationEvent event)
     {
