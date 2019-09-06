@@ -14,8 +14,6 @@ public class RealSurvMod {
 	public static final String NAME = "realsurvmod";
 	public static final String VERSION = "0.1";
 
-	private static Logger logger;
-
 	@Mod.Instance(RealSurvMod.MODID)
 	public static RealSurvMod instance;
 
