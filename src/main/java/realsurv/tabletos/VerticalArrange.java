@@ -1,4 +1,4 @@
-package realsurv.tabletos.ui;
+package realsurv.tabletos;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;

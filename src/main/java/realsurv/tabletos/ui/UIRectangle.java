@@ -17,7 +17,7 @@ public class UIRectangle extends UIObject {
 	}
 	
 	@Override
-	public void render() {
+	public void render(int mx, int my) {
 		Rectangle bounds = getActualBounds();
 		Gui.drawRect(bounds.x, bounds.y, bounds.x + bounds.width, bounds.y + bounds.height, color);
 	}

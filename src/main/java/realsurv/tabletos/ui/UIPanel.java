@@ -15,9 +15,17 @@ public class UIPanel extends UIObject {
 		obj.setParentPanel(this);
 	}
 	
+	public void requestLayout() {
+		if(panel == null) {
+			invalidateSize();
+			layout();
+		} else
+			panel.requestLayout();
+	}
+	
 	@Override
-	public void setBoundsByArrange(Rectangle available) {
-		super.setBoundsByArrange(available);
+	public void arrange(Rectangle available) {
+		super.arrange(available);
 		layout();
 	}
 	
@@ -35,14 +43,14 @@ public class UIPanel extends UIObject {
 	public void layout() {
 		Rectangle available = getActualBounds();
 		for(UIObject obj : uiList) {
-			obj.setBoundsByArrange(available);
+			obj.arrange(available);
 		}
 	}
 	
 	@Override
-	public void render() {
+	public void render(int mouseX, int mouseY) {
 		for(UIObject obj : uiList)
-			obj.render();
+			obj.render(mouseX, mouseY);
 	}
 	
 	@Override
@@ -52,14 +60,16 @@ public class UIPanel extends UIObject {
 		super.invalidateSize();
 	}
 	
-	public void keyTyped(char typedChar, int keyCode) {
+	@Override
+	public void onKeyTyped(int keyCode, char typedChar) {
 		for(UIObject obj : uiList) {
 			if(obj.isEnabledKeyEvent() && focusd == obj) 
 				obj.onKeyTyped(keyCode, typedChar);
 		}
 	}
 
-	public void mouseClicked(int mouseX, int mouseY, int mouseButton) {
+	@Override
+	public void onPress(int mouseX, int mouseY, int mouseButton) {
 		for(int i=uiList.size()-1;i>=0;i--) {
 			UIObject obj = uiList.get(i);
 			if(obj.contains(mouseX, mouseY)) {
@@ -73,14 +83,16 @@ public class UIPanel extends UIObject {
 		}
 	}
 
-	public void mouseReleased(int mouseX, int mouseY, int state) {
+	@Override
+	public void onRelease(int mouseX, int mouseY, int state) {
 		if(lastPressedObject != null) {
 			lastPressedObject.onRelease(mouseX, mouseY, state);
 			lastPressedObject = null;
 		}
 	}
 
-	public void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
+	@Override
+	public void onDrag(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
 		for(UIObject obj : uiList) {
 			if(obj.isEnabledMouseEvent()) {
 				obj.onDrag(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);

@@ -1,4 +1,4 @@
-package realsurv.tabletos.ui;
+package realsurv.tabletos;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
@@ -28,11 +28,11 @@ public class DirWeights {
 		right = w;
 	}
 
-	public Dimension outExpandedSize(Dimension size) {
+	public Dimension getExpandedSize(Dimension size) {
 		return new Dimension(size.width + left + right, size.height + up + down);
 	}
-
-	public Dimension inExpandedSize(Dimension size) {
-		return new Dimension(size.width - left - right, size.height - up - down);
+	
+	public Rectangle getContentRect(Rectangle rect) {
+		return new Rectangle(rect.x + left, rect.y + up, rect.width - left - right, rect.height - up - down);
 	}
 }

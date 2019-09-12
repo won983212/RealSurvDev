@@ -60,17 +60,23 @@ public class TabletModel implements IBakedModel {
 				ClientEventHandler.instance.bindTabletScreenTexture();
 				float bx = OpenGlHelper.lastBrightnessX;
 				float by = OpenGlHelper.lastBrightnessY;
-				final float zlevel = 0.065f;
+				final float unit = 0.0625f;
+				final float zlevel = (1 - 0.2402f) * unit;
+				final float xMin = 0.455f * unit;
+				final float xMax = xMin + 16f * unit;
+				final float zMin = 2.39f * unit;
+				final float zMax = zMin + 10.75f * unit;
+				
 				OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 240f, 240f);
 				GlStateManager.glBegin(7);
 				GlStateManager.glTexCoord2f(0, 0);
-				GlStateManager.glVertex3f(0.0625f, zlevel, 0.0625f*8);
+				GlStateManager.glVertex3f(xMin, zlevel, zMax);
 				GlStateManager.glTexCoord2f(1, 0);
-				GlStateManager.glVertex3f(0.0625f*15, zlevel, 0.0625f*8);
+				GlStateManager.glVertex3f(xMax, zlevel, zMax);
 				GlStateManager.glTexCoord2f(1, 1);
-				GlStateManager.glVertex3f(0.0625f*15, zlevel, 0.0625f);
+				GlStateManager.glVertex3f(xMax, zlevel, zMin);
 				GlStateManager.glTexCoord2f(0, 1);
-				GlStateManager.glVertex3f(0.0625f, zlevel, 0.0625f);
+				GlStateManager.glVertex3f(xMin, zlevel, zMin);
 				GlStateManager.glEnd();
 				OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, bx, by);
 				RenderHelper.enableStandardItemLighting();

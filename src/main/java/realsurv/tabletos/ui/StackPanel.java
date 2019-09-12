@@ -3,10 +3,10 @@ package realsurv.tabletos.ui;
 import java.awt.Dimension;
 import java.awt.Rectangle;
 
-public class PanelStack extends UIPanel {
+public class StackPanel extends UIPanel {
 	private Orientation orientation;
 	
-	public PanelStack setOrientation(Orientation o) {
+	public StackPanel setOrientation(Orientation o) {
 		orientation = o;
 		return this;
 	}
@@ -42,7 +42,7 @@ public class PanelStack extends UIPanel {
 				y += clientDim.height;
 				rect.width = bounds.width;
 			}
-			obj.setBoundsByArrange(rect);
+			obj.arrange(rect);
 		}
 	}
 	

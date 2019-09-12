@@ -2,6 +2,7 @@ package realsurv.tabletos;
 
 import java.util.ArrayList;
 
+import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
 import net.minecraft.client.Minecraft;
@@ -9,11 +10,12 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.shader.Framebuffer;
+import realsurv.tabletos.scenes.SceneMainScreen;
 import realsurv.tabletos.ui.UIPanel;
 
 public class TabletOS {
-	public static final int WIDTH = 160*2;
-	public static final int HEIGHT = 90*2;
+	public static final int WIDTH = 320;
+	public static final int HEIGHT = 215;
 	private Framebuffer fbo = null;
 	private SceneMainScreen mainScreen = new SceneMainScreen();
 	
@@ -40,24 +42,32 @@ public class TabletOS {
         GlStateManager.clear(GL11.GL_COLOR_BUFFER_BIT);
         GlStateManager.translate(0.0F, 0.0F, -2000.0F);
         GlStateManager.enableTexture2D();
-        mainScreen.render();
+        
+        Minecraft mc = Minecraft.getMinecraft();
+        final ScaledResolution scaledresolution = new ScaledResolution(mc);
+        int i1 = scaledresolution.getScaledWidth();
+        int j1 = scaledresolution.getScaledHeight();
+        final int k1 = Mouse.getX() * i1 / mc.displayWidth;
+        final int l1 = j1 - Mouse.getY() * j1 / mc.displayHeight - 1;
+        
+        mainScreen.render(k1, l1);
         Minecraft.getMinecraft().getFramebuffer().bindFramebuffer(true);
 	}
 	
-	public void keyTyped(char typedChar, int keyCode) {
-		mainScreen.keyTyped(typedChar, keyCode);
+	public void keyTyped(int keyCode, char typedChar) {
+		mainScreen.onKeyTyped(keyCode, typedChar);
 	}
 
 	public void mouseClicked(int mouseX, int mouseY, int mouseButton) {
-		mainScreen.mouseClicked(mouseX, mouseY, mouseButton);
+		mainScreen.onPress(mouseX, mouseY, mouseButton);
 	}
 
 	public void mouseReleased(int mouseX, int mouseY, int state) {
-		mainScreen.mouseReleased(mouseX, mouseY, state);
+		mainScreen.onRelease(mouseX, mouseY, state);
 	}
 
 	public void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
-		mainScreen.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
+		mainScreen.onDrag(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
 	}
 }
  
