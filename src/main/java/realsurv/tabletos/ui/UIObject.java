@@ -5,6 +5,7 @@ import java.awt.Rectangle;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.Gui;
 import realsurv.tabletos.DirWeights;
 import realsurv.tabletos.HorizontalArrange;
 import realsurv.tabletos.VerticalArrange;
@@ -17,9 +18,13 @@ public abstract class UIObject {
 	private Dimension minSize = new Dimension(10, 10);
 	private DirWeights margin = new DirWeights();
 	private DirWeights padding = new DirWeights();
+	private boolean visible = true;
+	protected int backgroundColor = 0xfff0f0f0;
+	protected int foregroundColor = 0xff000000;
+	
 	protected UIPanel panel;
 	private boolean focusd = false;
-	private Dimension actualSize = null;
+	private Dimension sizeCache = null;
 	
 	// for grid
 	public int layoutX = 0;
@@ -28,8 +33,8 @@ public abstract class UIObject {
 	public int layoutYSpan = 1;
 	
 	public void arrange(Rectangle available) {
-		setPositionByArrange(available);
 		setSizeByArrange(available);
+		setPositionByArrange(available);
 	}
 
 	public boolean contains(int x, int y) {
@@ -40,14 +45,14 @@ public abstract class UIObject {
 		return bounds;
 	}
 	
-	public Dimension getDesiredSize() {
-		return margin.getExpandedSize(getMeasuredSize());
+	public Dimension getLayoutMinSize() {
+		return margin.getExpandedSize(getMeasuredMinSize());
 	}
 	
-	public Dimension getMeasuredSize() {
-		if(actualSize == null)
-			actualSize = measureSize();
-		return actualSize;
+	public Dimension getMeasuredMinSize() {
+		if(sizeCache == null)
+			sizeCache = measureMinSize();
+		return sizeCache;
 	}
 
 	public HorizontalArrange getHorizontalArrange() {
@@ -71,22 +76,22 @@ public abstract class UIObject {
 	}
 	
 	public void invalidateSize() {
-		actualSize = null;
+		sizeCache = null;
 	}
 	
-	public boolean isEnabledKeyEvent() {
-		return true;
+	public boolean isInteractive() {
+		return visible;
 	}
 	
-	public boolean isEnabledMouseEvent() {
-		return true;
+	public boolean isVisible() {
+		return visible;
 	}
 	
 	public boolean isFocusd() {
 		return focusd;
 	}
 	
-	protected Dimension measureSize() {
+	protected Dimension measureMinSize() {
 		return padding.getExpandedSize(minSize);
 	}
 	
@@ -138,6 +143,16 @@ public abstract class UIObject {
 		this.margin = margin;
 		return this;
 	}
+	
+	public UIObject setBackgroundColor(int color) {
+		this.backgroundColor = color;
+		return this;
+	}
+	
+	public UIObject setForegroundColor(int color) {
+		this.foregroundColor = color;
+		return this;
+	}
 
 	public UIObject setMinimumSize(int minWidth, int minHeight) {
 		minSize.setSize(minWidth, minHeight);
@@ -148,36 +163,52 @@ public abstract class UIObject {
 		this.padding = padding;
 		return this;
 	}
+	
+	public UIObject setVisible(boolean visible) {
+		this.visible = visible;
+		return this;
+	}
 
 	public void setParentPanel(UIPanel panel) {
 		this.panel = panel;
 	}
 
-	public void setPosition(int x, int y) {
+	protected void setActualBounds(int x, int y, int width, int height) {
+		bounds.setBounds(x, y, width, height);
+	}
+	
+	private void setPositionByArrange(Rectangle available) {
+		Dimension size = getActualBounds().getSize();
+		int x = hArrange.getHorizontalArrangedLocation(available, size) + margin.left;
+		int y = vArrange.getVerticalArrangedLocation(available, size) + margin.top;
 		bounds.setLocation(x, y);
 	}
 
-	private void setPositionByArrange(Rectangle available) {
-		Dimension size = getDesiredSize();
-		int x = hArrange.getHorizontalArrangedLocation(available, size) + margin.left;
-		int y = vArrange.getVerticalArrangedLocation(available, size) + margin.up;
-		setPosition(x, y);
-	}
-
-	public void setSize(int width, int height) {
-		bounds.setSize(width, height);
-	}
-
 	private void setSizeByArrange(Rectangle available) {
-		Dimension size = getMeasuredSize();
+		Dimension size = getMeasuredMinSize();
 		Rectangle marginCalc = margin.getContentRect(available);
 		int width = Math.max(minSize.width, hArrange.getWidthArranged(marginCalc, size));
 		int height = Math.max(minSize.height, vArrange.getHeightArranged(marginCalc, size));
-		setSize(width, height);
+		bounds.setSize(width, height);
 	}
 
 	public UIObject setVerticalArrange(VerticalArrange arr) {
 		this.vArrange = arr;
 		return this;
+	}
+	
+	public static int offsetColor(int color, int offset) {
+		int a = (color >> 24) & 0xff;
+		int r = Math.min(((color >> 16) & 0xff) + offset, 0xff);
+		int g = Math.min(((color >> 8) & 0xff) + offset, 0xff);
+		int b = Math.min((color & 0xff) + offset, 0xff);
+		return (a << 24) + (r << 16) + (g << 8) + b;
+	}
+	
+	public static void renderBorder(int x1, int y1, int x2, int y2, int color, int thickness) {
+		Gui.drawRect(x1, y1, x2, y1 + thickness, color);
+		Gui.drawRect(x1, y2 - thickness, x2, y2, color);
+		Gui.drawRect(x1, y1, x1 + thickness, y2, color);
+		Gui.drawRect(x2 - thickness, y1, x2, y2, color);
 	}
 }

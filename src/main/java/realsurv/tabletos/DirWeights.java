@@ -4,8 +4,8 @@ import java.awt.Dimension;
 import java.awt.Rectangle;
 
 public class DirWeights {
-	public int up;
-	public int down;
+	public int top;
+	public int bottom;
 	public int left;
 	public int right;
 
@@ -21,18 +21,18 @@ public class DirWeights {
 		this(vertical, vertical, horizontal, horizontal);
 	}
 	
-	public DirWeights(int n, int s, int e, int w) {
-		up = n;
-		down = s;
-		left = e;
-		right = w;
+	public DirWeights(int top, int bottom, int left, int right) {
+		this.top = top;
+		this.bottom = bottom;
+		this.left = left;
+		this.right = right;
 	}
 
 	public Dimension getExpandedSize(Dimension size) {
-		return new Dimension(size.width + left + right, size.height + up + down);
+		return new Dimension(size.width + left + right, size.height + top + bottom);
 	}
 	
 	public Rectangle getContentRect(Rectangle rect) {
-		return new Rectangle(rect.x + left, rect.y + up, rect.width - left - right, rect.height - up - down);
+		return new Rectangle(rect.x + left, rect.y + top, rect.width - left - right, rect.height - top - bottom);
 	}
 }

@@ -18,6 +18,8 @@ public class TabletOS {
 	public static final int HEIGHT = 215;
 	private Framebuffer fbo = null;
 	private SceneMainScreen mainScreen = new SceneMainScreen();
+	private int lastMouseX = 0;
+	private int lastMouseY = 0;
 	
 	private void initializeFramebuffer() {
 		if(fbo == null) {
@@ -28,6 +30,11 @@ public class TabletOS {
 	public void bindFrameBufferTexture() {
 		initializeFramebuffer();
 		fbo.bindFramebufferTexture();
+	}
+	
+	public void moveMouseTo(int x, int y) {
+		lastMouseX = x;
+		lastMouseY = y;
 	}
 	
 	public void updateScreen() {
@@ -42,15 +49,7 @@ public class TabletOS {
         GlStateManager.clear(GL11.GL_COLOR_BUFFER_BIT);
         GlStateManager.translate(0.0F, 0.0F, -2000.0F);
         GlStateManager.enableTexture2D();
-        
-        Minecraft mc = Minecraft.getMinecraft();
-        final ScaledResolution scaledresolution = new ScaledResolution(mc);
-        int i1 = scaledresolution.getScaledWidth();
-        int j1 = scaledresolution.getScaledHeight();
-        final int k1 = Mouse.getX() * i1 / mc.displayWidth;
-        final int l1 = j1 - Mouse.getY() * j1 / mc.displayHeight - 1;
-        
-        mainScreen.render(k1, l1);
+        mainScreen.render(lastMouseX, lastMouseY);
         Minecraft.getMinecraft().getFramebuffer().bindFramebuffer(true);
 	}
 	

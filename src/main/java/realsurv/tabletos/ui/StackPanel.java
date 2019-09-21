@@ -12,10 +12,10 @@ public class StackPanel extends UIPanel {
 	}
 	
 	@Override
-	public Dimension measureSize() {
+	public Dimension measureMinSize() {
 		Dimension size = new Dimension();
 		for(UIObject obj : uiList) {
-			Dimension dim = obj.getDesiredSize();
+			Dimension dim = obj.getLayoutMinSize();
 			if(orientation == Orientation.HORIZONTAL) {
 				size.width += dim.width;
 				size.height = Math.max(size.height, dim.height);
@@ -33,7 +33,7 @@ public class StackPanel extends UIPanel {
 		int x=bounds.x;
 		int y=bounds.y;
 		for(UIObject obj : uiList) {
-			Dimension clientDim = obj.getDesiredSize();
+			Dimension clientDim = obj.getLayoutMinSize();
 			Rectangle rect = new Rectangle(x, y, clientDim.width, clientDim.height);
 			if(orientation == Orientation.HORIZONTAL) {
 				x += clientDim.width;

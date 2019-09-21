@@ -5,41 +5,49 @@ import java.awt.Rectangle;
 
 import net.minecraft.client.gui.Gui;
 import realsurv.tabletos.DirWeights;
+import realsurv.tabletos.ui.events.IButtonEvent;
 
 public class UIButton extends UIObject {
 	private String label;
-	private int test = 0;
+	private IButtonEvent event;
 	
 	public UIButton(String label) {
-		setMargin(new DirWeights(2));
 		setPadding(new DirWeights(2));
 		setLabel(label);
 	}
 	
-	public void setLabel(String label) {
+	public UIButton setLabel(String label) {
 		this.label = label;
-		DirWeights padding = getPadding();
-		setMinimumSize(fontrenderer.getStringWidth(label) + padding.left + padding.right, fontrenderer.FONT_HEIGHT + padding.up + padding.down);
-		requestLayout();
+		setMinimumSize(fontrenderer.getStringWidth(label), fontrenderer.FONT_HEIGHT);
+		return this;
 	}
 	
+	public UIButton setClickEvent(IButtonEvent e) {
+		this.event = e;
+		return this;
+	}
+
 	@Override
 	public void render(int mx, int my) {
 		Rectangle bounds = getActualBounds();
-		DirWeights padding = getPadding();
 		int fontWidth = fontrenderer.getStringWidth(label);
-		Gui.drawRect(bounds.x, bounds.y, bounds.x + bounds.width, bounds.y + bounds.height, 0xff999999);
-		fontrenderer.drawString(label, bounds.x + padding.left + (bounds.width - fontWidth) / 2, bounds.y + padding.up + (bounds.height - fontrenderer.FONT_HEIGHT) / 2, 0xffffffff);
+		int color = backgroundColor;
+
+		if(bounds.contains(mx, my))
+			color = offsetColor(color, 20);
+		Gui.drawRect(bounds.x, bounds.y, bounds.x + bounds.width, bounds.y + bounds.height, color);
+		fontrenderer.drawString(label, bounds.x + (bounds.width - fontWidth) / 2, bounds.y + (bounds.height - fontrenderer.FONT_HEIGHT) / 2, foregroundColor);
 	}
 
 	@Override
 	public void onPress(int x, int y, int bt) {
-		setLabel("Clicked " + ++test);
+		if(event != null)
+			event.onClicked(this, bt);
+		setBackgroundColor(offsetColor(backgroundColor, -20));
 	}
 
 	@Override
 	public void onRelease(int x, int y, int bt) {
-		// TODO Auto-generated method stub
-		super.onRelease(x, y, bt);
-	}	
+		setBackgroundColor(offsetColor(backgroundColor, 20));
+	}
 }

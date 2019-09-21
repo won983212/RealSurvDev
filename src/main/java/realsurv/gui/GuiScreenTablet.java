@@ -57,10 +57,26 @@ public class GuiScreenTablet extends GuiScreen {
 	@Override
 	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
 		this.drawDefaultBackground();
+		Point p = guiCoordsToScreen(mouseX, mouseY);
+		if(p != null)
+			system.moveMouseTo(p.x, p.y);
+		
 		Point2d size = getScreenSize();
-		ClientEventHandler.instance.bindTabletScreenTexture();
 		Tessellator tes = Tessellator.getInstance();
 		BufferBuilder buf = tes.getBuffer();
+
+		GlStateManager.disableTexture2D();
+		GlStateManager.color(0.08f, 0.08f, 0.08f, 1);
+		buf.begin(7, DefaultVertexFormats.POSITION);
+		buf.pos((width-size.x)/2, (height-size.y)/2, 0).endVertex();
+		buf.pos((width-size.x)/2, (height+size.y)/2, 0).endVertex();
+		buf.pos((width+size.x)/2, (height+size.y)/2, 0).endVertex();
+		buf.pos((width+size.x)/2, (height-size.y)/2, 0).endVertex();
+		tes.draw();
+		GlStateManager.enableTexture2D();
+		
+		GlStateManager.color(1, 1, 1, 1);
+		ClientEventHandler.instance.bindTabletScreenTexture();
 		buf.begin(7, DefaultVertexFormats.POSITION_TEX);
 		buf.pos((width-size.x)/2, (height-size.y)/2, 0).tex(0, 1).endVertex();
 		buf.pos((width-size.x)/2, (height+size.y)/2, 0).tex(0, 0).endVertex();

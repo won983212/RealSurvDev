@@ -13,7 +13,7 @@ public class GridPanel extends UIPanel {
 	@Override
 	public void add(UIObject obj) {
 		super.add(obj);
-		Dimension desired = obj.getDesiredSize();
+		Dimension desired = obj.getLayoutMinSize();
 		CellLength column = columns.get(obj.layoutX);
 		column.maxDesiredLength = Math.max(column.maxDesiredLength, desired.width);
 		CellLength row = rows.get(obj.layoutY);
@@ -71,7 +71,7 @@ public class GridPanel extends UIPanel {
 	}
 	
 	@Override
-	public Dimension measureSize() {
+	public Dimension measureMinSize() {
 		Dimension size = new Dimension();
 		size.width = (int) calculateMinLength(columns);
 		size.height = (int) calculateMinLength(rows);
@@ -80,14 +80,15 @@ public class GridPanel extends UIPanel {
 
 	@Override
 	public void layout() {
-		Dimension dim = getActualBounds().getSize();
-		int[] widths = calculateActualLength(dim.width, columns);
-		int[] heights = calculateActualLength(dim.height, rows);
+		Rectangle rect = getActualBounds();
+		int[] widths = calculateActualLength(rect.width, columns);
+		int[] heights = calculateActualLength(rect.height, rows);
 		int[] stackedX = new int[widths.length+1];
 		int[] stackedY = new int[heights.length+1];
 		
 		// calculate stackedX or Y
-		stackedX[0] = stackedY[0] = 0;
+		stackedX[0] = rect.x;
+		stackedY[0] = rect.y;
 		for(int i=1;i<stackedX.length;i++)
 			stackedX[i] = stackedX[i-1]+widths[i-1];
 		for(int i=1;i<stackedY.length;i++)
