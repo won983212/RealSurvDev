@@ -15,15 +15,17 @@ public enum VerticalArrange {
 			return available.y + available.height - objectSize.height;
 		case CENTER:
 			return available.y + (available.height - objectSize.height) / 2;
+		default:
+			return available.y;
 		}
-		return available.y;
 	}
 	
 	public int getHeightArranged(Rectangle available, Dimension objectSize) {
 		switch(this) {
 		case STRECTCH:
 			return available.height;
+		default:
+			return objectSize.height;
 		}
-		return objectSize.height;
 	}
 }

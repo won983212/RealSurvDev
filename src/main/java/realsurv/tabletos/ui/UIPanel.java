@@ -5,6 +5,7 @@ import java.awt.Rectangle;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import net.minecraft.client.renderer.GlStateManager;
 import realsurv.tabletos.DirWeights;
 
 public class UIPanel extends UIObject {
@@ -19,21 +20,16 @@ public class UIPanel extends UIObject {
 	}
 	
 	public void addPopup(UIObject obj) {
-		if(panel != null)
-			panel.addPopup(obj);
-	}
-	
-	public void setPopupLocation(UIObject obj, int x, int y) {
-		if(panel != null)
-			panel.setPopupLocation(obj, x, y);
+		if(parentPanel != null)
+			parentPanel.addPopup(obj);
 	}
 	
 	public void requestLayout() {
-		if(panel == null) {
+		if(parentPanel == null) {
 			invalidateSize();
 			layout();
 		} else
-			panel.requestLayout();
+			parentPanel.requestLayout();
 	}
 	
 	@Override
@@ -54,7 +50,7 @@ public class UIPanel extends UIObject {
 	}
 	
 	public void layout() {
-		Rectangle available = getActualBounds();
+		Rectangle available = getInnerBounds();
 		for(UIObject obj : uiList) {
 			obj.arrange(available);
 		}
@@ -62,9 +58,14 @@ public class UIPanel extends UIObject {
 	
 	@Override
 	public void render(int mouseX, int mouseY) {
-		for(UIObject obj : uiList)
-			if(obj.isVisible())
-				obj.render(mouseX, mouseY);
+		for(UIObject obj : uiList) {
+			if(obj.isVisible()) {
+				Rectangle bounds = obj.getRelativeBounds();
+				GlStateManager.translate(bounds.x, bounds.y, 0);
+				obj.render(mouseX - bounds.x, mouseY - bounds.y);
+				GlStateManager.translate(-bounds.x, -bounds.y, 0);
+			}
+		}
 	}
 	
 	@Override
@@ -75,9 +76,10 @@ public class UIPanel extends UIObject {
 	}
 	
 	@Override
-	public boolean contains(int x, int y) {
+	public boolean containsRelative(int x, int y) {
 		for(UIObject obj : uiList) {
-			if(obj.isInteractive() && obj.contains(x, y)) 
+			Rectangle bounds = obj.getRelativeBounds();
+			if(obj.isInteractive() && obj.containsRelative(x - bounds.x, y - bounds.y)) 
 				return true;
 		}
 		return false;
@@ -86,7 +88,7 @@ public class UIPanel extends UIObject {
 	@Override
 	public void onKeyTyped(int keyCode, char typedChar) {
 		for(UIObject obj : uiList) {
-			if(obj instanceof UIPanel && focusd == obj) 
+			if(obj instanceof UIPanel || focusd == obj) 
 				obj.onKeyTyped(keyCode, typedChar);
 		}
 	}
@@ -96,25 +98,27 @@ public class UIPanel extends UIObject {
 		boolean any = false;
 		for(int i=uiList.size()-1;i>=0;i--) {
 			UIObject obj = uiList.get(i);
-			if(obj.contains(mouseX, mouseY)) {
+			Rectangle rect = obj.getRelativeBounds();
+			if(obj.containsRelative(mouseX - rect.x, mouseY - rect.y)) {
 				if(obj.isInteractive()) {
 					setFocus(obj);
 					any = true;
-					obj.onPress(mouseX, mouseY, mouseButton);
+					obj.onPress(mouseX - rect.x, mouseY - rect.y, mouseButton);
 					lastPressedObject = obj;
 					break;
 				}
 			}
 		}
 
-		if(!any && focusd != null)
+		if(!any)
 			setFocus(null);
 	}
 
 	@Override
 	public void onRelease(int mouseX, int mouseY, int state) {
 		if(lastPressedObject != null) {
-			lastPressedObject.onRelease(mouseX, mouseY, state);
+			Rectangle rect = lastPressedObject.getRelativeBounds();
+			lastPressedObject.onRelease(mouseX - rect.x, mouseY - rect.y, state);
 			lastPressedObject = null;
 		}
 	}
@@ -123,7 +127,8 @@ public class UIPanel extends UIObject {
 	public void onDrag(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
 		for(UIObject obj : uiList) {
 			if(obj.isInteractive()) {
-				obj.onDrag(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
+				Rectangle rect = obj.getRelativeBounds();
+				obj.onDrag(mouseX - rect.x, mouseY - rect.y, clickedMouseButton, timeSinceLastClick);
 			}
 		}
 	}
@@ -136,5 +141,11 @@ public class UIPanel extends UIObject {
 		focusd = obj;
 		if(focusd != null)
 			focusd.onGotFocus();
+	}
+	
+	@Override
+	public void onLostFocus() {
+		super.onLostFocus();
+		setFocus(null);
 	}
 }

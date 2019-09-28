@@ -40,7 +40,7 @@ public class GuiScreenTablet extends GuiScreen {
 	
 	private Point2d getScreenSize() {
 		double scale = Math.min(width, height * (double) TabletOS.WIDTH / TabletOS.HEIGHT);
-		return new Point2d(scale, scale * TabletOS.HEIGHT / TabletOS.WIDTH);
+		return new Point2d(TabletOS.WIDTH, TabletOS.HEIGHT);
 	}
 	
 	private Point guiCoordsToScreen(int x, int y) {
@@ -60,6 +60,16 @@ public class GuiScreenTablet extends GuiScreen {
 		Point p = guiCoordsToScreen(mouseX, mouseY);
 		if(p != null)
 			system.moveMouseTo(p.x, p.y);
+		
+		double scale = Math.min(width/10.0, height/10.0);
+		GlStateManager.pushMatrix();
+		GlStateManager.translate(width/2, height/2, 0);
+		GlStateManager.scale(scale, scale, 1);
+		GlStateManager.translate(-8, -8, 0);
+		Minecraft.getMinecraft().getRenderItem().renderItemIntoGUI(dummy, 0, 0);
+		GlStateManager.translate(-0.4, -0.55, 100);
+		GlStateManager.scale(1.05, 1.05, 1);
+		ClientEventHandler.instance.bindTabletScreenTexture();
 		
 		Point2d size = getScreenSize();
 		Tessellator tes = Tessellator.getInstance();
@@ -83,6 +93,7 @@ public class GuiScreenTablet extends GuiScreen {
 		buf.pos((width+size.x)/2, (height+size.y)/2, 0).tex(1, 0).endVertex();
 		buf.pos((width+size.x)/2, (height-size.y)/2, 0).tex(1, 1).endVertex();
 		tes.draw();
+		
 		super.drawScreen(mouseX, mouseY, partialTicks);
 	}
 

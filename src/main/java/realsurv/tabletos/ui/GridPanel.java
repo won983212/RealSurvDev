@@ -13,11 +13,6 @@ public class GridPanel extends UIPanel {
 	@Override
 	public void add(UIObject obj) {
 		super.add(obj);
-		Dimension desired = obj.getLayoutMinSize();
-		CellLength column = columns.get(obj.layoutX);
-		column.maxDesiredLength = Math.max(column.maxDesiredLength, desired.width);
-		CellLength row = rows.get(obj.layoutY);
-		row.maxDesiredLength = Math.max(row.maxDesiredLength, desired.height);
 	}
 	
 	public void addColumn(LengthDefinition column) {
@@ -26,6 +21,20 @@ public class GridPanel extends UIPanel {
 	
 	public void addRow(LengthDefinition row) {
 		rows.add(new CellLength(row, 0));
+	}
+	
+	private void measureMaxSize() {
+		for(CellLength c : columns)
+			c.maxDesiredLength = 0;
+		for(CellLength r : rows)
+			r.maxDesiredLength = 0;
+		for(UIObject obj : uiList) {
+			Dimension desired = obj.getLayoutMinSize();
+			CellLength column = columns.get(obj.layoutX);
+			column.maxDesiredLength = Math.max(column.maxDesiredLength, desired.width);
+			CellLength row = rows.get(obj.layoutY);
+			row.maxDesiredLength = Math.max(row.maxDesiredLength, desired.height);
+		}
 	}
 	
 	private int[] calculateActualLength(int totalLen, ArrayList<CellLength> cellLen) {
@@ -73,6 +82,7 @@ public class GridPanel extends UIPanel {
 	@Override
 	public Dimension measureMinSize() {
 		Dimension size = new Dimension();
+		measureMaxSize();
 		size.width = (int) calculateMinLength(columns);
 		size.height = (int) calculateMinLength(rows);
 		return size;
@@ -80,15 +90,16 @@ public class GridPanel extends UIPanel {
 
 	@Override
 	public void layout() {
-		Rectangle rect = getActualBounds();
+		measureMaxSize();
+		Rectangle rect = getRelativeBounds();
 		int[] widths = calculateActualLength(rect.width, columns);
 		int[] heights = calculateActualLength(rect.height, rows);
 		int[] stackedX = new int[widths.length+1];
 		int[] stackedY = new int[heights.length+1];
 		
 		// calculate stackedX or Y
-		stackedX[0] = rect.x;
-		stackedY[0] = rect.y;
+		stackedX[0] = 0;
+		stackedY[0] = 0;
 		for(int i=1;i<stackedX.length;i++)
 			stackedX[i] = stackedX[i-1]+widths[i-1];
 		for(int i=1;i<stackedY.length;i++)

@@ -1,6 +1,7 @@
 package realsurv.tabletos.ui;
 
 import java.awt.Dimension;
+import java.awt.Point;
 import java.awt.Rectangle;
 
 import net.minecraft.client.Minecraft;
@@ -22,9 +23,10 @@ public abstract class UIObject {
 	protected int backgroundColor = 0xfff0f0f0;
 	protected int foregroundColor = 0xff000000;
 	
-	protected UIPanel panel;
+	protected UIPanel parentPanel;
 	private boolean focusd = false;
 	private Dimension sizeCache = null;
+	public Object metadata = null;
 	
 	// for grid
 	public int layoutX = 0;
@@ -37,12 +39,32 @@ public abstract class UIObject {
 		setPositionByArrange(available);
 	}
 
-	public boolean contains(int x, int y) {
-		return bounds.contains(x, y);
+	public boolean containsRelative(int x, int y) {
+		return x >= 0 && y >= 0 && x < bounds.width && y < bounds.height;
 	}
 
-	public Rectangle getActualBounds() {
+	public Point calculateActualLocation() {
+		UIObject obj = this;
+		Point p = new Point(0, 0);
+		while(obj != null) {
+			Rectangle r = obj.getRelativeBounds();
+			p.x += r.x;
+			p.y += r.y;
+			obj = obj.parentPanel;
+		}
+		return p;
+	}
+	
+	public Rectangle getRelativeBounds() {
 		return bounds;
+	}
+	
+	public Dimension getBoundsSize() {
+		return bounds.getSize();
+	}
+	
+	public Rectangle getInnerBounds() {
+		return new Rectangle(0, 0, bounds.width, bounds.height);
 	}
 	
 	public Dimension getLayoutMinSize() {
@@ -116,8 +138,8 @@ public abstract class UIObject {
 	}
 	
 	public void requestLayout() {
-		if(panel != null)
-			panel.requestLayout();
+		if(parentPanel != null)
+			parentPanel.requestLayout();
 	}
 
 	public abstract void render(int mouseX, int mouseY);
@@ -127,9 +149,18 @@ public abstract class UIObject {
 		return this;
 	}
 
+	public void setRelativeLocation(int x, int y) {
+		bounds.setLocation(x, y);
+	}
+	
 	public UIObject setLayoutPosition(int x, int y) {
 		this.layoutX = x;
 		this.layoutY = y;
+		return this;
+	}
+	
+	public UIObject setMetadata(Object data) {
+		this.metadata = data;
 		return this;
 	}
 	
@@ -170,15 +201,15 @@ public abstract class UIObject {
 	}
 
 	public void setParentPanel(UIPanel panel) {
-		this.panel = panel;
+		this.parentPanel = panel;
 	}
 
-	protected void setActualBounds(int x, int y, int width, int height) {
+	protected void setRelativeBounds(int x, int y, int width, int height) {
 		bounds.setBounds(x, y, width, height);
 	}
 	
 	private void setPositionByArrange(Rectangle available) {
-		Dimension size = getActualBounds().getSize();
+		Dimension size = getRelativeBounds().getSize();
 		int x = hArrange.getHorizontalArrangedLocation(available, size) + margin.left;
 		int y = vArrange.getVerticalArrangedLocation(available, size) + margin.top;
 		bounds.setLocation(x, y);

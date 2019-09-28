@@ -29,9 +29,8 @@ public class StackPanel extends UIPanel {
 
 	@Override
 	public void layout() {
-		Rectangle bounds = getActualBounds();
-		int x=bounds.x;
-		int y=bounds.y;
+		Rectangle bounds = getRelativeBounds();
+		int x=0, y=0;
 		for(UIObject obj : uiList) {
 			Dimension clientDim = obj.getLayoutMinSize();
 			Rectangle rect = new Rectangle(x, y, clientDim.width, clientDim.height);

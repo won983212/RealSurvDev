@@ -29,14 +29,14 @@ public class UIButton extends UIObject {
 
 	@Override
 	public void render(int mx, int my) {
-		Rectangle bounds = getActualBounds();
+		Dimension size = getBoundsSize();
 		int fontWidth = fontrenderer.getStringWidth(label);
 		int color = backgroundColor;
 
-		if(bounds.contains(mx, my))
+		if(containsRelative(mx, my))
 			color = offsetColor(color, 20);
-		Gui.drawRect(bounds.x, bounds.y, bounds.x + bounds.width, bounds.y + bounds.height, color);
-		fontrenderer.drawString(label, bounds.x + (bounds.width - fontWidth) / 2, bounds.y + (bounds.height - fontrenderer.FONT_HEIGHT) / 2, foregroundColor);
+		Gui.drawRect(0, 0, size.width, size.height, color);
+		fontrenderer.drawString(label, (size.width - fontWidth) / 2, (size.height - fontrenderer.FONT_HEIGHT) / 2, foregroundColor);
 	}
 
 	@Override

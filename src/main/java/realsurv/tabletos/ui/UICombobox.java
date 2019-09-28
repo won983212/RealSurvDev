@@ -1,13 +1,16 @@
 package realsurv.tabletos.ui;
 
+import java.awt.Dimension;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Collection;
 
 import net.minecraft.client.gui.Gui;
 import realsurv.tabletos.VerticalArrange;
+import realsurv.tabletos.ui.events.IItemSelectedEvent;
 
-public class UICombobox extends UIObject {
+public class UICombobox extends UIObject implements IItemSelectedEvent {
 	private ArrayList<String> items = new ArrayList<String>();
 	private UIMenu menu = new UIMenu();
 	private int selected = 0;
@@ -15,6 +18,7 @@ public class UICombobox extends UIObject {
 
 	public UICombobox() {
 		menu.setVisible(false);
+		menu.setItemSelectedEvent(this);
 		setVerticalArrange(VerticalArrange.CENTER);
 	}
 	
@@ -39,16 +43,18 @@ public class UICombobox extends UIObject {
 	@Override
 	public void arrange(Rectangle available) {
 		super.arrange(available);
-		if(panel != null) {
-			Rectangle rect = getActualBounds();
-			panel.addPopup(menu);
-			panel.setPopupLocation(menu, rect.x, rect.y + rect.height);
+		if(parentPanel != null) {
+			Rectangle rect = getRelativeBounds();
+			parentPanel.addPopup(menu.setMinimumSize(rect.width, 0));
 		}
 	}
 	
 	@Override
 	public void onPress(int x, int y, int bt) {
+		Point loc = calculateActualLocation();
+		Dimension size = getBoundsSize();
 		menu.setVisible(!menu.isVisible());
+		menu.setRelativeLocation(loc.x, loc.y + size.height);
 	}
 
 	public int getSelectedIndex() {
@@ -73,10 +79,15 @@ public class UICombobox extends UIObject {
 
 	@Override
 	public void render(int mouseX, int mouseY) {
-		Rectangle bounds = getActualBounds();
-		Gui.drawRect(bounds.x, bounds.y, bounds.x + bounds.width, bounds.y + bounds.height, backgroundColor);
-		Gui.drawRect(bounds.x + bounds.width - 11, bounds.y, bounds.x + bounds.width, bounds.y + bounds.height, 0xffcccccc);
+		Dimension size = getBoundsSize();
+		Gui.drawRect(0, 0, size.width, size.height, backgroundColor);
 		if(items.size() > selected)
-			fontrenderer.drawString(getSelectedItem(), bounds.x + 2, bounds.y + 2, foregroundColor);
+			fontrenderer.drawString(getSelectedItem(), 2, 2, foregroundColor);
+	}
+
+	@Override
+	public void onSelected(UIObject obj, Object item) {
+		System.out.println(item);
+		selected = (int) item;
 	}
 }

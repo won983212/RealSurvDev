@@ -17,7 +17,6 @@ public class UILabel extends UIObject {
 	
 	@Override
 	public void render(int mx, int my) {
-		Rectangle rect = getActualBounds();
-		fontrenderer.drawString(label, rect.x, rect.y, foregroundColor);
+		fontrenderer.drawString(label, 0, 0, foregroundColor);
 	}
 }

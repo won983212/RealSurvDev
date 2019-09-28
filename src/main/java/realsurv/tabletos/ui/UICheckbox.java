@@ -14,7 +14,7 @@ public class UICheckbox extends UIObject {
 	
 	public UICheckbox setLabel(String label) {
 		this.label = label;
-		setMinimumSize(fontrenderer.getStringWidth(label) + 10, fontrenderer.FONT_HEIGHT);
+		setMinimumSize(fontrenderer.getStringWidth(label) + 14, fontrenderer.FONT_HEIGHT);
 		return this;
 	}
 	
@@ -30,10 +30,9 @@ public class UICheckbox extends UIObject {
 	
 	@Override
 	public void render(int mouseX, int mouseY) {
-		Rectangle bounds = getActualBounds();
-		Gui.drawRect(bounds.x, bounds.y, bounds.x + 9, bounds.y + 9, 0xffffffff);
+		Gui.drawRect(0, 0, 9, 9, 0xffffffff);
 		if(checked)
-			Gui.drawRect(bounds.x + 1, bounds.y + 1, bounds.x + 8, bounds.y + 8, 0xff000000);
-		fontrenderer.drawString(label, bounds.x + 10, bounds.y, foregroundColor);
+			Gui.drawRect(1, 1, 8, 8, 0xff000000);
+		fontrenderer.drawString(label, 12, 1, foregroundColor);
 	}
 }

@@ -36,26 +36,35 @@ public class SceneMainScreen extends UIPanel {
 	public void addPopup(UIObject obj) {
 		popupPanel.add(obj);
 	}
-
-	//TODO impolement layout
-	@Override
-	public void setPopupLocation(UIObject obj, int x, int y) {
-		popupPanel.layout();
-	}
 	
 	private void refresh() {
 		popupPanel = new UIPanel();
 		uiList.clear();
 		UIPanel panel = new UIPanel();
-		panel.setMinimumSize(120, 50);
+		panel.setMinimumSize(120, 62);
 		panel.setHorizontalArrange(HorizontalArrange.CENTER);
 		panel.setVerticalArrange(VerticalArrange.CENTER);
-		panel.add(new UICombobox().add("MyItem").add("Item2").add("Item3").add("Item4"));
+		
+		GridPanel loginForm = new GridPanel();
+		loginForm.setLayoutPosition(1, 1);
+		loginForm.addColumn(new LengthDefinition(LengthType.ALLOCATED, 1));
+		loginForm.addColumn(new LengthDefinition(LengthType.AUTO, 1));
+		loginForm.addRow(new LengthDefinition(LengthType.ALLOCATED, 1));
+		loginForm.addRow(new LengthDefinition(LengthType.ALLOCATED, 1));
+		loginForm.addRow(new LengthDefinition(LengthType.ALLOCATED, 1));
+		loginForm.addRow(new LengthDefinition(LengthType.ALLOCATED, 1));
+		loginForm.add(new UIRectangle().setBackgroundColor(0xffcccccc).setLayoutSpan(2, 4));
+		loginForm.add(new UITextfield().setHint("ID").setMargin(new DirWeights(2, 0, 2, 0)).setVerticalArrange(VerticalArrange.CENTER));
+		loginForm.add(new UITextfield().setHint("Password").setHiddenText(true).setMargin(new DirWeights(2, 0, 2, 0)).setLayoutPosition(0, 1).setVerticalArrange(VerticalArrange.CENTER));
+		loginForm.add(new UICheckbox().setLabel("Remember").setMargin(new DirWeights(0, 0, 2, 0)).setVerticalArrange(VerticalArrange.CENTER).setLayoutPosition(0, 2));
+		loginForm.add(new UIButton("Login").setMargin(new DirWeights(2)).setLayoutPosition(1, 0).setLayoutSpan(1, 3));
+		loginForm.add(new UICombobox().add("Item1").add("Item2").add("Item3").setLayoutPosition(0, 3).setLayoutSpan(2, 1));
+		panel.add(loginForm);
 		add(panel);
 		
 		add(popupPanel);
 		invalidateSize();
-		setActualBounds(0, 0, screenSize.width, screenSize.height);
+		setRelativeBounds(0, 0, screenSize.width, screenSize.height);
 		layout();
 	}
 	

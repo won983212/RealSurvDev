@@ -1,5 +1,6 @@
 package realsurv.tabletos.ui;
 
+import java.awt.Dimension;
 import java.awt.Rectangle;
 
 import net.minecraft.client.gui.Gui;
@@ -57,10 +58,10 @@ public class UITextfield extends UIObject {
 	
 	@Override
 	public void render(int mouseX, int mouseY) {
-		Rectangle bounds = getActualBounds();
+		Rectangle bounds = getInnerBounds();
 		Rectangle actBounds = getPadding().getContentRect(bounds);
 		
-		Gui.drawRect(bounds.x, bounds.y, bounds.x + bounds.width, bounds.y + bounds.height, backgroundColor);
+		Gui.drawRect(0, 0, bounds.width, bounds.height, backgroundColor);
 		if(hint != null && textfield.getText().length() == 0)
 			fontrenderer.drawString(hint, actBounds.x, actBounds.y, hintTextColor);
 		textfield.setTextColor(foregroundColor);
