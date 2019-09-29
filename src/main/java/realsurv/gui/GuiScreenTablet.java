@@ -61,21 +61,18 @@ public class GuiScreenTablet extends GuiScreen {
 		if(p != null)
 			system.moveMouseTo(p.x, p.y);
 		
-		double scale = Math.min(width/10.0, height/10.0);
-		GlStateManager.pushMatrix();
-		GlStateManager.translate(width/2, height/2, 0);
-		GlStateManager.scale(scale, scale, 1);
-		GlStateManager.translate(-8, -8, 0);
-		Minecraft.getMinecraft().getRenderItem().renderItemIntoGUI(dummy, 0, 0);
-		GlStateManager.translate(-0.4, -0.55, 100);
-		GlStateManager.scale(1.05, 1.05, 1);
-		ClientEventHandler.instance.bindTabletScreenTexture();
-		
 		Point2d size = getScreenSize();
 		Tessellator tes = Tessellator.getInstance();
 		BufferBuilder buf = tes.getBuffer();
 
 		GlStateManager.disableTexture2D();
+		GlStateManager.color(0.3f, 0.3f, 0.3f, 1);
+		buf.begin(7, DefaultVertexFormats.POSITION);
+		buf.pos((width-size.x)/2-1, (height-size.y)/2-1, 0).endVertex();
+		buf.pos((width-size.x)/2-1, (height+size.y)/2+1, 0).endVertex();
+		buf.pos((width+size.x)/2+1, (height+size.y)/2+1, 0).endVertex();
+		buf.pos((width+size.x)/2+1, (height-size.y)/2-1, 0).endVertex();
+		tes.draw();
 		GlStateManager.color(0.08f, 0.08f, 0.08f, 1);
 		buf.begin(7, DefaultVertexFormats.POSITION);
 		buf.pos((width-size.x)/2, (height-size.y)/2, 0).endVertex();

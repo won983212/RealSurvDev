@@ -35,7 +35,7 @@ public class UIButton extends UIObject {
 
 		if(containsRelative(mx, my))
 			color = offsetColor(color, 20);
-		Gui.drawRect(0, 0, size.width, size.height, color);
+		renderArcRect(0, 0, size.width, size.height, arc, color);
 		fontrenderer.drawString(label, (size.width - fontWidth) / 2, (size.height - fontrenderer.FONT_HEIGHT) / 2, foregroundColor);
 	}
 

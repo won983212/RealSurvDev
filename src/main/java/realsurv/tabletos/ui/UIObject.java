@@ -4,9 +4,12 @@ import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
 
+import org.lwjgl.opengl.GL11;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
+import net.minecraft.client.renderer.GlStateManager;
 import realsurv.tabletos.DirWeights;
 import realsurv.tabletos.HorizontalArrange;
 import realsurv.tabletos.VerticalArrange;
@@ -22,6 +25,7 @@ public abstract class UIObject {
 	private boolean visible = true;
 	protected int backgroundColor = 0xfff0f0f0;
 	protected int foregroundColor = 0xff000000;
+	protected int arc = 2;
 	
 	protected UIPanel parentPanel;
 	private boolean focusd = false;
@@ -170,6 +174,11 @@ public abstract class UIObject {
 		return this;
 	}
 	
+	public UIObject setRadius(int rad) {
+		this.arc = rad;
+		return this;
+	}
+	
 	public UIObject setMargin(DirWeights margin) {
 		this.margin = margin;
 		return this;
@@ -236,10 +245,39 @@ public abstract class UIObject {
 		return (a << 24) + (r << 16) + (g << 8) + b;
 	}
 	
-	public static void renderBorder(int x1, int y1, int x2, int y2, int color, int thickness) {
-		Gui.drawRect(x1, y1, x2, y1 + thickness, color);
-		Gui.drawRect(x1, y2 - thickness, x2, y2, color);
-		Gui.drawRect(x1, y1, x1 + thickness, y2, color);
-		Gui.drawRect(x2 - thickness, y1, x2, y2, color);
+	private static void pushVertexArc(int x, int y, int fromDegree, int toDegree, int r) {
+		final int step = (int)(r * Math.PI / 2);
+		GlStateManager.glBegin(GL11.GL_POLYGON);
+		GlStateManager.glVertex3f(x, y, 0);
+		for(int t=0;t<=step;t++) {
+			double theta = (fromDegree+((toDegree-fromDegree)/(double)step)*t)*Math.PI/180;
+			float xf = (float)(x + r*Math.cos(theta));
+			float yf = (float)(y + r*Math.sin(theta));
+			GlStateManager.glVertex3f(xf, yf, 0);
+		}
+		GlStateManager.glEnd();
+	}
+	
+	public static void renderArcRect(int x1, int y1, int x2, int y2, int arc, int color) {
+		if(arc == 0) {
+			Gui.drawRect(x1, y1, x2, y2, color);
+			return;
+		}
+		
+		Gui.drawRect(x1 + arc, y1, x2 - arc, y1 + arc, color);
+		Gui.drawRect(x1 + arc, y2 - arc, x2 - arc, y2, color);
+		Gui.drawRect(x1, y1 + arc, x1 + arc, y2 - arc, color);
+		Gui.drawRect(x2 - arc, y1 + arc, x2, y2 - arc, color);
+		Gui.drawRect(x1 + arc, y1 + arc, x2 - arc, y2 - arc, color);
+		
+		GlStateManager.disableTexture2D();
+		GlStateManager.enableBlend();
+		GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+		pushVertexArc(x2 - arc, y2 - arc, 90, 0, arc);
+		pushVertexArc(x1 + arc, y2 - arc, 180, 90, arc);
+		pushVertexArc(x1 + arc, y1 + arc, 270, 180, arc);
+		pushVertexArc(x2 - arc, y1 + arc, 360, 270, arc);
+		GlStateManager.enableTexture2D();
+		GlStateManager.disableBlend();
 	}
 }

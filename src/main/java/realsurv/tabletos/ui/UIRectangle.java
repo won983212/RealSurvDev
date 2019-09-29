@@ -9,6 +9,6 @@ public class UIRectangle extends UIObject {
 	@Override
 	public void render(int mx, int my) {
 		Dimension size = getBoundsSize();
-		Gui.drawRect(0, 0, size.width, size.height, backgroundColor);
+		renderArcRect(0, 0, size.width, size.height, arc, backgroundColor);
 	}
 }

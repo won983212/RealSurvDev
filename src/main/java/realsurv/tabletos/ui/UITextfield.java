@@ -60,8 +60,7 @@ public class UITextfield extends UIObject {
 	public void render(int mouseX, int mouseY) {
 		Rectangle bounds = getInnerBounds();
 		Rectangle actBounds = getPadding().getContentRect(bounds);
-		
-		Gui.drawRect(0, 0, bounds.width, bounds.height, backgroundColor);
+		renderArcRect(0, 0, bounds.width, bounds.height, arc, backgroundColor);
 		if(hint != null && textfield.getText().length() == 0)
 			fontrenderer.drawString(hint, actBounds.x, actBounds.y, hintTextColor);
 		textfield.setTextColor(foregroundColor);
