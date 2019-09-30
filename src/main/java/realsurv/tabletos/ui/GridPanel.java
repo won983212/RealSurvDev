@@ -19,8 +19,16 @@ public class GridPanel extends UIPanel {
 		columns.add(new CellLength(column, 0));
 	}
 	
+	public void addEmptyColumn() {
+		columns.add(new CellLength(new LengthDefinition(LengthType.ALLOCATED, 1), 0));
+	}
+	
 	public void addRow(LengthDefinition row) {
 		rows.add(new CellLength(row, 0));
+	}
+	
+	public void addEmptyRow() {
+		rows.add(new CellLength(new LengthDefinition(LengthType.ALLOCATED, 1), 0));
 	}
 	
 	private void measureMaxSize() {

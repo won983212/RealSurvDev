@@ -7,6 +7,7 @@ public class UILabel extends UIObject {
 	
 	public UILabel(String label) {
 		setLabel(label);
+		setShadowVisible(false);
 	}
 
 	public UILabel setLabel(String label) {
@@ -17,6 +18,6 @@ public class UILabel extends UIObject {
 	
 	@Override
 	public void render(int mx, int my) {
-		fontrenderer.drawString(label, 0, 0, foregroundColor);
+		fontrenderer.drawString(label, 0, 0, foregroundColor, showShadow);
 	}
 }

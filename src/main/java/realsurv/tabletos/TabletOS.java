@@ -10,14 +10,13 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.shader.Framebuffer;
-import realsurv.tabletos.scenes.SceneMainScreen;
 import realsurv.tabletos.ui.UIPanel;
 
 public class TabletOS {
-	public static final int WIDTH = 320;
-	public static final int HEIGHT = 215;
+	public static final int WIDTH = 640;
+	public static final int HEIGHT = 430;
 	private Framebuffer fbo = null;
-	private SceneMainScreen mainScreen = new SceneMainScreen();
+	private MainScreen mainScreen = new MainScreen();
 	private int lastMouseX = 0;
 	private int lastMouseY = 0;
 	

@@ -1,6 +1,8 @@
 package realsurv.gui;
 
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Graphics2D;
 import java.awt.Point;
 import java.io.IOException;
 
@@ -22,10 +24,10 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
 import realsurv.ClientEventHandler;
 import realsurv.CommonProxy;
+import realsurv.font.CanvasTexture;
 import realsurv.tabletos.TabletOS;
 
 public class GuiScreenTablet extends GuiScreen {
-	private static ItemStack dummy = new ItemStack(CommonProxy.tablet);
 	private static TabletOS system = ClientEventHandler.instance.getTabletContext();
 	
 	@Override
@@ -39,8 +41,7 @@ public class GuiScreenTablet extends GuiScreen {
 	}
 	
 	private Point2d getScreenSize() {
-		double scale = Math.min(width, height * (double) TabletOS.WIDTH / TabletOS.HEIGHT);
-		return new Point2d(TabletOS.WIDTH, TabletOS.HEIGHT);
+		return new Point2d(TabletOS.WIDTH/2, TabletOS.HEIGHT/2);
 	}
 	
 	private Point guiCoordsToScreen(int x, int y) {
@@ -54,6 +55,7 @@ public class GuiScreenTablet extends GuiScreen {
 		return new Point(x, y);
 	}
 
+	//TODO 화면이 약간 깨진다?
 	@Override
 	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
 		this.drawDefaultBackground();
@@ -90,7 +92,6 @@ public class GuiScreenTablet extends GuiScreen {
 		buf.pos((width+size.x)/2, (height+size.y)/2, 0).tex(1, 0).endVertex();
 		buf.pos((width+size.x)/2, (height-size.y)/2, 0).tex(1, 1).endVertex();
 		tes.draw();
-		
 		super.drawScreen(mouseX, mouseY, partialTicks);
 	}
 

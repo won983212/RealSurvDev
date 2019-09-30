@@ -3,6 +3,7 @@ package realsurv.tabletos.ui;
 import java.awt.Dimension;
 import java.awt.Rectangle;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import realsurv.tabletos.DirWeights;
 import realsurv.tabletos.GuiCompatibleTextfield;
@@ -12,9 +13,6 @@ public class UITextfield extends UIObject {
 	private String hint = null;
 	private int hintTextColor = 0xff999999;
 	
-	private boolean hideText = false;
-	private String hiddenText = "";
-	
 	public UITextfield() {
 		setPadding(new DirWeights(3));
 		setMinimumSize(10, fontrenderer.FONT_HEIGHT);
@@ -22,33 +20,25 @@ public class UITextfield extends UIObject {
 	}
 	
 	public String getText() {
-		if(hideText)
-			return hiddenText;
 		return textfield.getText();
 	}
-	
-	private String makeStarString(int num) {
-		StringBuilder sb = new StringBuilder();
-		for(int i=0;i<num;i++)
-			sb.append('*');
-		return sb.toString();
-	}
-	
+
 	@Override
 	public void onGotFocus() {
+		super.onGotFocus();
 		textfield.setFocused(true);
 	}
 	
 	@Override
 	public void onKeyTyped(int i, char c) {
 		textfield.textboxKeyTyped(c, i);
-		if(hideText)
-			setText(textfield.getText());
 	}
 	
 	@Override
 	public void onLostFocus() {
+		super.onLostFocus();
 		textfield.setFocused(false);
+		Minecraft.getMinecraft().currentScreen.setFocused(true);
 	}
 	
 	@Override
@@ -60,7 +50,22 @@ public class UITextfield extends UIObject {
 	public void render(int mouseX, int mouseY) {
 		Rectangle bounds = getInnerBounds();
 		Rectangle actBounds = getPadding().getContentRect(bounds);
-		renderArcRect(0, 0, bounds.width, bounds.height, arc, backgroundColor);
+		int color = backgroundColor;
+		
+		if(containsRelative(mouseX, mouseY))
+			color = offsetColor(color, 20);
+		
+		if(isFocusd()) {
+			int offset = 0;
+			if(showShadow) {
+				renderArcRect(1, 1, bounds.width, bounds.height, arc, 0xff999999, false);
+				offset++;
+			}
+			renderArcRect(0, 0, bounds.width - offset, bounds.height - offset, arc, 0xff99ccff, false);
+			renderArcRect(1, 1, bounds.width - offset - 1, bounds.height - offset - 1, arc, color, false);
+		} else {
+			renderArcRect(0, 0, bounds.width, bounds.height, arc, color, showShadow);
+		}
 		if(hint != null && textfield.getText().length() == 0)
 			fontrenderer.drawString(hint, actBounds.x, actBounds.y, hintTextColor);
 		textfield.setTextColor(foregroundColor);
@@ -78,24 +83,7 @@ public class UITextfield extends UIObject {
 	}
 	
 	public UITextfield setText(String text) {
-		if(hideText) {
-			hiddenText = text;
-			textfield.setText(makeStarString(hiddenText.length()));
-		} else {
-			textfield.setText(text);
-		}
-		return this;
-	}
-	
-	public UITextfield setHiddenText(boolean hiddenText) {
-		if(this.hideText != hiddenText) {
-			this.hideText = hiddenText;
-			if(hiddenText) {
-				setText(textfield.getText());
-			} else {
-				setText(this.hiddenText);
-			}
-		}
+		textfield.setText(text);
 		return this;
 	}
 }

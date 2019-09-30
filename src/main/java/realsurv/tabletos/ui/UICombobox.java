@@ -80,7 +80,7 @@ public class UICombobox extends UIObject implements IItemSelectedEvent {
 	@Override
 	public void render(int mouseX, int mouseY) {
 		Dimension size = getBoundsSize();
-		renderArcRect(0, 0, size.width, size.height, arc, backgroundColor);
+		renderArcRect(0, 0, size.width, size.height, arc, backgroundColor, showShadow);
 		if(items.size() > selected)
 			fontrenderer.drawString(getSelectedItem(), 2, 2, foregroundColor);
 	}

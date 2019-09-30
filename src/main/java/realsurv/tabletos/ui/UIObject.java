@@ -23,9 +23,10 @@ public abstract class UIObject {
 	private DirWeights margin = new DirWeights();
 	private DirWeights padding = new DirWeights();
 	private boolean visible = true;
-	protected int backgroundColor = 0xfff0f0f0;
+	protected int backgroundColor = 0xfff4f4f4;
 	protected int foregroundColor = 0xff000000;
 	protected int arc = 2;
+	protected boolean showShadow = true;
 	
 	protected UIPanel parentPanel;
 	private boolean focusd = false;
@@ -179,6 +180,11 @@ public abstract class UIObject {
 		return this;
 	}
 	
+	public UIObject setShadowVisible(boolean show) {
+		this.showShadow = show;
+		return this;
+	}
+	
 	public UIObject setMargin(DirWeights margin) {
 		this.margin = margin;
 		return this;
@@ -258,10 +264,14 @@ public abstract class UIObject {
 		GlStateManager.glEnd();
 	}
 	
-	public static void renderArcRect(int x1, int y1, int x2, int y2, int arc, int color) {
+	public static void renderArcRect(int x1, int y1, int x2, int y2, int arc, int color, boolean shadow) {
 		if(arc == 0) {
 			Gui.drawRect(x1, y1, x2, y2, color);
 			return;
+		}
+		
+		if(shadow) {
+			renderArcRect(x1+1, y1+1, x2--, y2--, arc, 0xff999999, false);
 		}
 		
 		Gui.drawRect(x1 + arc, y1, x2 - arc, y1 + arc, color);

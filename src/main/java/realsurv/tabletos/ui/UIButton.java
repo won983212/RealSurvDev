@@ -10,9 +10,11 @@ import realsurv.tabletos.ui.events.IButtonEvent;
 public class UIButton extends UIObject {
 	private String label;
 	private IButtonEvent event;
+	private boolean clicking = false;
 	
 	public UIButton(String label) {
 		setPadding(new DirWeights(2));
+		setShadowVisible(true);
 		setLabel(label);
 	}
 	
@@ -32,22 +34,23 @@ public class UIButton extends UIObject {
 		Dimension size = getBoundsSize();
 		int fontWidth = fontrenderer.getStringWidth(label);
 		int color = backgroundColor;
-
+		int offset = showShadow && clicking ? 1 : 0;
+		
 		if(containsRelative(mx, my))
 			color = offsetColor(color, 20);
-		renderArcRect(0, 0, size.width, size.height, arc, color);
-		fontrenderer.drawString(label, (size.width - fontWidth) / 2, (size.height - fontrenderer.FONT_HEIGHT) / 2, foregroundColor);
+		renderArcRect(offset, offset, size.width, size.height, arc, color, showShadow && !clicking);
+		fontrenderer.drawString(label, offset + (size.width - fontWidth) / 2, offset + (size.height - fontrenderer.FONT_HEIGHT) / 2, foregroundColor);
 	}
 
 	@Override
 	public void onPress(int x, int y, int bt) {
 		if(event != null)
 			event.onClicked(this, bt);
-		setBackgroundColor(offsetColor(backgroundColor, -20));
+		clicking = true;
 	}
 
 	@Override
 	public void onRelease(int x, int y, int bt) {
-		setBackgroundColor(offsetColor(backgroundColor, 20));
+		clicking = false;
 	}
 }

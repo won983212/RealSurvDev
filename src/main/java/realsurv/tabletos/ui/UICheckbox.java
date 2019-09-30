@@ -30,9 +30,13 @@ public class UICheckbox extends UIObject {
 	
 	@Override
 	public void render(int mouseX, int mouseY) {
-		renderArcRect(0, 0, 9, 9, arc, backgroundColor);
+		int color = backgroundColor;
+		if(containsRelative(mouseX, mouseY))
+			color = offsetColor(color, 20);
+		
+		renderArcRect(0, 0, 9, 9, arc, color, showShadow);
 		if(checked)
-			renderArcRect(1, 1, 8, 8, arc, 0xff000000);
+			renderArcRect(1, 1, showShadow ? 7 : 8, showShadow ? 7 : 8, arc, 0xff000000, false);
 		fontrenderer.drawString(label, 12, 1, foregroundColor);
 	}
 }
