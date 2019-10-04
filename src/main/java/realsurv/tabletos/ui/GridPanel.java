@@ -39,9 +39,9 @@ public class GridPanel extends UIPanel {
 		for(UIObject obj : uiList) {
 			Dimension desired = obj.getLayoutMinSize();
 			CellLength column = columns.get(obj.layoutX);
-			column.maxDesiredLength = Math.max(column.maxDesiredLength, desired.width);
+			column.maxDesiredLength = Math.max(column.maxDesiredLength, desired.width / obj.layoutXSpan);
 			CellLength row = rows.get(obj.layoutY);
-			row.maxDesiredLength = Math.max(row.maxDesiredLength, desired.height);
+			row.maxDesiredLength = Math.max(row.maxDesiredLength, desired.height / obj.layoutYSpan);
 		}
 	}
 	

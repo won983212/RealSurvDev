@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import net.minecraft.client.gui.Gui;
+import realsurv.font.TrueTypeFont;
 import realsurv.tabletos.VerticalArrange;
 import realsurv.tabletos.ui.events.IItemSelectedEvent;
 
@@ -25,8 +26,8 @@ public class UICombobox extends UIObject implements IItemSelectedEvent {
 	public UICombobox add(String item) {
 		items.add(item);
 		menu.addItem(item);
-		maxLength = Math.max(maxLength, fontrenderer.getStringWidth(item));
-		setMinimumSize(maxLength + 12, 11);
+		maxLength = Math.max(maxLength, getFont().getStringWidth(item));
+		setMinimumSize(maxLength + 12, getFont().getMaxHeight() + 2);
 		return this;
 	}
 
@@ -35,7 +36,7 @@ public class UICombobox extends UIObject implements IItemSelectedEvent {
 		menu.addAll(c);
 		maxLength = 0;
 		for (String str : items)
-			maxLength = Math.max(maxLength, fontrenderer.getStringWidth(str));
+			maxLength = Math.max(maxLength, getFont().getStringWidth(str));
 		setMinimumSize(maxLength + 12, 11);
 		return this;
 	}
@@ -80,9 +81,12 @@ public class UICombobox extends UIObject implements IItemSelectedEvent {
 	@Override
 	public void render(int mouseX, int mouseY) {
 		Dimension size = getBoundsSize();
+		TrueTypeFont font = getFont();
+		String item = getSelectedItem();
+		
 		renderArcRect(0, 0, size.width, size.height, arc, backgroundColor, showShadow);
 		if(items.size() > selected)
-			fontrenderer.drawString(getSelectedItem(), 2, 2, foregroundColor);
+			font.drawString(item, (size.width - font.getStringWidth(item)) / 2, (size.height - font.getMaxHeight()) / 2, foregroundColor);
 	}
 
 	@Override

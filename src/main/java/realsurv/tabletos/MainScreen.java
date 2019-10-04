@@ -1,12 +1,14 @@
 package realsurv.tabletos;
 
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 
 import org.lwjgl.input.Keyboard;
 
 import net.minecraft.client.gui.GuiScreen;
+import realsurv.font.TrueTypeFont;
 import realsurv.tabletos.ui.GridPanel;
 import realsurv.tabletos.ui.UILabel;
 import realsurv.tabletos.ui.UIObject;
@@ -34,6 +36,14 @@ public class MainScreen extends UIPanel {
 		popupPanel.add(obj);
 	}
 	
+	//TODO Debug for font
+	private TrueTypeFont font = new TrueTypeFont("맑은 고딕", 12, true);
+	@Override
+	public void render(int mouseX, int mouseY) {
+		super.render(mouseX, mouseY);
+		font.drawString("§mNi§n§l§oce§r §nto §l§ameet§r you \n§l동해물§r과 §o백두산§r이 마르고§d 닳도록\n§n하느님이 보§r§m우하사§r 우리나라 만세\n무궁화 삼천리 화려강산\n대한사람 대한으로 길이 보전하세", 0, 0, 0xffffffff);
+	}
+	
 	private void refresh() {
 		popupPanel = new UIPanel();
 		uiList.clear();
@@ -46,8 +56,7 @@ public class MainScreen extends UIPanel {
 		contents.addEmptyColumn();
 		
 		UIPanel taskbar = new UIPanel();
-		taskbar.add(new UIRectangle().setShadowVisible(false).setRadius(0).setBackgroundColor(0xaa000000).setLayoutSpan(2, 1));
-		taskbar.add(new UILabel("It is taskbar.").setForegroundColor(0xffffffff).setHorizontalArrange(HorizontalArrange.CENTER).setVerticalArrange(VerticalArrange.CENTER).setLayoutPosition(1, 0));
+		//taskbar.add(new UIRectangle().setShadowVisible(false).setRadius(0).setBackgroundColor(0xaa000000).setLayoutSpan(2, 1));
 		contents.add(taskbar);
 
 		GridPanel loginForm = new GridPanel();

@@ -4,6 +4,7 @@ import java.awt.Dimension;
 import java.awt.Rectangle;
 
 import net.minecraft.client.gui.Gui;
+import realsurv.font.TrueTypeFont;
 import realsurv.tabletos.DirWeights;
 import realsurv.tabletos.ui.events.IButtonEvent;
 
@@ -19,8 +20,9 @@ public class UIButton extends UIObject {
 	}
 	
 	public UIButton setLabel(String label) {
+		TrueTypeFont font = getFont();
 		this.label = label;
-		setMinimumSize(fontrenderer.getStringWidth(label), fontrenderer.FONT_HEIGHT);
+		setMinimumSize(font.getStringWidth(label), font.getMaxHeight());
 		return this;
 	}
 	
@@ -32,14 +34,15 @@ public class UIButton extends UIObject {
 	@Override
 	public void render(int mx, int my) {
 		Dimension size = getBoundsSize();
-		int fontWidth = fontrenderer.getStringWidth(label);
+		TrueTypeFont font = getFont();
+		int fontWidth = font.getStringWidth(label);
 		int color = backgroundColor;
 		int offset = showShadow && clicking ? 1 : 0;
 		
 		if(containsRelative(mx, my))
 			color = offsetColor(color, 20);
 		renderArcRect(offset, offset, size.width, size.height, arc, color, showShadow && !clicking);
-		fontrenderer.drawString(label, offset + (size.width - fontWidth) / 2, offset + (size.height - fontrenderer.FONT_HEIGHT) / 2, foregroundColor);
+		font.drawString(label, offset + (size.width - fontWidth) / 2, offset + (size.height - font.getMaxHeight()) / 2, foregroundColor);
 	}
 
 	@Override

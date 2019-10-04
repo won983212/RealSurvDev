@@ -8,4 +8,7 @@ public class Glyph {
 	public int textureY;
 	public int width;
 	public int height;
+	public int offsetX;
+	public int offsetY;
+	public float advance;
 }

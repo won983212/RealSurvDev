@@ -10,18 +10,20 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
+import realsurv.font.FontFactory;
+import realsurv.font.TrueTypeFont;
 import realsurv.tabletos.DirWeights;
 import realsurv.tabletos.HorizontalArrange;
 import realsurv.tabletos.VerticalArrange;
 
 public abstract class UIObject {
-	protected static final FontRenderer fontrenderer = Minecraft.getMinecraft().fontRenderer;
 	private HorizontalArrange hArrange = HorizontalArrange.STRECTCH;
 	private VerticalArrange vArrange = VerticalArrange.STRECTCH;
 	private Rectangle bounds = new Rectangle();
 	private Dimension minSize = new Dimension(10, 10);
 	private DirWeights margin = new DirWeights();
 	private DirWeights padding = new DirWeights();
+	private TrueTypeFont font = FontFactory.createFont("¸¼Àº °íµñ", 10);
 	private boolean visible = true;
 	protected int backgroundColor = 0xfff4f4f4;
 	protected int foregroundColor = 0xff000000;
@@ -62,6 +64,10 @@ public abstract class UIObject {
 	
 	public Rectangle getRelativeBounds() {
 		return bounds;
+	}
+	
+	public TrueTypeFont getFont() {
+		return font;
 	}
 	
 	public Dimension getBoundsSize() {
@@ -166,6 +172,11 @@ public abstract class UIObject {
 	
 	public UIObject setMetadata(Object data) {
 		this.metadata = data;
+		return this;
+	}
+	
+	public UIObject setFont(String family, int size) {
+		this.font = FontFactory.createFont(family, size);
 		return this;
 	}
 	

@@ -2,6 +2,7 @@ package realsurv.gui;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.io.IOException;
@@ -24,7 +25,8 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
 import realsurv.ClientEventHandler;
 import realsurv.CommonProxy;
-import realsurv.font.CanvasTexture;
+import realsurv.font.BufferedImageTexture;
+import realsurv.font.TrueTypeFont;
 import realsurv.tabletos.TabletOS;
 
 public class GuiScreenTablet extends GuiScreen {
@@ -41,7 +43,8 @@ public class GuiScreenTablet extends GuiScreen {
 	}
 	
 	private Point2d getScreenSize() {
-		return new Point2d(TabletOS.WIDTH/2, TabletOS.HEIGHT/2);
+		ScaledResolution r = new ScaledResolution(Minecraft.getMinecraft());
+		return new Point2d(TabletOS.WIDTH / r.getScaleFactor(), TabletOS.HEIGHT / r.getScaleFactor());
 	}
 	
 	private Point guiCoordsToScreen(int x, int y) {
@@ -55,7 +58,6 @@ public class GuiScreenTablet extends GuiScreen {
 		return new Point(x, y);
 	}
 
-	//TODO 화면이 약간 깨진다?
 	@Override
 	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
 		this.drawDefaultBackground();
@@ -67,30 +69,35 @@ public class GuiScreenTablet extends GuiScreen {
 		Tessellator tes = Tessellator.getInstance();
 		BufferBuilder buf = tes.getBuffer();
 
+		int minX = (int) ((width-size.x)/2);
+		int maxX = (int) (minX + size.x);
+		int minY = (int) ((height-size.y)/2);
+		int maxY = (int) (minY + size.y);
+		
 		GlStateManager.disableTexture2D();
 		GlStateManager.color(0.3f, 0.3f, 0.3f, 1);
 		buf.begin(7, DefaultVertexFormats.POSITION);
-		buf.pos((width-size.x)/2-1, (height-size.y)/2-1, 0).endVertex();
-		buf.pos((width-size.x)/2-1, (height+size.y)/2+1, 0).endVertex();
-		buf.pos((width+size.x)/2+1, (height+size.y)/2+1, 0).endVertex();
-		buf.pos((width+size.x)/2+1, (height-size.y)/2-1, 0).endVertex();
+		buf.pos(minX-1, maxY+1, 0).endVertex();
+		buf.pos(minX-1, minY-1, 0).endVertex();
+		buf.pos(maxX+1, minY-1, 0).endVertex();
+		buf.pos(maxX+1, maxY+1, 0).endVertex();
 		tes.draw();
 		GlStateManager.color(0.08f, 0.08f, 0.08f, 1);
 		buf.begin(7, DefaultVertexFormats.POSITION);
-		buf.pos((width-size.x)/2, (height-size.y)/2, 0).endVertex();
-		buf.pos((width-size.x)/2, (height+size.y)/2, 0).endVertex();
-		buf.pos((width+size.x)/2, (height+size.y)/2, 0).endVertex();
-		buf.pos((width+size.x)/2, (height-size.y)/2, 0).endVertex();
+		buf.pos(minX, maxY, 0).endVertex();
+		buf.pos(minX, minY, 0).endVertex();
+		buf.pos(maxX, minY, 0).endVertex();
+		buf.pos(maxX, maxY, 0).endVertex();
 		tes.draw();
 		GlStateManager.enableTexture2D();
 		
 		GlStateManager.color(1, 1, 1, 1);
 		ClientEventHandler.instance.bindTabletScreenTexture();
 		buf.begin(7, DefaultVertexFormats.POSITION_TEX);
-		buf.pos((width-size.x)/2, (height-size.y)/2, 0).tex(0, 1).endVertex();
-		buf.pos((width-size.x)/2, (height+size.y)/2, 0).tex(0, 0).endVertex();
-		buf.pos((width+size.x)/2, (height+size.y)/2, 0).tex(1, 0).endVertex();
-		buf.pos((width+size.x)/2, (height-size.y)/2, 0).tex(1, 1).endVertex();
+		buf.pos(minX, maxY, 0).tex(0, 0).endVertex();
+		buf.pos(minX, minY, 0).tex(0, 1).endVertex();
+		buf.pos(maxX, minY, 0).tex(1, 1).endVertex();
+		buf.pos(maxX, maxY, 0).tex(1, 0).endVertex();
 		tes.draw();
 		super.drawScreen(mouseX, mouseY, partialTicks);
 	}

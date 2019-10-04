@@ -9,14 +9,21 @@ import realsurv.tabletos.DirWeights;
 import realsurv.tabletos.GuiCompatibleTextfield;
 
 public class UITextfield extends UIObject {
-	private GuiCompatibleTextfield textfield = new GuiCompatibleTextfield(0);
+	private GuiCompatibleTextfield textfield = new GuiCompatibleTextfield(0, getFont().makeCompatibleFont());
 	private String hint = null;
 	private int hintTextColor = 0xff999999;
 	
 	public UITextfield() {
 		setPadding(new DirWeights(3));
-		setMinimumSize(10, fontrenderer.FONT_HEIGHT);
+		setMinimumSize(10, getFont().getMaxHeight());
 		textfield.setEnableBackgroundDrawing(false);
+	}
+	
+	@Override
+	public UIObject setFont(String family, int size) {
+		super.setFont(family, size);
+		textfield = new GuiCompatibleTextfield(0, getFont().makeCompatibleFont());
+		return this;
 	}
 	
 	public String getText() {
@@ -67,7 +74,7 @@ public class UITextfield extends UIObject {
 			renderArcRect(0, 0, bounds.width, bounds.height, arc, color, showShadow);
 		}
 		if(hint != null && textfield.getText().length() == 0)
-			fontrenderer.drawString(hint, actBounds.x, actBounds.y, hintTextColor);
+			getFont().drawString(hint, actBounds.x, actBounds.y, hintTextColor);
 		textfield.setTextColor(foregroundColor);
 		textfield.drawAtBounds(actBounds);
 	}
