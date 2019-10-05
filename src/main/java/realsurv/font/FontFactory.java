@@ -5,7 +5,7 @@ import java.util.HashMap;
 public class FontFactory {
 	private static HashMap<Key, TrueTypeFont> fonts = new HashMap<Key, TrueTypeFont>();
 	
-	public static TrueTypeFont createFont(String family, int size) {
+	public static TrueTypeFont makeFont(String family, int size) {
 		return getFont(new Key(family, size));
 	}
 	

@@ -23,7 +23,7 @@ public abstract class UIObject {
 	private Dimension minSize = new Dimension(10, 10);
 	private DirWeights margin = new DirWeights();
 	private DirWeights padding = new DirWeights();
-	private TrueTypeFont font = FontFactory.createFont("¸¼Àº °íµñ", 10);
+	private TrueTypeFont font = FontFactory.makeFont("¸¼Àº °íµñ", 14);
 	private boolean visible = true;
 	protected int backgroundColor = 0xfff4f4f4;
 	protected int foregroundColor = 0xff000000;
@@ -176,7 +176,7 @@ public abstract class UIObject {
 	}
 	
 	public UIObject setFont(String family, int size) {
-		this.font = FontFactory.createFont(family, size);
+		this.font = FontFactory.makeFont(family, size);
 		return this;
 	}
 	

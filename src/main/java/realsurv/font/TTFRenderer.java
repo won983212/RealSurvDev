@@ -29,7 +29,7 @@ public class TTFRenderer extends FontRenderer {
 	}
 	
 	public void setFont(String family, int size) {
-		font = FontFactory.createFont(family, size);
+		font = FontFactory.makeFont(family, size);
 		FONT_HEIGHT = (int)(size * 4.0 / 3);
 	}
 

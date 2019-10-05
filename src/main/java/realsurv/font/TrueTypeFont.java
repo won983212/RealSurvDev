@@ -46,9 +46,6 @@ public class TrueTypeFont {
 	private Graphics2D stringGraphics;
 	private FontRenderContext stringFRC;
 	private FontImageTexture glyphTexture = new FontImageTexture(TEXTURE_WIDTH, TEXTURE_HEIGHT);
-	/*private int imageData[] = new int[TEXTURE_WIDTH * TEXTURE_HEIGHT];
-	private IntBuffer imageBuffer = ByteBuffer.allocateDirect(4 * TEXTURE_WIDTH * TEXTURE_HEIGHT)
-			.order(ByteOrder.BIG_ENDIAN).asIntBuffer();*/
 
 	private final Font[] font = new Font[4];
 	private final boolean antialias;
@@ -62,8 +59,8 @@ public class TrueTypeFont {
 	private int[] ascent = new int[4];
 	private int[] descent = new int[4];
 	private int[] leading = new int[4];
-	
-	public TrueTypeFont(String family, int size, boolean antialias) {
+
+	protected TrueTypeFont(String family, int size, boolean antialias) {
 		for (int i = 0; i < 4; i++) {
 			font[i] = new Font(family, i, size);
 			FontMetrics metrics = glyphTexture.getGraphic().getFontMetrics(font[i]);
@@ -75,7 +72,7 @@ public class TrueTypeFont {
 		allocateStringImage(TEXTURE_WIDTH, TEXTURE_HEIGHT);
 		makeColorTable();
 	}
-	
+
 	private void makeColorTable() {
 		for (int i = 0; i < 16; ++i) {
 			int j = (i >> 3 & 1) * 85;
@@ -132,7 +129,6 @@ public class TrueTypeFont {
 		}
 	}
 
-	// TODO Need to Implementation.
 	public List<String> listFormattedStringToWidth(String str, int wrapWidth) {
 		ArrayList<String> ret = new ArrayList<String>();
 		StringBuilder sb = new StringBuilder();
@@ -140,7 +136,7 @@ public class TrueTypeFont {
 
 		cacheGlyphs(str);
 		style = specialStyle = 0;
-		for (int i=0;i<str.length();i++) {
+		for (int i = 0; i < str.length(); i++) {
 			int cp = str.codePointAt(i);
 			if (cp == '§' && i < str.length() - 1) {
 				if (applyStyle(str.charAt(i + 1), false)) {
@@ -148,8 +144,8 @@ public class TrueTypeFont {
 					continue;
 				}
 			}
-			
-			float width = glyphCache.get((long)style << 32 | cp).advance;
+
+			float width = glyphCache.get((long) style << 32 | cp).advance;
 			if (total + width > wrapWidth) {
 				ret.add(sb.toString());
 				sb = new StringBuilder();
@@ -163,13 +159,11 @@ public class TrueTypeFont {
 		return ret;
 	}
 
-	// TODO Need to implementation
 	public int getCharWidth(char c) {
 		cacheGlyphs(String.valueOf(c));
-		return (int) glyphCache.get((long)c).advance;
+		return (int) glyphCache.get((long) c).advance;
 	}
 
-	// TODO Need to implementation.
 	public int getStringWidth(String str) {
 		int width = 0;
 		cacheGlyphs(str);
@@ -193,9 +187,7 @@ public class TrueTypeFont {
 
 	private void enableBlend() {
 		GlStateManager.enableBlend();
-		GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA,
-				GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE,
-				GlStateManager.DestFactor.ZERO);
+		GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
 	}
 
 	public int drawString(String str, float x, float y, int color, boolean shadow) {
@@ -213,7 +205,7 @@ public class TrueTypeFont {
 		enableBlend();
 		GlStateManager.enableAlpha();
 		GlStateManager.enableTexture2D();
-		
+
 		style = specialStyle = 0;
 		for (int i = 0; i < str.length(); i++) {
 			int cp = str.codePointAt(i);
@@ -229,7 +221,7 @@ public class TrueTypeFont {
 			final float minY = y + g.offsetY;
 			final float texW = TEXTURE_WIDTH;
 			final float texH = TEXTURE_HEIGHT;
-			
+
 			if (cp != ' ') {
 				GlStateManager.bindTexture(g.texture);
 				GlStateManager.glBegin(7);
@@ -244,30 +236,32 @@ public class TrueTypeFont {
 				GlStateManager.glEnd();
 			}
 
-			GlStateManager.disableTexture2D();
-			if ((specialStyle & UNDERLINE) > 0) {
-				GlStateManager.translate(0, ascent[0] + 1, 0);
-				GlStateManager.glBegin(7);
-				GlStateManager.glVertex3f(x, y - 1, 0);
-				GlStateManager.glVertex3f(x, y, 0);
-				GlStateManager.glVertex3f(x + g.advance, y, 0);
-				GlStateManager.glVertex3f(x + g.advance, y - 1, 0);
-				GlStateManager.glEnd();
-				GlStateManager.translate(0, -ascent[0] - 1, 0);
-			}
+			if (specialStyle != 0) {
+				GlStateManager.disableTexture2D();
+				if ((specialStyle & UNDERLINE) > 0) {
+					GlStateManager.translate(0, ascent[0] + 1, 0);
+					GlStateManager.glBegin(7);
+					GlStateManager.glVertex3f(x, y - 1, 0);
+					GlStateManager.glVertex3f(x, y, 0);
+					GlStateManager.glVertex3f(x + g.advance, y, 0);
+					GlStateManager.glVertex3f(x + g.advance, y - 1, 0);
+					GlStateManager.glEnd();
+					GlStateManager.translate(0, -ascent[0] - 1, 0);
+				}
 
-			if ((specialStyle & STRIKE_THROUGH) > 0) {
-				GlStateManager.translate(0, ascent[0] * 3 / 4, 0);
-				GlStateManager.glBegin(7);
-				GlStateManager.glVertex3f(x, y - 1, 0);
-				GlStateManager.glVertex3f(x, y, 0);
-				GlStateManager.glVertex3f(x + g.advance, y, 0);
-				GlStateManager.glVertex3f(x + g.advance, y - 1, 0);
-				GlStateManager.glEnd();
-				GlStateManager.translate(0, -ascent[0] * 3 / 4, 0);
-			}
+				if ((specialStyle & STRIKE_THROUGH) > 0) {
+					GlStateManager.translate(0, ascent[0] * 3 / 4, 0);
+					GlStateManager.glBegin(7);
+					GlStateManager.glVertex3f(x, y - 1, 0);
+					GlStateManager.glVertex3f(x, y, 0);
+					GlStateManager.glVertex3f(x + g.advance, y, 0);
+					GlStateManager.glVertex3f(x + g.advance, y - 1, 0);
+					GlStateManager.glEnd();
+					GlStateManager.translate(0, -ascent[0] * 3 / 4, 0);
+				}
 
-			GlStateManager.enableTexture2D();
+				GlStateManager.enableTexture2D();
+			}
 			x += g.advance;
 		}
 		GlStateManager.disableBlend();
@@ -281,35 +275,38 @@ public class TrueTypeFont {
 			int cp = text.codePointAt(i);
 			if (cp == '§' && i < text.length() - 1) {
 				int idx = "rlo".indexOf(text.charAt(i + 1));
-				if(idx != -1) {
+				if (idx != -1) {
 					cacheGlyphs(sb.toString(), style);
 					i++;
-					if(idx == 0)
+					if (idx == 0)
 						style = 0;
 					else
 						style |= idx;
-				} else sb.append((char) cp);
-			} else sb.append((char) cp);
+				} else
+					sb.append((char) cp);
+			} else
+				sb.append((char) cp);
 		}
 		cacheGlyphs(sb.toString(), style);
 	}
-	
+
 	private void cacheGlyphs(String text, int style) {
-		if(text.length() == 0)
+		if (text.length() == 0)
 			return;
-		
+
 		char[] chars = text.toCharArray();
 		GlyphVector vec = null;
 		Rectangle bounds = null;
 		boolean isFirst = false;
 		long styleKey = (long) style << 32;
-		
+		int offsetY = ascent[style] - descent[style] - leading[style];
+
 		for (int i = 0; i < chars.length; i++) {
 			int cp = text.codePointAt(i);
-			if(glyphCache.containsKey(styleKey | cp)) {
+			if (glyphCache.containsKey(styleKey | cp)) {
 				continue;
 			}
-			
+
 			if (!isFirst) {
 				isFirst = true;
 				vec = font[style].layoutGlyphVector(stringFRC, chars, 0, text.length(), Font.LAYOUT_LEFT_TO_RIGHT);
@@ -329,11 +326,11 @@ public class TrueTypeFont {
 					allocateStringImage(w, h);
 				}
 
-				stringGraphics.clearRect(0, 0, boundsMaxW, boundsMaxH);
-				stringGraphics.drawGlyphVector(vec, GLYPH_PADDING - bounds.x, GLYPH_PADDING);
+				stringGraphics.clearRect(0, 0, boundsMaxW, boundsMaxH + offsetY);
+				stringGraphics.drawGlyphVector(vec, GLYPH_PADDING - bounds.x, GLYPH_PADDING + offsetY);
 			}
 
-			Rectangle r = vec.getGlyphPixelBounds(i, stringFRC, GLYPH_PADDING - bounds.x, GLYPH_PADDING);
+			Rectangle r = vec.getGlyphPixelBounds(i, stringFRC, GLYPH_PADDING - bounds.x, GLYPH_PADDING + offsetY);
 			Point2D p = vec.getGlyphPosition(i);
 
 			if (cacheX + r.width + GLYPH_PADDING * 2 > TEXTURE_WIDTH) {
@@ -369,35 +366,6 @@ public class TrueTypeFont {
 		}
 	}
 
-	/*
-	private void updateTexture(int x, int y, int width, int height) {
-		updateImageBuffer(x, y, width, height);
-		GlStateManager.bindTexture(texture);
-		GlStateManager.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, x, y, width, height, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE,
-				imageBuffer);
-	}
-
-	private void allocateGlyphCacheTexture() {
-		glyphGraphic.clearRect(0, 0, TEXTURE_WIDTH, TEXTURE_HEIGHT);
-		texture = TextureUtil.glGenTextures();
-
-		updateImageBuffer(0, 0, TEXTURE_WIDTH, TEXTURE_HEIGHT);
-		GlStateManager.bindTexture(texture);
-		GlStateManager.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, TEXTURE_WIDTH, TEXTURE_HEIGHT, 0, GL11.GL_RGBA,
-				GL11.GL_UNSIGNED_BYTE, imageBuffer);
-	}
-
-	private void updateImageBuffer(int x, int y, int width, int height) {
-		glyphImage.getRGB(x, y, width, height, imageData, 0, width);
-		for (int i = 0; i < width * height; i++) {
-			int color = imageData[i];
-			imageData[i] = (color << 8) | (color >>> 24);
-		}
-		imageBuffer.clear();
-		imageBuffer.put(imageData);
-		imageBuffer.flip();
-	}*/
-
 	private void allocateStringImage(int w, int h) {
 		stringVectorImage = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
 		stringGraphics = (Graphics2D) stringVectorImage.getGraphics();
@@ -415,7 +383,6 @@ public class TrueTypeFont {
 		return new TTFRenderer(font[0].getFamily(), font[0].getSize());
 	}
 
-	// TODO 굳이 offset이 필요할까?
 	private static class Glyph {
 		public int texture;
 		public int textureX;
