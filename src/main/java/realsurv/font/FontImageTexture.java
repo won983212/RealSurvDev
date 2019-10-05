@@ -55,6 +55,7 @@ public class FontImageTexture extends AbstractTexture {
 		GlStateManager.bindTexture(getGlTextureId());
 	}
 
+	//TODO Test. it is actually not update specific area. update all area.
 	public void updateTexture(int x, int y, int width, int height) {
 		if (!allocated) {
 			allocated = true;

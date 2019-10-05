@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import org.lwjgl.input.Keyboard;
 
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.renderer.GlStateManager;
 import realsurv.font.TrueTypeFont;
 import realsurv.tabletos.ui.GridPanel;
 import realsurv.tabletos.ui.UILabel;

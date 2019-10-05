@@ -38,7 +38,7 @@ public class TrueTypeFont {
 	private static final int STRING_IMAGE_HEIGHT = 64;
 	private static final int TEXTURE_WIDTH = 256;
 	private static final int TEXTURE_HEIGHT = 256;
-	private static final int GLYPH_PADDING = 2;
+	private static final int GLYPH_PADDING = 1;
 
 	private HashMap<Long, Glyph> glyphCache = new HashMap<Long, Glyph>();
 
@@ -138,16 +138,25 @@ public class TrueTypeFont {
 		StringBuilder sb = new StringBuilder();
 		float total = 0;
 
-		cacheGlyphs(str, 0);
-		for (char c : str.toCharArray()) {
-			float width = glyphCache.get(c).advance;
+		cacheGlyphs(str);
+		style = specialStyle = 0;
+		for (int i=0;i<str.length();i++) {
+			int cp = str.codePointAt(i);
+			if (cp == '¡×' && i < str.length() - 1) {
+				if (applyStyle(str.charAt(i + 1), false)) {
+					i++;
+					continue;
+				}
+			}
+			
+			float width = glyphCache.get((long)style << 32 | cp).advance;
 			if (total + width > wrapWidth) {
 				ret.add(sb.toString());
 				sb = new StringBuilder();
 			} else {
 				total += width;
 			}
-			sb.append(c);
+			sb.append((char) cp);
 		}
 		if (sb.length() > 0)
 			ret.add(sb.toString());
@@ -156,14 +165,15 @@ public class TrueTypeFont {
 
 	// TODO Need to implementation
 	public int getCharWidth(char c) {
-		cacheGlyphs(String.valueOf(c), 0);
-		return (int) glyphCache.get(c).advance;
+		cacheGlyphs(String.valueOf(c));
+		return (int) glyphCache.get((long)c).advance;
 	}
 
 	// TODO Need to implementation.
 	public int getStringWidth(String str) {
 		int width = 0;
-		cacheGlyphs(str, 0);
+		cacheGlyphs(str);
+		style = specialStyle = 0;
 		for (int i = 0; i < str.length(); i++) {
 			int cp = str.codePointAt(i);
 			if (cp == '¡×' && i < str.length() - 1) {
@@ -172,7 +182,7 @@ public class TrueTypeFont {
 					continue;
 				}
 			}
-			width += glyphCache.get((long) cp).advance;
+			width += glyphCache.get((long) style << 32 | cp).advance;
 		}
 		return width;
 	}
@@ -198,7 +208,7 @@ public class TrueTypeFont {
 	}
 
 	public int drawString(String str, float x, float y, int color) {
-		cacheGlyphs(str, 0);
+		cacheGlyphs(str);
 		applyColor(color);
 		enableBlend();
 		GlStateManager.enableAlpha();
@@ -214,8 +224,7 @@ public class TrueTypeFont {
 				}
 			}
 
-			//TODO Test. style is not considered.
-			Glyph g = glyphCache.get((long)cp);
+			Glyph g = glyphCache.get((long) style << 32 | cp);
 			final float minX = x + g.offsetX;
 			final float minY = y + g.offsetY;
 			final float texW = TEXTURE_WIDTH;
@@ -265,7 +274,30 @@ public class TrueTypeFont {
 		return (int) x;
 	}
 
+	private void cacheGlyphs(String text) {
+		StringBuilder sb = new StringBuilder();
+		int style = 0;
+		for (int i = 0; i < text.length(); i++) {
+			int cp = text.codePointAt(i);
+			if (cp == '¡×' && i < text.length() - 1) {
+				int idx = "rlo".indexOf(text.charAt(i + 1));
+				if(idx != -1) {
+					cacheGlyphs(sb.toString(), style);
+					i++;
+					if(idx == 0)
+						style = 0;
+					else
+						style |= idx;
+				} else sb.append((char) cp);
+			} else sb.append((char) cp);
+		}
+		cacheGlyphs(sb.toString(), style);
+	}
+	
 	private void cacheGlyphs(String text, int style) {
+		if(text.length() == 0)
+			return;
+		
 		char[] chars = text.toCharArray();
 		GlyphVector vec = null;
 		Rectangle bounds = null;
@@ -297,11 +329,11 @@ public class TrueTypeFont {
 					allocateStringImage(w, h);
 				}
 
-				stringGraphics.clearRect(0, 0, stringVectorImage.getWidth(), stringVectorImage.getHeight());
-				stringGraphics.drawGlyphVector(vec, GLYPH_PADDING - bounds.x, GLYPH_PADDING - bounds.y);
+				stringGraphics.clearRect(0, 0, boundsMaxW, boundsMaxH);
+				stringGraphics.drawGlyphVector(vec, GLYPH_PADDING - bounds.x, GLYPH_PADDING);
 			}
 
-			Rectangle r = vec.getGlyphPixelBounds(i, stringFRC, GLYPH_PADDING - bounds.x, GLYPH_PADDING - bounds.y);
+			Rectangle r = vec.getGlyphPixelBounds(i, stringFRC, GLYPH_PADDING - bounds.x, GLYPH_PADDING);
 			Point2D p = vec.getGlyphPosition(i);
 
 			if (cacheX + r.width + GLYPH_PADDING * 2 > TEXTURE_WIDTH) {
