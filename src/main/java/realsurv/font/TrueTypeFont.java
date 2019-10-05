@@ -4,6 +4,7 @@ import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
@@ -18,10 +19,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+
 import org.lwjgl.opengl.GL11;
 
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.texture.TextureUtil;
+import realsurv.TestFrame;
 
 public class TrueTypeFont {
 	private static final int BOLD = 1;
@@ -38,7 +43,9 @@ public class TrueTypeFont {
 	private HashMap<Long, Glyph> glyphCache = new HashMap<Long, Glyph>();
 
 	private BufferedImage stringVectorImage;
-	private BufferedImageTexture glyphTexture = new BufferedImageTexture(TEXTURE_WIDTH, TEXTURE_HEIGHT);
+	private Graphics2D stringGraphics;
+	private FontRenderContext stringFRC;
+	private FontImageTexture glyphTexture = new FontImageTexture(TEXTURE_WIDTH, TEXTURE_HEIGHT);
 	/*private int imageData[] = new int[TEXTURE_WIDTH * TEXTURE_HEIGHT];
 	private IntBuffer imageBuffer = ByteBuffer.allocateDirect(4 * TEXTURE_WIDTH * TEXTURE_HEIGHT)
 			.order(ByteOrder.BIG_ENDIAN).asIntBuffer();*/
@@ -55,7 +62,7 @@ public class TrueTypeFont {
 	private int[] ascent = new int[4];
 	private int[] descent = new int[4];
 	private int[] leading = new int[4];
-
+	
 	public TrueTypeFont(String family, int size, boolean antialias) {
 		for (int i = 0; i < 4; i++) {
 			font[i] = new Font(family, i, size);
@@ -68,7 +75,7 @@ public class TrueTypeFont {
 		allocateStringImage(TEXTURE_WIDTH, TEXTURE_HEIGHT);
 		makeColorTable();
 	}
-
+	
 	private void makeColorTable() {
 		for (int i = 0; i < 16; ++i) {
 			int j = (i >> 3 & 1) * 85;
@@ -211,18 +218,19 @@ public class TrueTypeFont {
 			Glyph g = glyphCache.get((long)cp);
 			final float minX = x + g.offsetX;
 			final float minY = y + g.offsetY;
+			final float texW = TEXTURE_WIDTH;
+			final float texH = TEXTURE_HEIGHT;
 			
 			if (cp != ' ') {
 				GlStateManager.bindTexture(g.texture);
-				//GlStateManager.glTexEnvi(GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_MODULATE);
 				GlStateManager.glBegin(7);
-				GlStateManager.glTexCoord2f(g.textureX / TEXTURE_WIDTH, g.textureY / TEXTURE_HEIGHT);
+				GlStateManager.glTexCoord2f(g.textureX / texW, g.textureY / texH);
 				GlStateManager.glVertex3f(minX, minY, 0);
-				GlStateManager.glTexCoord2f(g.textureX / TEXTURE_WIDTH, (g.textureY + g.height) / TEXTURE_HEIGHT);
+				GlStateManager.glTexCoord2f(g.textureX / texW, (g.textureY + g.height) / texH);
 				GlStateManager.glVertex3f(minX, minY + g.height, 0);
-				GlStateManager.glTexCoord2f((g.textureX + g.width) / TEXTURE_WIDTH, (g.textureY + g.height) / TEXTURE_HEIGHT);
+				GlStateManager.glTexCoord2f((g.textureX + g.width) / texW, (g.textureY + g.height) / texH);
 				GlStateManager.glVertex3f(minX + g.width, minY + g.height, 0);
-				GlStateManager.glTexCoord2f((g.textureX + g.width) / TEXTURE_WIDTH, g.textureY / TEXTURE_HEIGHT);
+				GlStateManager.glTexCoord2f((g.textureX + g.width) / texW, g.textureY / texH);
 				GlStateManager.glVertex3f(minX + g.width, minY, 0);
 				GlStateManager.glEnd();
 			}
@@ -263,8 +271,6 @@ public class TrueTypeFont {
 		Rectangle bounds = null;
 		boolean isFirst = false;
 		long styleKey = (long) style << 32;
-		Graphics2D g = (Graphics2D) stringVectorImage.getGraphics();
-		FontRenderContext ctx = g.getFontRenderContext();
 		
 		for (int i = 0; i < chars.length; i++) {
 			int cp = text.codePointAt(i);
@@ -274,7 +280,7 @@ public class TrueTypeFont {
 			
 			if (!isFirst) {
 				isFirst = true;
-				vec = font[style].layoutGlyphVector(ctx, chars, 0, text.length(), Font.LAYOUT_LEFT_TO_RIGHT);
+				vec = font[style].layoutGlyphVector(stringFRC, chars, 0, text.length(), Font.LAYOUT_LEFT_TO_RIGHT);
 
 				for (int j = 0; j < chars.length; j++) {
 					Point2D p = vec.getGlyphPosition(j);
@@ -282,7 +288,7 @@ public class TrueTypeFont {
 					vec.setGlyphPosition(j, p);
 				}
 
-				bounds = vec.getPixelBounds(ctx, GLYPH_PADDING, GLYPH_PADDING);
+				bounds = vec.getPixelBounds(stringFRC, 0, 0);
 				int boundsMaxW = bounds.width + GLYPH_PADDING * 2;
 				int boundsMaxH = bounds.height + GLYPH_PADDING * 2;
 				if (boundsMaxW > stringVectorImage.getWidth() || boundsMaxH > stringVectorImage.getHeight()) {
@@ -291,11 +297,11 @@ public class TrueTypeFont {
 					allocateStringImage(w, h);
 				}
 
-				g.clearRect(0, 0, boundsMaxH, boundsMaxW);
-				g.drawGlyphVector(vec, GLYPH_PADDING - bounds.x, GLYPH_PADDING - bounds.y);
+				stringGraphics.clearRect(0, 0, stringVectorImage.getWidth(), stringVectorImage.getHeight());
+				stringGraphics.drawGlyphVector(vec, GLYPH_PADDING - bounds.x, GLYPH_PADDING - bounds.y);
 			}
 
-			Rectangle r = vec.getGlyphPixelBounds(i, ctx, GLYPH_PADDING - bounds.x, GLYPH_PADDING - bounds.y);
+			Rectangle r = vec.getGlyphPixelBounds(i, stringFRC, GLYPH_PADDING - bounds.x, GLYPH_PADDING - bounds.y);
 			Point2D p = vec.getGlyphPosition(i);
 
 			if (cacheX + r.width + GLYPH_PADDING * 2 > TEXTURE_WIDTH) {
@@ -303,7 +309,7 @@ public class TrueTypeFont {
 				cacheY += getLineHeight(0) + GLYPH_PADDING * 2;
 			}
 
-			if (cacheY + GLYPH_PADDING * 2 > TEXTURE_HEIGHT) {
+			if (cacheY + GLYPH_PADDING * 2 + getMaxHeight() > TEXTURE_HEIGHT) {
 				cacheX = cacheY = 0;
 				glyphTexture.reallocate(TEXTURE_WIDTH, TEXTURE_HEIGHT);
 			}
@@ -322,14 +328,13 @@ public class TrueTypeFont {
 			final int dy = cacheY;
 			final int dw = glyph.width;
 			final int dh = glyph.height;
-			final int rx = r.x;
-			final int ry = r.y;
+			final int rx = r.x - GLYPH_PADDING;
+			final int ry = r.y - GLYPH_PADDING;
 			glyphTexture.getGraphic().drawImage(stringVectorImage, dx, dy, dx + dw, dy + dh, rx, ry, rx + dw, ry + dh, null);
 			glyphTexture.updateTexture(dx, dy, dw, dh);
 			glyphCache.put(styleKey | cp, glyph);
 			cacheX += glyph.width;
 		}
-		glyphTexture.saveImage();
 	}
 
 	/*
@@ -361,17 +366,17 @@ public class TrueTypeFont {
 		imageBuffer.flip();
 	}*/
 
-	private Graphics2D allocateStringImage(int w, int h) {
+	private void allocateStringImage(int w, int h) {
 		stringVectorImage = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-		Graphics2D g = (Graphics2D) stringVectorImage.getGraphics();
+		stringGraphics = (Graphics2D) stringVectorImage.getGraphics();
+		stringFRC = stringGraphics.getFontRenderContext();
 		if (antialias) {
-			g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-			g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-			g.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+			stringGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+			stringGraphics.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+			stringGraphics.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
 		}
-		g.setColor(Color.white);
-		g.setBackground(BufferedImageTexture.TRANSCOLOR);
-		return g;
+		stringGraphics.setColor(Color.white);
+		stringGraphics.setBackground(FontImageTexture.TRANSCOLOR);
 	}
 
 	public TTFRenderer makeCompatibleFont() {

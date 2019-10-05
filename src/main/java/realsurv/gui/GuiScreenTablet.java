@@ -25,7 +25,7 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
 import realsurv.ClientEventHandler;
 import realsurv.CommonProxy;
-import realsurv.font.BufferedImageTexture;
+import realsurv.font.FontImageTexture;
 import realsurv.font.TrueTypeFont;
 import realsurv.tabletos.TabletOS;
 
