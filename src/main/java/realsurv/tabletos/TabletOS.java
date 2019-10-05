@@ -13,12 +13,6 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.shader.Framebuffer;
 import realsurv.tabletos.ui.UIPanel;
 
-/*
- * TODO
-[16:53:23] [main/ERROR] [minecraft/Minecraft]: ########## GL ERROR ##########
-[16:53:23] [main/ERROR] [minecraft/Minecraft]: @ Post render
-[16:53:23] [main/ERROR] [minecraft/Minecraft]: 1286: Invalid framebuffer operation
-*/
 public class TabletOS {
 	public static final int WIDTH = 640;
 	public static final int HEIGHT = 430;

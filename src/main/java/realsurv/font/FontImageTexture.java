@@ -29,10 +29,6 @@ public class FontImageTexture extends AbstractTexture {
 		reallocate(width, height);
 	}
 
-	public FontRenderContext getFontCtx() {
-		return graphic.getFontRenderContext();
-	}
-
 	public int getWidth() {
 		return image.getWidth();
 	}
@@ -89,5 +85,9 @@ public class FontImageTexture extends AbstractTexture {
 
 	@Override
 	public void loadTexture(IResourceManager resourceManager) throws IOException {
+	}
+
+	public BufferedImage getImage() {
+		return image;
 	}
 }

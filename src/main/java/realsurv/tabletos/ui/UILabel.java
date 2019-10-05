@@ -7,8 +7,7 @@ import realsurv.font.TrueTypeFont;
 public class UILabel extends UIObject {
 	private String label;
 	
-	public UILabel(String label) {
-		setLabel(label);
+	public UILabel() {
 		setShadowVisible(false);
 	}
 

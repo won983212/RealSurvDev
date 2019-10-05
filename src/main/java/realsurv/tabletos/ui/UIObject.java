@@ -23,7 +23,7 @@ public abstract class UIObject {
 	private Dimension minSize = new Dimension(10, 10);
 	private DirWeights margin = new DirWeights();
 	private DirWeights padding = new DirWeights();
-	private TrueTypeFont font = FontFactory.makeFont("¸¼Àº °íµñ", 14);
+	private TrueTypeFont font = FontFactory.makeFont("³ª´®¹Ù¸¥°íµñ", 14);
 	private boolean visible = true;
 	protected int backgroundColor = 0xfff4f4f4;
 	protected int foregroundColor = 0xff000000;
@@ -236,8 +236,9 @@ public abstract class UIObject {
 	
 	private void setPositionByArrange(Rectangle available) {
 		Dimension size = getRelativeBounds().getSize();
-		int x = hArrange.getHorizontalArrangedLocation(available, size) + margin.left;
-		int y = vArrange.getVerticalArrangedLocation(available, size) + margin.top;
+		Rectangle marginCalc = margin.getContentRect(available);
+		int x = hArrange.getHorizontalArrangedLocation(marginCalc, size);
+		int y = vArrange.getVerticalArrangedLocation(marginCalc, size);
 		bounds.setLocation(x, y);
 	}
 
