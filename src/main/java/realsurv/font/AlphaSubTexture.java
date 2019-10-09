@@ -16,7 +16,7 @@ import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.client.resources.IResourceManager;
 
-public class FontImageTexture extends AbstractTexture {
+public class AlphaSubTexture extends AbstractTexture {
 	public static final Color TRANSCOLOR = new Color(255, 255, 255, 0);
 	private int imageData[];
 	private IntBuffer imageBuffer;
@@ -25,7 +25,7 @@ public class FontImageTexture extends AbstractTexture {
 	private Graphics2D graphic = null;
 	private boolean allocated = false;
 
-	public FontImageTexture(int width, int height) {
+	public AlphaSubTexture(int width, int height) {
 		reallocate(width, height);
 	}
 
