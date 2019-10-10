@@ -25,9 +25,9 @@ public class GlyphTextureCache {
 	
 	private static final int STRING_IMAGE_WIDTH = 256;
 	private static final int STRING_IMAGE_HEIGHT = 64;
-	private static final int TEXTURE_WIDTH = 256;
-	private static final int TEXTURE_HEIGHT = 256;
-	private static final int GLYPH_PADDING = 1;
+	public static final int TEXTURE_WIDTH = 256;
+	public static final int TEXTURE_HEIGHT = 256;
+	public static final int GLYPH_PADDING = 1;
 	
 	private int cacheX = 0;
 	private int cacheY = 0;

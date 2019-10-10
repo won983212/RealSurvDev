@@ -9,10 +9,10 @@ import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.util.ResourceLocation;
-import realsurv.font.TTFRenderer;
+import realsurv.font.AdaptiveTTF;
 
 public class GuiCompatibleTextfield extends GuiTextField {
-	public GuiCompatibleTextfield(int componentId, TTFRenderer font) {
+	public GuiCompatibleTextfield(int componentId, AdaptiveTTF font) {
 		super(componentId, font.setDisableShadow(), 0, 0, 10, 10);
 	}
 	

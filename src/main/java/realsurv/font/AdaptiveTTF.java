@@ -10,20 +10,20 @@ import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.util.ResourceLocation;
 
-public class TTFRenderer extends FontRenderer {
+public class AdaptiveTTF extends FontRenderer {
 	private TrueTypeFont font;
 	private boolean forceDisableShadow = false;
 	
-	public TTFRenderer(String family, int size) {
+	public AdaptiveTTF(String family, int size) {
 		this(family, size, Minecraft.getMinecraft());
 	}
 	
-	private TTFRenderer(String family, int size, Minecraft mc) {
+	private AdaptiveTTF(String family, int size, Minecraft mc) {
 		super(mc.gameSettings, new ResourceLocation("textures/font/ascii.png"), mc.getTextureManager(), mc.isUnicode());
 		setFont(family, size);
 	}
 	
-	public TTFRenderer setDisableShadow() {
+	public AdaptiveTTF setDisableShadow() {
 		forceDisableShadow = true;
 		return this;
 	}

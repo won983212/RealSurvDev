@@ -10,6 +10,7 @@ import org.lwjgl.input.Keyboard;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
+import realsurv.font.FontFactory;
 import realsurv.font.TrueTypeFont;
 import realsurv.tabletos.ui.GridPanel;
 import realsurv.tabletos.ui.UILabel;
@@ -38,22 +39,48 @@ public class MainScreen extends UIPanel {
 		popupPanel.add(obj);
 	}
 	
+	private TrueTypeFont font = FontFactory.makeFont("나눔바른고딕", 14);
+	@Override
+	public void render(int mouseX, int mouseY) {
+		super.render(mouseX, mouseY);
+		String str = "@나라 §n사랑§r하세. §a동해물과 §n백두산§r이 마르고 닳도록? This is right. OK?";
+		Gui.drawRect(10, 10, 10 + font.getStringWidth(str), 10 + font.getMaxHeight(), 0xff000000);
+		font.drawString(str, 10, 10, 0xffffffff);
+	}
+	
 	private void refresh() {
 		popupPanel = new UIPanel();
 		uiList.clear();
+		
 		add(new UIImage("realsurv:ui/wallpaper.png"));
 		
 		GridPanel contents = new GridPanel();
-		contents.addRow(new LengthDefinition(LengthType.FIXED, 30));
+		contents.addRow(new LengthDefinition(LengthType.FIXED, 20));
 		contents.addRow(new LengthDefinition(LengthType.ALLOCATED, 1));
 		contents.addEmptyColumn();
-		add(contents);
 		
 		UIPanel taskbar = new UIPanel();
-		taskbar.add(new UIRectangle().setShadowVisible(false).setRadius(0).setBackgroundColor(0xaa000000));
-		taskbar.add(new UILabel().setLabel("12:31").setMargin(new DirWeights(0, 0, 0, 5)).setHorizontalArrange(HorizontalArrange.RIGHT).setVerticalArrange(VerticalArrange.CENTER).setForegroundColor(0xffffffff));
-		taskbar.add(new UILabel().setLabel("��lInternet App").setMargin(new DirWeights(0, 0, 10, 0)).setHorizontalArrange(HorizontalArrange.LEFT).setVerticalArrange(VerticalArrange.CENTER).setForegroundColor(0xffffffff));
-		contents.add(taskbar);		
+		taskbar.add(new UILabel().setLabel("Good job!. Hello, world!").setForegroundColor(0xffffffff));
+		//taskbar.add(new UIRectangle().setShadowVisible(false).setRadius(0).setBackgroundColor(0xaa000000).setLayoutSpan(2, 1));
+		contents.add(taskbar);
+
+		GridPanel loginForm = new GridPanel();
+		loginForm.setMinimumSize(130, 50);
+		loginForm.setHorizontalArrange(HorizontalArrange.CENTER);
+		loginForm.setVerticalArrange(VerticalArrange.CENTER);
+		loginForm.setLayoutPosition(0, 1);
+		loginForm.addColumn(new LengthDefinition(LengthType.FIXED, 120));
+		loginForm.addColumn(new LengthDefinition(LengthType.AUTO, 1));
+		loginForm.addRow(new LengthDefinition(LengthType.ALLOCATED, 1));
+		loginForm.addRow(new LengthDefinition(LengthType.ALLOCATED, 1));
+		loginForm.addRow(new LengthDefinition(LengthType.ALLOCATED, 1));
+		loginForm.add(new UIRectangle().setBackgroundColor(0xffcccccc).setLayoutSpan(2, 3));
+		loginForm.add(new UITextfield().setHint("ID").setMargin(new DirWeights(4, 0, 4, 0)).setVerticalArrange(VerticalArrange.CENTER));
+		loginForm.add(new UITextfield().setHint("Password").setMargin(new DirWeights(4, 0, 4, 0)).setLayoutPosition(0, 1).setVerticalArrange(VerticalArrange.CENTER));
+		loginForm.add(new UICheckbox().setLabel("Remember").setMargin(new DirWeights(0, 0, 4, 0)).setVerticalArrange(VerticalArrange.CENTER).setLayoutPosition(0, 2));
+		loginForm.add(new UIButton("Login").setMargin(new DirWeights(4)).setLayoutPosition(1, 0).setLayoutSpan(1, 3));
+		contents.add(loginForm);
+		add(contents);
 		
 		add(popupPanel);
 		invalidateSize();
