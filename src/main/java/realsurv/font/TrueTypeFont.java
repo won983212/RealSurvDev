@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.lwjgl.opengl.GL11;
+
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
@@ -18,7 +20,7 @@ public class TrueTypeFont {
 	private static class ArrangedGlyph {
 		public int x;
 		public int y;
-		public float advance;
+		public int advance;
 		public int codepoint;
 		public int color;
 		public int specialStyle;
@@ -26,7 +28,7 @@ public class TrueTypeFont {
 	}
 
 	private static class FormattedString {
-		public float advance;
+		public int advance;
 		public ArrangedGlyph[] glyphs;
 	}
 
@@ -45,8 +47,8 @@ public class TrueTypeFont {
 	protected TrueTypeFont(String family, int size, boolean antialias) {
 		for (int i = 0; i < 4; i++)
 			font[i] = new Font(family, i, size);
-		this.glyphTextures = new GlyphTextureCache(this);
 		this.antialias = antialias;
+		this.glyphTextures = new GlyphTextureCache(this);
 		makeColorTable();
 	}
 
@@ -114,7 +116,7 @@ public class TrueTypeFont {
 		ArrayList<ArrangedGlyph> glyphList = new ArrayList<>();
 		StringBuilder cacheList = new StringBuilder();
 		int advance = 0;
-		
+
 		style = specialStyle = 0;
 		lastColor = 0xffffffff;
 		for (int i = 0; i < str.length(); i++) {
@@ -122,7 +124,7 @@ public class TrueTypeFont {
 			if (cp == '¡×' && i < str.length() - 1) {
 				if ("0123456789abcdefmnrlo".indexOf(cp) != -1) {
 					advance += cacheString(cacheList.toString(), glyphList, advance, style, specialStyle, lastColor);
-					applyStyle(str.charAt(i+1), false);
+					applyStyle(str.charAt(i + 1), false);
 					i++;
 				} else {
 					cacheList.append((char) cp);
@@ -156,66 +158,65 @@ public class TrueTypeFont {
 			glyph.color = color;
 			glyph.specialStyle = specialStyle;
 			glyph.texture = textures[i];
-			glyph.advance = locations[(i + 1) * 2] - locations[i * 2];
+			glyph.advance = (int) (locations[(i + 1) * 2] - locations[i * 2]);
 			glyphs.add(glyph);
 		}
 
 		return (int) locations[locations.length - 2];
 	}
 
-	public int drawString(String str, float x, float y, int color) {
+	public int drawString(String str, double x, double y, int color) {
 		applyColor(color);
 		enableBlend();
 		GlStateManager.enableAlpha();
 		GlStateManager.enableTexture2D();
 
+		Tessellator tes = Tessellator.getInstance();
+		BufferBuilder buf = tes.getBuffer();
 		FormattedString cached = cacheString(str);
+		double lineY = 0;
+
 		for (int i = 0; i < str.length(); i++) {
 			ArrangedGlyph glyph = cached.glyphs[i];
 			GlyphTexture tex = glyph.texture;
-			final float minX = x + glyph.x;
-			final float minY = y + glyph.y;
-			final float texW = GlyphTextureCache.TEXTURE_WIDTH;
-			final float texH = GlyphTextureCache.TEXTURE_HEIGHT;
+			final double minX = x + glyph.x - GlyphTextureCache.GLYPH_PADDING;
+			final double minY = y + glyph.y - GlyphTextureCache.GLYPH_PADDING;
+			final double maxX = minX + tex.width;
+			final double maxY = minY + tex.height;
 
 			if (glyph.codepoint != ' ') {
-				Tessellator tes = Tessellator.getInstance();
-				BufferBuilder buf = tes.getBuffer();
 				GlStateManager.bindTexture(tex.texture);
 				buf.begin(7, DefaultVertexFormats.POSITION_TEX);
-				buf.pos(minX, minY, 0).tex(tex.textureX / texW, tex.textureY / texH).endVertex();
-				buf.pos(minX, minY + tex.height, 0).tex(tex.textureX / texW, (tex.textureY + tex.height) / texH).endVertex();
-				buf.pos(minX + tex.width, minY + tex.height, 0).tex((tex.textureX + tex.width) / texW, (tex.textureY + tex.height) / texH).endVertex();
-				buf.pos(minX + tex.width, minY, 0).tex((tex.textureX + tex.width) / texW, tex.textureY / texH).endVertex();
+				buf.pos(minX, minY, 0).tex(tex.u1, tex.v1).endVertex();
+				buf.pos(minX, maxY, 0).tex(tex.u1, tex.v2).endVertex();
+				buf.pos(maxX, maxY, 0).tex(tex.u2, tex.v2).endVertex();
+				buf.pos(maxX, minY, 0).tex(tex.u2, tex.v1).endVertex();
 				tes.draw();
 			}
 
 			if (glyph.specialStyle != 0) {
 				GlStateManager.disableTexture2D();
 				if ((glyph.specialStyle & UNDERLINE) > 0) {
-					GlStateManager.translate(0, glyphTextures.getAscent(0) + 1, 0);
-					GlStateManager.glBegin(7);
-					GlStateManager.glVertex3f(x, y - 1, 0);
-					GlStateManager.glVertex3f(x, y, 0);
-					GlStateManager.glVertex3f(x + glyph.advance, y, 0);
-					GlStateManager.glVertex3f(x + glyph.advance, y - 1, 0);
-					GlStateManager.glEnd();
-					GlStateManager.translate(0, -glyphTextures.getAscent(0) - 1, 0);
+					lineY = y + glyphTextures.getAscent(0) + 1;
+					buf.begin(7, DefaultVertexFormats.POSITION);
+					buf.pos(x, lineY - 1, 0).endVertex();
+					buf.pos(x, lineY, 0).endVertex();
+					buf.pos(x + glyph.advance, lineY, 0).endVertex();
+					buf.pos(x + glyph.advance, lineY - 1, 0).endVertex();
+					tes.draw();
 				}
 				if ((glyph.specialStyle & STRIKE_THROUGH) > 0) {
-					GlStateManager.translate(0, glyphTextures.getAscent(0) * 3 / 4, 0);
-					GlStateManager.glBegin(7);
-					GlStateManager.glVertex3f(x, y - 1, 0);
-					GlStateManager.glVertex3f(x, y, 0);
-					GlStateManager.glVertex3f(x + glyph.advance, y, 0);
-					GlStateManager.glVertex3f(x + glyph.advance, y - 1, 0);
-					GlStateManager.glEnd();
-					GlStateManager.translate(0, -glyphTextures.getAscent(0) * 3 / 4, 0);
+					lineY = y + glyphTextures.getAscent(0) * 3 / 4;
+					buf.begin(7, DefaultVertexFormats.POSITION);
+					buf.pos(x, lineY - 1, 0).endVertex();
+					buf.pos(x, lineY, 0).endVertex();
+					buf.pos(x + glyph.advance, lineY, 0).endVertex();
+					buf.pos(x + glyph.advance, lineY - 1, 0).endVertex();
+					tes.draw();
 				}
 				GlStateManager.enableTexture2D();
 			}
 		}
-		GlStateManager.disableBlend();
 		return (int) cached.advance;
 	}
 
@@ -230,9 +231,7 @@ public class TrueTypeFont {
 
 	private void enableBlend() {
 		GlStateManager.enableBlend();
-		GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA,
-				GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE,
-				GlStateManager.DestFactor.ZERO);
+		GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 	}
 
 	public int getCharWidth(char c) {
@@ -254,7 +253,7 @@ public class TrueTypeFont {
 	public List<String> listFormattedStringToWidth(String str, int wrapWidth) {
 		ArrayList<String> ret = new ArrayList<String>();
 		StringBuilder sb = new StringBuilder();
-		float total = 0;
+		int total = 0;
 
 		FormattedString format = cacheString(str);
 		for (ArrangedGlyph glyph : format.glyphs) {

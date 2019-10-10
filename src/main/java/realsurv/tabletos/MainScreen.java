@@ -39,11 +39,11 @@ public class MainScreen extends UIPanel {
 		popupPanel.add(obj);
 	}
 	
-	private TrueTypeFont font = FontFactory.makeFont("ë‚˜ëˆ”ë°”ë¥¸ê³ ë”•", 14);
+	private TrueTypeFont font = FontFactory.makeFont("¸¼Àº °íµñ", 14);
 	@Override
 	public void render(int mouseX, int mouseY) {
 		super.render(mouseX, mouseY);
-		String str = "@ë‚˜ë¼ Â§nì‚¬ë‘Â§rí•˜ì„¸. Â§aë™í•´ë¬¼ê³¼ Â§në°±ë‘ì‚°Â§rì´ ë§ˆë¥´ê³  ë‹³ë„ë¡? This is right. OK?";
+		String str = "@µ¿ÇØ¹°°ú ¹éµÎ»êÀÌ ¸¶¸£°í ´âµµ·Ï ÇÏ´À´ÔÀÌ º¸¿ìÇÏ»ç ¿ì¸® ³ª¶ó¸¸¼¼. This is right. OK?";
 		Gui.drawRect(10, 10, 10 + font.getStringWidth(str), 10 + font.getMaxHeight(), 0xff000000);
 		font.drawString(str, 10, 10, 0xffffffff);
 	}
@@ -60,7 +60,7 @@ public class MainScreen extends UIPanel {
 		contents.addEmptyColumn();
 		
 		UIPanel taskbar = new UIPanel();
-		taskbar.add(new UILabel().setLabel("Good job!. Hello, world!").setForegroundColor(0xffffffff));
+		taskbar.add(new UILabel().setLabel("Remember").setForegroundColor(0xffffffff));
 		//taskbar.add(new UIRectangle().setShadowVisible(false).setRadius(0).setBackgroundColor(0xaa000000).setLayoutSpan(2, 1));
 		contents.add(taskbar);
 
