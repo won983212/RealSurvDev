@@ -5,6 +5,8 @@ import java.awt.Rectangle;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
+import net.minecraft.client.renderer.GlStateManager;
+import realsurv.font.TrueTypeFont;
 import realsurv.tabletos.DirWeights;
 import realsurv.tabletos.GuiCompatibleTextfield;
 
@@ -76,7 +78,10 @@ public class UITextfield extends UIObject {
 		if(hint != null && textfield.getText().length() == 0)
 			getFont().drawString(hint, actBounds.x, actBounds.y, hintTextColor);
 		textfield.setTextColor(foregroundColor);
-		textfield.drawAtBounds(actBounds);
+		
+		Rectangle textbox = new Rectangle(actBounds);
+		textbox.width -= 5;
+		textfield.drawAtBounds(textbox);
 	}
 	
 	public UITextfield setHint(String hint) {

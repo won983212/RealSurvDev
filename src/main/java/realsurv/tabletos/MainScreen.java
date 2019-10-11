@@ -43,8 +43,8 @@ public class MainScreen extends UIPanel {
 	@Override
 	public void render(int mouseX, int mouseY) {
 		super.render(mouseX, mouseY);
-		//String str = "@동해물과 백두산이 마르고 닳도록 하느님이 보우하사 우리 나라만세. This is right. OK?";
-		String str = "Ga";
+		String str = "@동해물과 백두산이 마르고 닳도록 하느님이 보우하사 우리 나라만세. This is right. OK?";
+		//String str = "GagPos";
 		Gui.drawRect(10, 10, 10 + font.getStringWidth(str), 10 + font.getMaxHeight(), 0xff000000);
 		font.drawString(str, 10, 10, 0xffffffff);
 	}

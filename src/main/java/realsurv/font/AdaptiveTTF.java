@@ -39,7 +39,7 @@ public class AdaptiveTTF extends FontRenderer {
 
 	@Override
 	public int drawString(String text, float x, float y, int color, boolean dropShadow) {
-		return font.drawString(text, x, y, color, !forceDisableShadow && dropShadow);
+		return (int) x + font.drawString(text, x, y, color, !forceDisableShadow && dropShadow);
 	}
 
 	@Override
@@ -58,8 +58,17 @@ public class AdaptiveTTF extends FontRenderer {
 	}
 
 	@Override
+	public String trimStringToWidth(String text, int width, boolean reverse) {
+		return font.trimStringToWidth(text, width, reverse);
+	}
+
+	@Override
 	public List<String> listFormattedStringToWidth(String str, int wrapWidth) {
 		return font.listFormattedStringToWidth(str, wrapWidth);
 	}
 	
+	@Override
+	public String toString() {
+		return "Adaptive" + font.toString();
+	}
 }

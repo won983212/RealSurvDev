@@ -140,7 +140,8 @@ public class TrueTypeFont {
 		return value;
 	}
 
-	private int cacheString(String str, ArrayList<ArrangedGlyph> glyphs, float advance, int fontStyle, int specialStyle, int color) {
+	private int cacheString(String str, ArrayList<ArrangedGlyph> glyphs, float advance, int fontStyle, int specialStyle,
+			int color) {
 		if (str.length() == 0)
 			return 0;
 
@@ -148,9 +149,11 @@ public class TrueTypeFont {
 		GlyphVector vec = glyphTextures.layoutGlyphVector(font[fontStyle], str);
 		Rectangle bounds = vec.getPixelBounds(null, 0, 0);
 		float[] locations = vec.getGlyphPositions(0, str.length() + 1, null);
+		int offsetY = glyphTextures.getAscent(fontStyle) - glyphTextures.getDescent(fontStyle)
+				- glyphTextures.getLeading(fontStyle);
 
 		for (int i = 0; i < str.length(); i++) {
-			Point pos = vec.getGlyphPixelBounds(i, null, advance, -bounds.y).getLocation();
+			Point pos = vec.getGlyphPixelBounds(i, null, advance, offsetY).getLocation();
 			ArrangedGlyph glyph = new ArrangedGlyph();
 			glyph.codepoint = str.codePointAt(i);
 			glyph.x = pos.x;
@@ -250,6 +253,24 @@ public class TrueTypeFont {
 		return (int) cacheString(str).advance;
 	}
 
+	public String trimStringToWidth(String str, int wrapWidth, boolean reverse) {
+		StringBuilder sb = new StringBuilder();
+		int total = 0;
+		FormattedString format = cacheString(str);
+		int i = reverse ? format.glyphs.length - 1 : 0;
+		while (reverse ? (i >= 0) : (i < format.glyphs.length)) {
+			ArrangedGlyph glyph = format.glyphs[i];
+			if (total + glyph.advance > wrapWidth) {
+				return sb.toString();
+			} else {
+				total += glyph.advance;
+			}
+			sb.append((char) glyph.codepoint);
+			i += reverse ? -1 : 1;
+		}
+		return sb.toString();
+	}
+
 	public List<String> listFormattedStringToWidth(String str, int wrapWidth) {
 		ArrayList<String> ret = new ArrayList<String>();
 		StringBuilder sb = new StringBuilder();
@@ -292,5 +313,10 @@ public class TrueTypeFont {
 
 	public boolean isUseAntialias() {
 		return antialias;
+	}
+
+	@Override
+	public String toString() {
+		return "TTFont[" + font[0].getFamily() + ", " + font[0].getSize() + "]";
 	}
 }

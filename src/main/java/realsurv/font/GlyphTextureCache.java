@@ -46,13 +46,13 @@ public class GlyphTextureCache {
 	
 	public GlyphTextureCache(TrueTypeFont font) {
 		this.font = font;
+		allocateStringImage(TEXTURE_WIDTH, TEXTURE_HEIGHT);
 		for (int i = 0; i < 4; i++) {
-			FontMetrics metrics = glyphTexture.getGraphic().getFontMetrics(font.getJavaFont(i));
+			FontMetrics metrics = stringGraphics.getFontMetrics(font.getJavaFont(i));
 			ascent[i] = metrics.getAscent();
 			descent[i] = metrics.getDescent();
 			leading[i] = metrics.getLeading();
 		}
-		allocateStringImage(TEXTURE_WIDTH, TEXTURE_HEIGHT);
 	}
 	
 	public GlyphVector layoutGlyphVector(Font font, String str) {
@@ -171,7 +171,7 @@ public class GlyphTextureCache {
 	}
 
 	public int getMaxHeight() {
-		return ascent[Font.BOLD] + descent[Font.BOLD];
+		return ascent[Font.BOLD];
 	}
 	
 	public int getAscent(int style) {
