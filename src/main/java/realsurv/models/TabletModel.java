@@ -67,6 +67,17 @@ public class TabletModel implements IBakedModel {
 				final float zMin = 2.39f * unit;
 				final float zMax = zMin + 10.75f * unit;
 				
+				GlStateManager.disableTexture2D();
+				GlStateManager.color(0.08f, 0.08f, 0.08f, 1);
+				GlStateManager.glBegin(7);
+				GlStateManager.glVertex3f(xMin, zlevel, zMax);
+				GlStateManager.glVertex3f(xMax, zlevel, zMax);
+				GlStateManager.glVertex3f(xMax, zlevel, zMin);
+				GlStateManager.glVertex3f(xMin, zlevel, zMin);
+				GlStateManager.glEnd();
+				
+				GlStateManager.enableTexture2D();
+				GlStateManager.color(1, 1, 1, 1);
 				OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 240f, 240f);
 				GlStateManager.glBegin(7);
 				GlStateManager.glTexCoord2f(0, 0);
