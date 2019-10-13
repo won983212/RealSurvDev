@@ -4,6 +4,8 @@ import java.awt.Font;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.font.GlyphVector;
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,9 +23,9 @@ public class TrueTypeFont {
 		public int x;
 		public int y;
 		public int advance;
-		public int codepoint;
 		public int color;
-		public int specialStyle;
+		public int index;
+		public int affectedStyle;
 		public GlyphTexture texture;
 	}
 
@@ -35,6 +37,7 @@ public class TrueTypeFont {
 	private static final int UNDERLINE = 4;
 	private static final int STRIKE_THROUGH = 8;
 
+	private ArrangedGlyph[][] digitCache;
 	private HashMap<String, FormattedString> stringCache = new HashMap<>();
 	private final Font[] font = new Font[4];
 	private final boolean antialias;
@@ -50,6 +53,16 @@ public class TrueTypeFont {
 		this.antialias = antialias;
 		this.glyphTextures = new GlyphTextureCache(this);
 		makeColorTable();
+	}
+
+	private void cacheDigits() {
+		if (digitCache != null)
+			return;
+		digitCache = new ArrangedGlyph[4][];
+		digitCache[Font.PLAIN] = cacheString("0123456789").glyphs;
+		digitCache[Font.BOLD] = cacheString("§l0123456789").glyphs;
+		digitCache[Font.ITALIC] = cacheString("§o0123456789").glyphs;
+		digitCache[Font.BOLD | Font.ITALIC] = cacheString("§l§o0123456789").glyphs;
 	}
 
 	// All digits will be zero.
@@ -116,6 +129,7 @@ public class TrueTypeFont {
 		ArrayList<ArrangedGlyph> glyphList = new ArrayList<>();
 		StringBuilder cacheList = new StringBuilder();
 		int advance = 0;
+		int lastIndex = 0;
 
 		style = specialStyle = 0;
 		lastColor = 0xffffffff;
@@ -123,9 +137,9 @@ public class TrueTypeFont {
 			int cp = str.codePointAt(i);
 			if (cp == '§' && i < str.length() - 1) {
 				if ("0123456789abcdefmnrlo".indexOf(cp) != -1) {
-					advance += cacheString(cacheList.toString(), glyphList, advance, style, specialStyle, lastColor);
+					advance += cacheString(cacheList.toString(), glyphList, lastIndex, advance, style, specialStyle, lastColor);
 					applyStyle(str.charAt(i + 1), false);
-					i++;
+					lastIndex = ++i + 1;
 				} else {
 					cacheList.append((char) cp);
 				}
@@ -134,14 +148,13 @@ public class TrueTypeFont {
 			}
 		}
 		value = new FormattedString();
-		value.advance = advance + cacheString(cacheList.toString(), glyphList, advance, style, specialStyle, lastColor);
+		value.advance = advance + cacheString(cacheList.toString(), glyphList, lastIndex, advance, style, specialStyle, lastColor);
 		value.glyphs = glyphList.toArray(new ArrangedGlyph[glyphList.size()]);
 		stringCache.put(key, value);
 		return value;
 	}
 
-	private int cacheString(String str, ArrayList<ArrangedGlyph> glyphs, float advance, int fontStyle, int specialStyle,
-			int color) {
+	private int cacheString(String str, ArrayList<ArrangedGlyph> glyphs, int start, float advance, int fontStyle, int specialStyle, int color) {
 		if (str.length() == 0)
 			return 0;
 
@@ -149,20 +162,22 @@ public class TrueTypeFont {
 		GlyphVector vec = glyphTextures.layoutGlyphVector(font[fontStyle], str);
 		Rectangle bounds = vec.getPixelBounds(null, 0, 0);
 		float[] locations = vec.getGlyphPositions(0, str.length() + 1, null);
-		int offsetY = glyphTextures.getAscent(fontStyle) - glyphTextures.getDescent(fontStyle)
-				- glyphTextures.getLeading(fontStyle);
-
+		int offsetY = glyphTextures.getAscent(fontStyle) - glyphTextures.getDescent(fontStyle) - glyphTextures.getLeading(fontStyle);
+		double adv = 0;
+		
+		//TODO 어떻게 폰트를 더 잘 그릴 수 있을까?
 		for (int i = 0; i < str.length(); i++) {
-			Point pos = vec.getGlyphPixelBounds(i, null, advance, offsetY).getLocation();
+			Rectangle2D pos = vec.getGlyphVisualBounds(i).getBounds2D();
 			ArrangedGlyph glyph = new ArrangedGlyph();
-			glyph.codepoint = str.codePointAt(i);
-			glyph.x = pos.x;
-			glyph.y = pos.y;
+			glyph.index = start + i;
+			glyph.x = (int)(pos.getX() - locations[(i + 1) * 2] + adv + advance);
+			glyph.y = (int)(pos.getY() + offsetY);
 			glyph.color = color;
-			glyph.specialStyle = specialStyle;
+			glyph.affectedStyle = fontStyle | specialStyle;
 			glyph.texture = textures[i];
 			glyph.advance = (int) (locations[(i + 1) * 2] - locations[i * 2]);
 			glyphs.add(glyph);
+			adv += locations[(i + 1) * 2] - locations[i * 2];
 		}
 
 		return (int) locations[locations.length - 2];
@@ -172,7 +187,6 @@ public class TrueTypeFont {
 		applyColor(color);
 		enableBlend();
 		GlStateManager.enableAlpha();
-		GlStateManager.enableTexture2D();
 
 		Tessellator tes = Tessellator.getInstance();
 		BufferBuilder buf = tes.getBuffer();
@@ -180,14 +194,25 @@ public class TrueTypeFont {
 		double lineY = 0;
 
 		for (int i = 0; i < str.length(); i++) {
+			int offsetX = 0;
 			ArrangedGlyph glyph = cached.glyphs[i];
+			char charAt = str.charAt(glyph.index);
 			GlyphTexture tex = glyph.texture;
-			final double minX = x + glyph.x - GlyphTextureCache.GLYPH_PADDING;
-			final double minY = y + glyph.y - GlyphTextureCache.GLYPH_PADDING;
-			final double maxX = minX + tex.width;
-			final double maxY = minY + tex.height;
 
-			if (glyph.codepoint != ' ') {
+			if (charAt >= '0' && charAt <= '9') {
+				cacheDigits();
+				ArrangedGlyph digitGlyph = digitCache[glyph.affectedStyle][charAt - '0'];
+				tex = digitGlyph.texture;
+				offsetX = (glyph.advance - digitGlyph.advance) >> 1;
+			}
+
+			double minX = x + glyph.x - GlyphTextureCache.GLYPH_PADDING + offsetX;
+			double minY = y + glyph.y - GlyphTextureCache.GLYPH_PADDING;
+			double maxX = minX + tex.width;
+			double maxY = minY + tex.height;
+
+			if (charAt != ' ') {
+				GlStateManager.enableTexture2D();
 				GlStateManager.bindTexture(tex.texture);
 				buf.begin(7, DefaultVertexFormats.POSITION_TEX);
 				buf.pos(minX, minY, 0).tex(tex.u1, tex.v1).endVertex();
@@ -197,9 +222,9 @@ public class TrueTypeFont {
 				tes.draw();
 			}
 
-			if (glyph.specialStyle != 0) {
+			if ((glyph.affectedStyle & (UNDERLINE | STRIKE_THROUGH)) > 0) {
 				GlStateManager.disableTexture2D();
-				if ((glyph.specialStyle & UNDERLINE) > 0) {
+				if ((glyph.affectedStyle & UNDERLINE) > 0) {
 					lineY = y + glyphTextures.getAscent(0) + 1;
 					buf.begin(7, DefaultVertexFormats.POSITION);
 					buf.pos(x, lineY - 1, 0).endVertex();
@@ -208,7 +233,7 @@ public class TrueTypeFont {
 					buf.pos(x + glyph.advance, lineY - 1, 0).endVertex();
 					tes.draw();
 				}
-				if ((glyph.specialStyle & STRIKE_THROUGH) > 0) {
+				if ((glyph.affectedStyle & STRIKE_THROUGH) > 0) {
 					lineY = y + glyphTextures.getAscent(0) * 3 / 4;
 					buf.begin(7, DefaultVertexFormats.POSITION);
 					buf.pos(x, lineY - 1, 0).endVertex();
@@ -217,9 +242,11 @@ public class TrueTypeFont {
 					buf.pos(x + glyph.advance, lineY - 1, 0).endVertex();
 					tes.draw();
 				}
-				GlStateManager.enableTexture2D();
 			}
 		}
+
+		GlStateManager.enableTexture2D();
+		GlStateManager.disableBlend();
 		return (int) cached.advance;
 	}
 
@@ -234,7 +261,7 @@ public class TrueTypeFont {
 
 	private void enableBlend() {
 		GlStateManager.enableBlend();
-		GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+		GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
 	}
 
 	public int getCharWidth(char c) {
@@ -265,7 +292,7 @@ public class TrueTypeFont {
 			} else {
 				total += glyph.advance;
 			}
-			sb.append((char) glyph.codepoint);
+			sb.append((char) str.charAt(glyph.index));
 			i += reverse ? -1 : 1;
 		}
 		return sb.toString();
@@ -284,7 +311,7 @@ public class TrueTypeFont {
 			} else {
 				total += glyph.advance;
 			}
-			sb.append((char) glyph.codepoint);
+			sb.append((char) str.charAt(glyph.index));
 		}
 		if (sb.length() > 0)
 			ret.add(sb.toString());

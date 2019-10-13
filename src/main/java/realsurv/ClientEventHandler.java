@@ -37,11 +37,11 @@ public class ClientEventHandler {
 	}
 	
 	//TODO To debug - displyscreen on guimainmenu
-	/*@SubscribeEvent
+	@SubscribeEvent
 	public void onMainScreenEvent(GuiScreenEvent.InitGuiEvent e) {
 		if(e.getGui() instanceof GuiMainMenu)
 			Minecraft.getMinecraft().displayGuiScreen(new GuiScreenTablet());
-	}*/
+	}
 	
 	@SubscribeEvent
 	public void onModelBakeEvent(ModelBakeEvent e) {

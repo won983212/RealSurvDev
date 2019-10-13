@@ -39,7 +39,7 @@ public class MainScreen extends UIPanel {
 		popupPanel.add(obj);
 	}
 	
-	/*private TrueTypeFont font = FontFactory.makeFont("¸¼Àº °íµñ", 14);
+	private TrueTypeFont font = FontFactory.makeFont("¸¼Àº °íµñ", 14);
 	@Override
 	public void render(int mouseX, int mouseY) {
 		super.render(mouseX, mouseY);
@@ -47,7 +47,7 @@ public class MainScreen extends UIPanel {
 		//String str = "GagPos";
 		Gui.drawRect(10, 10, 10 + font.getStringWidth(str), 10 + font.getMaxHeight(), 0xff000000);
 		font.drawString(str, 10, 10, 0xffffffff);
-	}*/
+	}
 	
 	private void refresh() {
 		popupPanel = new UIPanel();
@@ -62,7 +62,7 @@ public class MainScreen extends UIPanel {
 		
 		UIPanel taskbar = new UIPanel();
 		//taskbar.add(new UILabel().setLabel("Remember").setForegroundColor(0xffffffff));
-		taskbar.add(new UIRectangle().setShadowVisible(false).setRadius(0).setBackgroundColor(0xaa000000).setLayoutSpan(2, 1));
+		//taskbar.add(new UIRectangle().setShadowVisible(false).setRadius(0).setBackgroundColor(0xaa000000).setLayoutSpan(2, 1));
 		contents.add(taskbar);
 
 		GridPanel loginForm = new GridPanel();
