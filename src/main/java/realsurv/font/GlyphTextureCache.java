@@ -8,6 +8,7 @@ import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.font.GlyphVector;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -114,9 +115,10 @@ public class GlyphTextureCache {
 				frame.updateImageTest(stringVectorImage);*/
 			}
 
-			Rectangle r = vec.getGlyphPixelBounds(i, null, GLYPH_PADDING - bounds.x, GLYPH_PADDING - bounds.y);
+			Rectangle2D r = vec.getGlyphVisualBounds(i).getBounds2D();
+			r.setRect(r.getX() + GLYPH_PADDING - bounds.x, r.getY() + GLYPH_PADDING - bounds.y, r.getWidth(), r.getHeight());
 
-			if (cacheX + r.width + GLYPH_PADDING * 2 > TEXTURE_WIDTH) {
+			if (cacheX + r.getWidth() + GLYPH_PADDING * 2 > TEXTURE_WIDTH) {
 				cacheX = 0;
 				cacheY += getLineHeight(0) + GLYPH_PADDING * 2;
 			}
@@ -127,8 +129,8 @@ public class GlyphTextureCache {
 			}
 
 			GlyphTexture glyph = new GlyphTexture();
-			glyph.width = r.width + GLYPH_PADDING * 2;
-			glyph.height = r.height + GLYPH_PADDING * 2;
+			glyph.width = (int)r.getWidth() + GLYPH_PADDING * 2;
+			glyph.height = (int)r.getHeight() + GLYPH_PADDING * 2;
 			glyph.texture = glyphTexture.getGlTextureId();
 			glyph.u1 = cacheX / (double) TEXTURE_WIDTH;
 			glyph.v1 = cacheY / (double) TEXTURE_HEIGHT;
@@ -139,8 +141,8 @@ public class GlyphTextureCache {
 			final int dy = cacheY;
 			final int dw = glyph.width;
 			final int dh = glyph.height;
-			final int rx = r.x - GLYPH_PADDING;
-			final int ry = r.y - GLYPH_PADDING;
+			final int rx = (int)Math.round(r.getX()) - GLYPH_PADDING;
+			final int ry = (int)Math.round(r.getY()) - GLYPH_PADDING;
 			glyphTexture.getGraphic().drawImage(stringVectorImage, dx, dy, dx + dw, dy + dh, rx, ry, rx + dw, ry + dh, null);
 			/*Graphics2D g2 = glyphTexture.getGraphic();
 			g2.setColor(Color.green);

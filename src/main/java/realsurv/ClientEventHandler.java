@@ -17,6 +17,7 @@ import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
 import net.minecraftforge.fml.common.gameevent.TickEvent.RenderTickEvent;
+import realsurv.font.FontFactory;
 import realsurv.gui.GuiScreenTablet;
 import realsurv.models.TabletModel;
 import realsurv.tabletos.TabletOS;
@@ -39,8 +40,8 @@ public class ClientEventHandler {
 	//TODO To debug - displyscreen on guimainmenu
 	@SubscribeEvent
 	public void onMainScreenEvent(GuiScreenEvent.InitGuiEvent e) {
-		if(e.getGui() instanceof GuiMainMenu)
-			Minecraft.getMinecraft().displayGuiScreen(new GuiScreenTablet());
+		/*if(e.getGui() instanceof GuiMainMenu)
+			Minecraft.getMinecraft().displayGuiScreen(new GuiScreenTablet());*/
 	}
 	
 	@SubscribeEvent

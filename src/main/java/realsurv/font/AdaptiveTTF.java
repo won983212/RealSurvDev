@@ -13,24 +13,24 @@ import net.minecraft.util.ResourceLocation;
 public class AdaptiveTTF extends FontRenderer {
 	private TrueTypeFont font;
 	private boolean forceDisableShadow = false;
-	
+
 	public AdaptiveTTF(String family, int size) {
 		this(family, size, Minecraft.getMinecraft());
 	}
-	
+
 	private AdaptiveTTF(String family, int size, Minecraft mc) {
 		super(mc.gameSettings, new ResourceLocation("textures/font/ascii.png"), mc.getTextureManager(), mc.isUnicode());
 		setFont(family, size);
 	}
-	
+
 	public AdaptiveTTF setDisableShadow() {
 		forceDisableShadow = true;
 		return this;
 	}
-	
+
 	public void setFont(String family, int size) {
-		font = FontFactory.makeFont(family, size);
-		FONT_HEIGHT = (int)(size * 4.0 / 3);
+		font = FontFactory.makeFont(family, size).setScaledHalf();
+		FONT_HEIGHT = (int) (size * 4.0 / 6.0);
 	}
 
 	@Override
@@ -38,7 +38,12 @@ public class AdaptiveTTF extends FontRenderer {
 	}
 
 	@Override
+	protected void bindTexture(ResourceLocation location) {
+	}
+
+	@Override
 	public int drawString(String text, float x, float y, int color, boolean dropShadow) {
+		color |= 0xff000000;
 		return (int) x + font.drawString(text, x, y, color, !forceDisableShadow && dropShadow);
 	}
 
@@ -66,7 +71,7 @@ public class AdaptiveTTF extends FontRenderer {
 	public List<String> listFormattedStringToWidth(String str, int wrapWidth) {
 		return font.listFormattedStringToWidth(str, wrapWidth);
 	}
-	
+
 	@Override
 	public String toString() {
 		return "Adaptive" + font.toString();
