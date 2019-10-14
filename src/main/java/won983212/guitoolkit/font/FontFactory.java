@@ -7,7 +7,7 @@ public class FontFactory {
 	private static HashMap<Key, AdaptiveTTF> scaledFonts = new HashMap<Key, AdaptiveTTF>();
 	
 	public static TrueTypeFont makeFont(String family, int size) {
-		Key key = new Key(family, size, false);
+		Key key = new Key(family, size, 1);
 		TrueTypeFont f = fonts.get(key);
 		if(f != null) {
 			return f;
@@ -18,18 +18,17 @@ public class FontFactory {
 	}
 	
 	public static AdaptiveTTF makeMinecraftFont(String family, int size) {
-		return makeMinecraftFont(family, size, true);
+		return makeMinecraftFont(family, size, 2);
 	}
 	
-	public static AdaptiveTTF makeMinecraftFont(String family, int size, boolean isHalf) {
-		Key key = new Key(family, size, isHalf);
+	public static AdaptiveTTF makeMinecraftFont(String family, int size, int scale) {
+		Key key = new Key(family, size, scale);
 		AdaptiveTTF f = scaledFonts.get(key);
 		if(f != null) {
 			return f;
 		}
 		f = new AdaptiveTTF(family, size);
-		if(isHalf) 
-			f.setFontHalf();
+		f.setFontScale(scale);
 		scaledFonts.put(key, f);
 		return f;
 	}
@@ -37,19 +36,19 @@ public class FontFactory {
 	private static class Key {
 		public String font;
 		public int size;
-		private boolean isNative;
+		private int scale;
 		
-		public Key(String family, int size, boolean isNative) {
+		public Key(String family, int size, int scale) {
 			this.font = family;
 			this.size = size;
-			this.isNative = isNative;
+			this.scale = scale;
 		}
 
 		@Override
 		public int hashCode() {
 			int hash = font.hashCode();
 			hash = 31 * hash + Integer.hashCode(size);
-			hash = 31 * hash + Boolean.hashCode(isNative);
+			hash = 31 * hash + Integer.hashCode(scale);
 			return hash;
 		}
 		
@@ -57,7 +56,7 @@ public class FontFactory {
 		public boolean equals(Object obj) {
 			if(obj instanceof Key) {
 				Key k = (Key) obj;
-				return k.font == font && k.size == size && k.isNative == isNative;
+				return k.font == font && k.size == size && k.scale == scale;
 			}
 			return false;
 		}

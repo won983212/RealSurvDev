@@ -33,8 +33,8 @@ public class AdaptiveTTF extends FontRenderer {
 		FONT_HEIGHT = (int) (size * 4.0 / 6.0);
 	}
 	
-	public void setFontHalf() {
-		font.setScaledHalf();
+	public void setFontScale(int scale) {
+		font.setScaleModifier(scale);
 	}
 
 	@Override

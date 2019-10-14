@@ -27,7 +27,7 @@ public class UITextfield extends UIObject {
 	
 	private AdaptiveTTF makeATTF() {
 		Font font = getFont().getJavaFont(0);
-		return FontFactory.makeMinecraftFont(font.getFamily(), font.getSize(), false);
+		return FontFactory.makeMinecraftFont(font.getFamily(), font.getSize(), 1);
 	}
 	
 	@Override
