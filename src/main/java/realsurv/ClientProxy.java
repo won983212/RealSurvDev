@@ -7,7 +7,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import realsurv.font.FontFactory;
+import won983212.guitoolkit.font.FontFactory;
 
 public class ClientProxy extends CommonProxy {
 	@Override

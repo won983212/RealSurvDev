@@ -1,4 +1,4 @@
-package realsurv.tabletos;
+package won983212.guitoolkit;
 
 import java.awt.Rectangle;
 
@@ -9,7 +9,7 @@ import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.util.ResourceLocation;
-import realsurv.font.AdaptiveTTF;
+import won983212.guitoolkit.font.AdaptiveTTF;
 
 public class GuiCompatibleTextfield extends GuiTextField {
 	public GuiCompatibleTextfield(int componentId, AdaptiveTTF font) {

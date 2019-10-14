@@ -1,10 +1,11 @@
-package realsurv.tabletos.ui;
+package won983212.guitoolkit.element;
 
 import java.awt.Font;
 import java.awt.Rectangle;
 
 import net.minecraft.client.gui.Gui;
-import realsurv.font.TrueTypeFont;
+import won983212.guitoolkit.UIObject;
+import won983212.guitoolkit.font.TrueTypeFont;
 
 public class UICheckbox extends UIObject {
 	private boolean checked = false;

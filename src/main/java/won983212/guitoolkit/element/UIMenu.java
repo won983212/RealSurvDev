@@ -1,11 +1,12 @@
-package realsurv.tabletos.ui;
+package won983212.guitoolkit.element;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
-import realsurv.tabletos.HorizontalArrange;
-import realsurv.tabletos.ui.events.IButtonEvent;
-import realsurv.tabletos.ui.events.IItemSelectedEvent;
+import won983212.guitoolkit.HorizontalArrange;
+import won983212.guitoolkit.StackPanel;
+import won983212.guitoolkit.events.IButtonEvent;
+import won983212.guitoolkit.events.IItemSelectedEvent;
 
 public class UIMenu extends StackPanel implements IButtonEvent {
 	private ArrayList<String> items = new ArrayList<String>();

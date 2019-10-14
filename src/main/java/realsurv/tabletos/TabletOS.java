@@ -11,7 +11,7 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.shader.Framebuffer;
-import realsurv.tabletos.ui.UIPanel;
+import won983212.guitoolkit.UIPanel;
 
 public class TabletOS {
 	public static final int WIDTH = 640;
@@ -67,6 +67,10 @@ public class TabletOS {
 
 	public void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
 		mainScreen.onDrag(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
+	}
+
+	public void setWindowSize(int w, int h) {
+		mainScreen.setNativeWindowSize(w, h);
 	}
 }
  

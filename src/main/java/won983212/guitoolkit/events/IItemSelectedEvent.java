@@ -1,6 +1,6 @@
-package realsurv.tabletos.ui.events;
+package won983212.guitoolkit.events;
 
-import realsurv.tabletos.ui.UIObject;
+import won983212.guitoolkit.UIObject;
 
 public interface IItemSelectedEvent {
 	public void onSelected(UIObject obj, Object item);

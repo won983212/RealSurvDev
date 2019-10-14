@@ -1,4 +1,4 @@
-package realsurv.tabletos.ui;
+package won983212.guitoolkit;
 
 import java.awt.Dimension;
 import java.awt.Point;
@@ -10,11 +10,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
-import realsurv.font.FontFactory;
-import realsurv.font.TrueTypeFont;
-import realsurv.tabletos.DirWeights;
-import realsurv.tabletos.HorizontalArrange;
-import realsurv.tabletos.VerticalArrange;
+import won983212.guitoolkit.font.FontFactory;
+import won983212.guitoolkit.font.TrueTypeFont;
 
 public abstract class UIObject {
 	private HorizontalArrange hArrange = HorizontalArrange.STRECTCH;

@@ -1,9 +1,10 @@
-package realsurv.tabletos.ui;
+package won983212.guitoolkit.element;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
 
 import net.minecraft.client.gui.Gui;
+import won983212.guitoolkit.UIObject;
 
 public class UIRectangle extends UIObject {
 	@Override

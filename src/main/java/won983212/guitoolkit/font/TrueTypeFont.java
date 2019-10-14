@@ -1,4 +1,4 @@
-package realsurv.font;
+package won983212.guitoolkit.font;
 
 import java.awt.Font;
 import java.awt.Rectangle;
@@ -15,7 +15,7 @@ import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import realsurv.font.GlyphTextureCache.GlyphTexture;
+import won983212.guitoolkit.font.GlyphTextureCache.GlyphTexture;
 
 //TODO BIDI는 렌더링이 안되는듯?
 //TODO 갑자기 black color되어버리는 현상

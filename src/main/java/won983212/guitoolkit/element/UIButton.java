@@ -1,12 +1,13 @@
-package realsurv.tabletos.ui;
+package won983212.guitoolkit.element;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
 
 import net.minecraft.client.gui.Gui;
-import realsurv.font.TrueTypeFont;
-import realsurv.tabletos.DirWeights;
-import realsurv.tabletos.ui.events.IButtonEvent;
+import won983212.guitoolkit.DirWeights;
+import won983212.guitoolkit.UIObject;
+import won983212.guitoolkit.events.IButtonEvent;
+import won983212.guitoolkit.font.TrueTypeFont;
 
 public class UIButton extends UIObject {
 	private String label;

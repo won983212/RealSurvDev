@@ -10,33 +10,30 @@ import org.lwjgl.input.Keyboard;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
-import realsurv.font.FontFactory;
-import realsurv.font.TrueTypeFont;
-import realsurv.tabletos.ui.GridPanel;
-import realsurv.tabletos.ui.UILabel;
-import realsurv.tabletos.ui.UIObject;
-import realsurv.tabletos.ui.GridPanel.LengthDefinition;
-import realsurv.tabletos.ui.GridPanel.LengthType;
-import realsurv.tabletos.ui.events.IButtonEvent;
-import realsurv.tabletos.ui.UIButton;
-import realsurv.tabletos.ui.UICheckbox;
-import realsurv.tabletos.ui.UICombobox;
-import realsurv.tabletos.ui.UIImage;
-import realsurv.tabletos.ui.UIPanel;
-import realsurv.tabletos.ui.UIRectangle;
-import realsurv.tabletos.ui.UITextfield;
+import won983212.guitoolkit.DirWeights;
+import won983212.guitoolkit.GridPanel;
+import won983212.guitoolkit.HorizontalArrange;
+import won983212.guitoolkit.RootPane;
+import won983212.guitoolkit.UIObject;
+import won983212.guitoolkit.UIPanel;
+import won983212.guitoolkit.VerticalArrange;
+import won983212.guitoolkit.GridPanel.LengthDefinition;
+import won983212.guitoolkit.GridPanel.LengthType;
+import won983212.guitoolkit.element.UIButton;
+import won983212.guitoolkit.element.UICheckbox;
+import won983212.guitoolkit.element.UICombobox;
+import won983212.guitoolkit.element.UIImage;
+import won983212.guitoolkit.element.UILabel;
+import won983212.guitoolkit.element.UIRectangle;
+import won983212.guitoolkit.element.UITextfield;
+import won983212.guitoolkit.events.IButtonEvent;
+import won983212.guitoolkit.font.FontFactory;
+import won983212.guitoolkit.font.TrueTypeFont;
 
-public class MainScreen extends UIPanel {
-	private static final Dimension screenSize = new Dimension(TabletOS.WIDTH, TabletOS.HEIGHT);
-	private UIPanel popupPanel;
-	
+public class MainScreen extends RootPane {
 	public MainScreen() {
-		refresh();
-	}
-	
-	@Override
-	public void addPopup(UIObject obj) {
-		popupPanel.add(obj);
+		super(TabletOS.WIDTH, TabletOS.HEIGHT);
+		setScaledFactor(2);
 	}
 	
 	private TrueTypeFont font = FontFactory.makeFont("¸¼Àº °íµñ", 14);
@@ -49,10 +46,8 @@ public class MainScreen extends UIPanel {
 		font.drawString(str, 10, 10, 0xffffffff);
 	}
 	
-	private void refresh() {
-		popupPanel = new UIPanel();
-		uiList.clear();
-		
+	@Override
+	protected void initGui() {
 		add(new UIImage("realsurv:ui/wallpaper.png"));
 		
 		GridPanel contents = new GridPanel();
@@ -82,11 +77,6 @@ public class MainScreen extends UIPanel {
 		loginForm.add(new UIButton("Login").setMargin(new DirWeights(4)).setLayoutPosition(1, 0).setLayoutSpan(1, 3));
 		contents.add(loginForm);
 		add(contents);
-		
-		add(popupPanel);
-		invalidateSize();
-		setRelativeBounds(0, 0, screenSize.width, screenSize.height);
-		layout();
 	}
 	
 	@Override
@@ -94,14 +84,9 @@ public class MainScreen extends UIPanel {
 		//TODO Debug Key
 		if(keyCode == Keyboard.KEY_T) {
 			if(GuiScreen.isCtrlKeyDown()) {
-				refresh();
+				initializePanel();
 			}
 		}
 		super.onKeyTyped(keyCode, typedChar);
-	}
-	
-	@Override
-	public Dimension measureMinSize() {
-		return screenSize;
 	}
 }

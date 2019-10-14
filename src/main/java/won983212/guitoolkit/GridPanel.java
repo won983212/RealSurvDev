@@ -1,10 +1,10 @@
-package realsurv.tabletos.ui;
+package won983212.guitoolkit;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 
-import realsurv.tabletos.ui.StackPanel.Orientation;
+import won983212.guitoolkit.StackPanel.Orientation;
 
 public class GridPanel extends UIPanel {
 	private ArrayList<CellLength> columns = new ArrayList<CellLength>();

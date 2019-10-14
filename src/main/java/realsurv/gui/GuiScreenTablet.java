@@ -25,64 +25,49 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
 import realsurv.ClientEventHandler;
 import realsurv.CommonProxy;
-import realsurv.font.Alpha8Texture;
-import realsurv.font.TrueTypeFont;
 import realsurv.tabletos.TabletOS;
+import won983212.guitoolkit.font.Alpha8Texture;
+import won983212.guitoolkit.font.TrueTypeFont;
 
 public class GuiScreenTablet extends GuiScreen {
 	private static TabletOS system = ClientEventHandler.instance.getTabletContext();
-	
+
 	@Override
 	public void initGui() {
 		Keyboard.enableRepeatEvents(true);
+		system.setWindowSize(width, height);
 	}
 
 	@Override
 	public void onGuiClosed() {
 		Keyboard.enableRepeatEvents(false);
 	}
-	
-	private Point2d getScreenSize() {
-		ScaledResolution r = new ScaledResolution(Minecraft.getMinecraft());
-		return new Point2d(TabletOS.WIDTH / r.getScaleFactor(), TabletOS.HEIGHT / r.getScaleFactor());
-	}
-	
-	private Point guiCoordsToScreen(int x, int y) {
-		Point2d size = getScreenSize();
-		x -= (width-size.x)/2;
-		y -= (height-size.y)/2;
-		x = (int) (TabletOS.WIDTH * x / size.x);
-		y = (int) (TabletOS.HEIGHT * y / size.y);
-		if(x < 0 || x > TabletOS.WIDTH || y < 0 || y > TabletOS.HEIGHT)
-			return null;
-		return new Point(x, y);
-	}
 
+	@Override
+	public void onResize(Minecraft mcIn, int w, int h) {
+		super.onResize(mcIn, w, h);
+		system.setWindowSize(w, h);
+	}
+	
 	@Override
 	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
 		this.drawDefaultBackground();
-		Point p = guiCoordsToScreen(mouseX, mouseY);
-		if(p != null)
-			system.moveMouseTo(p.x, p.y);
-		
-		Point2d size = getScreenSize();
+		system.moveMouseTo(mouseX, mouseY);
+
 		Tessellator tes = Tessellator.getInstance();
 		BufferBuilder buf = tes.getBuffer();
-		ScaledResolution sr = new ScaledResolution(mc);
-		double scale = sr.getScaleFactor() / 2;
+		int minX = (int) ((width - TabletOS.WIDTH / 2) / 2);
+		int maxX = (int) (minX + TabletOS.WIDTH / 2);
+		int minY = (int) ((height - TabletOS.HEIGHT / 2) / 2);
+		int maxY = (int) (minY + TabletOS.HEIGHT / 2);
 
-		int minX = (int) ((width - size.x * scale)/2);
-		int maxX = (int) (minX + size.x * scale);
-		int minY = (int) ((height - size.y * scale)/2);
-		int maxY = (int) (minY + size.y * scale);
-		
 		GlStateManager.disableTexture2D();
 		GlStateManager.color(0.3f, 0.3f, 0.3f, 1);
 		buf.begin(7, DefaultVertexFormats.POSITION);
-		buf.pos(maxX+1, maxY+1, 0).endVertex();
-		buf.pos(maxX+1, minY-1, 0).endVertex();
-		buf.pos(minX-1, minY-1, 0).endVertex();
-		buf.pos(minX-1, maxY+1, 0).endVertex();
+		buf.pos(maxX + 1, maxY + 1, 0).endVertex();
+		buf.pos(maxX + 1, minY - 1, 0).endVertex();
+		buf.pos(minX - 1, minY - 1, 0).endVertex();
+		buf.pos(minX - 1, maxY + 1, 0).endVertex();
 		tes.draw();
 		GlStateManager.color(0.08f, 0.08f, 0.08f, 1);
 		buf.begin(7, DefaultVertexFormats.POSITION);
@@ -92,7 +77,7 @@ public class GuiScreenTablet extends GuiScreen {
 		buf.pos(minX, maxY, 0).endVertex();
 		tes.draw();
 		GlStateManager.enableTexture2D();
-		
+
 		GlStateManager.color(1, 1, 1, 1);
 		ClientEventHandler.instance.bindTabletScreenTexture();
 		buf.begin(7, DefaultVertexFormats.POSITION_TEX);
@@ -113,25 +98,19 @@ public class GuiScreenTablet extends GuiScreen {
 	@Override
 	protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
 		super.mouseClicked(mouseX, mouseY, mouseButton);
-		Point pos = guiCoordsToScreen(mouseX, mouseY);
-		if(pos != null)
-			system.mouseClicked(pos.x, pos.y, mouseButton);
+		system.mouseClicked(mouseX, mouseY, mouseButton);
 	}
 
 	@Override
 	protected void mouseReleased(int mouseX, int mouseY, int state) {
 		super.mouseReleased(mouseX, mouseY, state);
-		Point pos = guiCoordsToScreen(mouseX, mouseY);
-		if(pos != null)
-			system.mouseReleased(pos.x, pos.y, state);
+		system.mouseReleased(mouseX, mouseY, state);
 	}
 
 	@Override
 	protected void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
 		super.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
-		Point pos = guiCoordsToScreen(mouseX, mouseY);
-		if(pos != null)
-			system.mouseClickMove(pos.x, pos.y, clickedMouseButton, timeSinceLastClick);
+		system.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
 	}
-	
+
 }

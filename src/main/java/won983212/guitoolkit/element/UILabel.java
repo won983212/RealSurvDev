@@ -1,8 +1,9 @@
-package realsurv.tabletos.ui;
+package won983212.guitoolkit.element;
 
 import java.awt.Rectangle;
 
-import realsurv.font.TrueTypeFont;
+import won983212.guitoolkit.UIObject;
+import won983212.guitoolkit.font.TrueTypeFont;
 
 public class UILabel extends UIObject {
 	private String label;

@@ -1,6 +1,6 @@
-package realsurv.tabletos.ui.events;
+package won983212.guitoolkit.events;
 
-import realsurv.tabletos.ui.UIButton;
+import won983212.guitoolkit.element.UIButton;
 
 public interface IButtonEvent {
 	public void onClicked(UIButton button, int buttontype);

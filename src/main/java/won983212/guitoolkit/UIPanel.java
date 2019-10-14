@@ -1,4 +1,4 @@
-package realsurv.tabletos.ui;
+package won983212.guitoolkit;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import net.minecraft.client.renderer.GlStateManager;
-import realsurv.tabletos.DirWeights;
 
 public class UIPanel extends UIObject {
 	protected ArrayList<UIObject> uiList = new ArrayList<UIObject>();
