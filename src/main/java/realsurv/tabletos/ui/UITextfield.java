@@ -1,17 +1,20 @@
 package realsurv.tabletos.ui;
 
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Rectangle;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
+import realsurv.font.AdaptiveTTF;
+import realsurv.font.FontFactory;
 import realsurv.font.TrueTypeFont;
 import realsurv.tabletos.DirWeights;
 import realsurv.tabletos.GuiCompatibleTextfield;
 
 public class UITextfield extends UIObject {
-	private GuiCompatibleTextfield textfield = new GuiCompatibleTextfield(0, getFont().makeCompatibleFont());
+	private GuiCompatibleTextfield textfield = new GuiCompatibleTextfield(0, makeATTF());
 	private String hint = null;
 	private int hintTextColor = 0xff999999;
 	
@@ -21,10 +24,15 @@ public class UITextfield extends UIObject {
 		textfield.setEnableBackgroundDrawing(false);
 	}
 	
+	private AdaptiveTTF makeATTF() {
+		Font font = getFont().getJavaFont(0);
+		return FontFactory.makeMinecraftFont(font.getFamily(), font.getSize(), false);
+	}
+	
 	@Override
 	public UIObject setFont(String family, int size) {
 		super.setFont(family, size);
-		textfield = new GuiCompatibleTextfield(0, getFont().makeCompatibleFont());
+		textfield = new GuiCompatibleTextfield(0, makeATTF());
 		return this;
 	}
 	

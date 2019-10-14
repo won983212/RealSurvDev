@@ -19,10 +19,9 @@ public class ClientProxy extends CommonProxy {
 		ModelLoader.setCustomModelResourceLocation(CommonProxy.tablet, 0, loc);
 	}
 	
-	//TODO 실제 마크에도 폰트를 적용할 예정이다.
 	@Override
 	public void postInit(FMLPostInitializationEvent e) {
-		Minecraft.getMinecraft().fontRenderer = FontFactory.makeFont("맑은 고딕", 14).makeCompatibleFont();
+		Minecraft.getMinecraft().fontRenderer = FontFactory.makeMinecraftFont("맑은 고딕", 14);
 		ClientEventHandler.initTabletOS();
 	}
 }

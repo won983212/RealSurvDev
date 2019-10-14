@@ -17,6 +17,8 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import realsurv.font.GlyphTextureCache.GlyphTexture;
 
+//TODO BIDI는 렌더링이 안되는듯?
+//TODO 갑자기 black color되어버리는 현상
 public class TrueTypeFont {
 	private static class ArrangedGlyph {
 		public int x;
@@ -349,10 +351,6 @@ public class TrueTypeFont {
 				k += 85;
 			colorCodes[i] = 255 << 24 | (k & 255) << 16 | (l & 255) << 8 | i1 & 255;
 		}
-	}
-
-	public AdaptiveTTF makeCompatibleFont() {
-		return new AdaptiveTTF(font[0].getFamily(), font[0].getSize());
 	}
 
 	public Font getJavaFont(int style) {

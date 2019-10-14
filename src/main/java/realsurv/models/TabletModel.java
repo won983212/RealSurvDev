@@ -1,7 +1,5 @@
 package realsurv.models;
 
-import java.awt.Color;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -9,13 +7,10 @@ import javax.vecmath.Matrix4f;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.opengl.GL11;
-
-import com.google.common.primitives.Ints;
+import org.lwjgl.util.vector.Vector3f;
 
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.EntityRenderer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderHelper;
@@ -26,17 +21,15 @@ import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType;
 import net.minecraft.client.renderer.block.model.ItemOverride;
 import net.minecraft.client.renderer.block.model.ItemOverrideList;
+import net.minecraft.client.renderer.block.model.ItemTransformVec3f;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.texture.TextureUtil;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
+import net.minecraftforge.common.model.TRSRTransformation;
 import realsurv.ClientEventHandler;
-import realsurv.tabletos.TabletOS;
 
 public class TabletModel implements IBakedModel {
 	public static final ModelResourceLocation baseModelLoc = new ModelResourceLocation("realsurv:tablet", "inventory");
@@ -52,8 +45,8 @@ public class TabletModel implements IBakedModel {
 
 	@Override
 	public List<BakedQuad> getQuads(IBlockState state, EnumFacing side, long rand) {
-		if(type == TransformType.FIRST_PERSON_RIGHT_HAND) {
-			if(side == null) {
+		if (type == TransformType.FIRST_PERSON_RIGHT_HAND) {
+			if (side == null) {
 				renderModel(baseModel);
 				RenderHelper.disableStandardItemLighting();
 				GL11.glPushAttrib(GL11.GL_TEXTURE_BIT);
@@ -66,7 +59,7 @@ public class TabletModel implements IBakedModel {
 				final float xMax = xMin + 16f * unit;
 				final float zMin = 2.39f * unit;
 				final float zMax = zMin + 10.75f * unit;
-				
+
 				GlStateManager.disableTexture2D();
 				GlStateManager.color(0.08f, 0.08f, 0.08f, 1);
 				GlStateManager.glBegin(7);
@@ -75,7 +68,7 @@ public class TabletModel implements IBakedModel {
 				GlStateManager.glVertex3f(xMax, zlevel, zMin);
 				GlStateManager.glVertex3f(xMin, zlevel, zMin);
 				GlStateManager.glEnd();
-				
+
 				GlStateManager.enableTexture2D();
 				GlStateManager.color(1, 1, 1, 1);
 				OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 240f, 240f);
@@ -97,7 +90,7 @@ public class TabletModel implements IBakedModel {
 		}
 		return baseModel.getQuads(state, side, rand);
 	}
-	
+
 	private void renderModel(IBakedModel model) {
 		Tessellator tessellator = Tessellator.getInstance();
 		BufferBuilder bufferbuilder = tessellator.getBuffer();

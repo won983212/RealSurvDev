@@ -14,7 +14,7 @@ public class AdaptiveTTF extends FontRenderer {
 	private TrueTypeFont font;
 	private boolean forceDisableShadow = false;
 
-	public AdaptiveTTF(String family, int size) {
+	protected AdaptiveTTF(String family, int size) {
 		this(family, size, Minecraft.getMinecraft());
 	}
 
@@ -29,8 +29,12 @@ public class AdaptiveTTF extends FontRenderer {
 	}
 
 	public void setFont(String family, int size) {
-		font = FontFactory.makeFont(family, size).setScaledHalf();
+		font = new TrueTypeFont(family, size, true);
 		FONT_HEIGHT = (int) (size * 4.0 / 6.0);
+	}
+	
+	public void setFontHalf() {
+		font.setScaledHalf();
 	}
 
 	@Override

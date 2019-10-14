@@ -38,7 +38,7 @@ public class GlyphTextureCache {
 	private HashMap<Long, GlyphTexture> glyphCache = new HashMap<Long, GlyphTexture>();
 	private BufferedImage stringVectorImage;
 	private Graphics2D stringGraphics;
-	private AlphaSubTexture glyphTexture = new AlphaSubTexture(TEXTURE_WIDTH, TEXTURE_HEIGHT);
+	private Alpha8Texture glyphTexture = new Alpha8Texture(TEXTURE_WIDTH, TEXTURE_HEIGHT);
 	private TrueTypeFont font;
 	
 	private int[] ascent = new int[4];
@@ -165,7 +165,7 @@ public class GlyphTextureCache {
 			stringGraphics.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
 		}
 		stringGraphics.setColor(Color.white);
-		stringGraphics.setBackground(AlphaSubTexture.TRANSCOLOR);
+		stringGraphics.setBackground(Alpha8Texture.TRANSCOLOR);
 	}
 	
 	public int getLineHeight(int style) {
