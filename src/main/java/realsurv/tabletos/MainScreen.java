@@ -35,29 +35,33 @@ public class MainScreen extends RootPane {
 		super(TabletOS.WIDTH, TabletOS.HEIGHT);
 		setScaledFactor(2);
 	}
-	
+
 	private TrueTypeFont font = FontFactory.makeFont("맑은 고딕", 14);
+
 	@Override
 	public void render(int mouseX, int mouseY) {
 		super.render(mouseX, mouseY);
 		String str = "§l@동해물과§r §l§o백두산§r이 §a마르고 §c닳도록 §l하느§o님이§r 보우하사 우리 나라만세. 012312312311";
-		//String str = "GagPos";
+		// String str = "GagPos";
 		Gui.drawRect(10, 10, 10 + font.getStringWidth(str), 10 + font.getMaxHeight(), 0xff000000);
 		font.drawString(str, 10, 10, 0xffffffff);
 	}
-	
+
 	@Override
 	protected void initGui() {
 		add(new UIImage("realsurv:ui/wallpaper.png"));
-		
+
 		GridPanel contents = new GridPanel();
 		contents.addRow(new LengthDefinition(LengthType.FIXED, 20));
 		contents.addRow(new LengthDefinition(LengthType.ALLOCATED, 1));
 		contents.addEmptyColumn();
-		
+
 		UIPanel taskbar = new UIPanel();
-		//taskbar.add(new UILabel().setLabel("Remember").setForegroundColor(0xffffffff));
-		//taskbar.add(new UIRectangle().setShadowVisible(false).setRadius(0).setBackgroundColor(0xaa000000).setLayoutSpan(2, 1));
+		// taskbar.add(new
+		// UILabel().setLabel("Remember").setForegroundColor(0xffffffff));
+		// taskbar.add(new
+		// UIRectangle().setShadowVisible(false).setRadius(0).setBackgroundColor(0xaa000000).setLayoutSpan(2,
+		// 1));
 		contents.add(taskbar);
 
 		GridPanel loginForm = new GridPanel();
@@ -78,12 +82,12 @@ public class MainScreen extends RootPane {
 		contents.add(loginForm);
 		add(contents);
 	}
-	
+
 	@Override
 	public void onKeyTyped(int keyCode, char typedChar) {
-		//TODO Debug Key
-		if(keyCode == Keyboard.KEY_T) {
-			if(GuiScreen.isCtrlKeyDown()) {
+		// TODO Debug Key
+		if (keyCode == Keyboard.KEY_T) {
+			if (GuiScreen.isCtrlKeyDown()) {
 				initializePanel();
 			}
 		}

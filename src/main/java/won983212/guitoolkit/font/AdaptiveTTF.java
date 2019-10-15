@@ -47,7 +47,6 @@ public class AdaptiveTTF extends FontRenderer {
 
 	@Override
 	public int drawString(String text, float x, float y, int color, boolean dropShadow) {
-		color |= 0xff000000;
 		return (int) x + font.drawString(text, x, y, color, !forceDisableShadow && dropShadow);
 	}
 

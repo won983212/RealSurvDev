@@ -25,26 +25,26 @@ public class GlyphTextureCache {
 		public int width;
 		public int height;
 	}
-	
+
 	private static final int STRING_IMAGE_WIDTH = 256;
 	private static final int STRING_IMAGE_HEIGHT = 64;
 	public static final int TEXTURE_WIDTH = 256;
 	public static final int TEXTURE_HEIGHT = 256;
-	public static final int GLYPH_PADDING = 1;
-	
+	public static final int GLYPH_PADDING = 2;
+
 	private int cacheX = 0;
 	private int cacheY = 0;
-	
+
 	private HashMap<Long, GlyphTexture> glyphCache = new HashMap<Long, GlyphTexture>();
 	private BufferedImage stringVectorImage;
 	private Graphics2D stringGraphics;
 	private Alpha8Texture glyphTexture = new Alpha8Texture(TEXTURE_WIDTH, TEXTURE_HEIGHT);
 	private TrueTypeFont font;
-	
+
 	private int[] ascent = new int[4];
 	private int[] descent = new int[4];
 	private int[] leading = new int[4];
-	
+
 	public GlyphTextureCache(TrueTypeFont font) {
 		this.font = font;
 		allocateStringImage(TEXTURE_WIDTH, TEXTURE_HEIGHT);
@@ -55,17 +55,19 @@ public class GlyphTextureCache {
 			leading[i] = metrics.getLeading();
 		}
 	}
-	
+
 	public GlyphVector layoutGlyphVector(Font font, String str) {
 		return layoutGlyphVector(font, str.toCharArray());
 	}
-	
+
 	public GlyphVector layoutGlyphVector(Font font, char[] str) {
 		return font.layoutGlyphVector(stringGraphics.getFontRenderContext(), str, 0, str.length, Font.LAYOUT_LEFT_TO_RIGHT);
 	}
-	
-	/*private TestFrame frame = new TestFrame("StringCache");
-	private TestFrame frame2 = new TestFrame("GlyphCache");*/
+
+	/*
+	 * private TestFrame frame = new TestFrame("StringCache"); private TestFrame
+	 * frame2 = new TestFrame("GlyphCache");
+	 */
 	public GlyphTexture[] cacheGlyphs(String text, int style) {
 		if (text.length() == 0)
 			return new GlyphTexture[0];
@@ -74,45 +76,43 @@ public class GlyphTextureCache {
 		char[] chars = text.toCharArray();
 		GlyphVector vec = null;
 		Rectangle bounds = null;
-		boolean isFirst = false;
 		long styleKey = (long) style << 32;
+
+		if (chars.length > 0) {
+			vec = layoutGlyphVector(font.getJavaFont(style), chars);
+
+			for (int j = 0; j < chars.length; j++) {
+				Point2D p = vec.getGlyphPosition(j);
+				p.setLocation(p.getX() + GLYPH_PADDING * 2 * j, p.getY());
+				vec.setGlyphPosition(j, p);
+			}
+
+			bounds = vec.getPixelBounds(null, 0, 0);
+			int boundsMaxW = bounds.width + GLYPH_PADDING * 4;
+			int boundsMaxH = bounds.height + GLYPH_PADDING * 4;
+			if (boundsMaxW > stringVectorImage.getWidth() || boundsMaxH > stringVectorImage.getHeight()) {
+				int w = Math.max(boundsMaxW, stringVectorImage.getWidth());
+				int h = Math.max(boundsMaxH, stringVectorImage.getHeight());
+				allocateStringImage(w, h);
+			}
+
+			stringGraphics.clearRect(0, 0, boundsMaxW, boundsMaxH + ascent[style]);
+			stringGraphics.drawGlyphVector(vec, GLYPH_PADDING - bounds.x, GLYPH_PADDING - bounds.y);
+
+			/*
+			 * stringGraphics.setColor(Color.cyan); for(int j=0;j<vec.getNumGlyphs();j++) {
+			 * Rectangle r = vec.getGlyphPixelBounds(j, null, GLYPH_PADDING - bounds.x,
+			 * GLYPH_PADDING - bounds.y); stringGraphics.drawRect(r.x, r.y, r.width-1,
+			 * r.height-1); } stringGraphics.setColor(Color.white);
+			 * frame.updateImageTest(stringVectorImage);
+			 */
+		}
 
 		for (int i = 0; i < chars.length; i++) {
 			int cp = text.codePointAt(i);
 			if (glyphCache.containsKey(styleKey | cp)) {
 				glyphs.add(glyphCache.get(styleKey | cp));
 				continue;
-			}
-
-			if (!isFirst) {
-				isFirst = true;
-				vec = layoutGlyphVector(font.getJavaFont(style), chars);
-
-				for (int j = 0; j < chars.length; j++) {
-					Point2D p = vec.getGlyphPosition(j);
-					p.setLocation(p.getX() + GLYPH_PADDING * 2 * j, p.getY());
-					vec.setGlyphPosition(j, p);
-				}
-
-				bounds = vec.getPixelBounds(null, 0, 0);
-				int boundsMaxW = bounds.width + GLYPH_PADDING * 2;
-				int boundsMaxH = bounds.height + GLYPH_PADDING * 2;
-				if (boundsMaxW > stringVectorImage.getWidth() || boundsMaxH > stringVectorImage.getHeight()) {
-					int w = Math.max(boundsMaxW, stringVectorImage.getWidth());
-					int h = Math.max(boundsMaxH, stringVectorImage.getHeight());
-					allocateStringImage(w, h);
-				}
-
-				stringGraphics.clearRect(0, 0, boundsMaxW, boundsMaxH + ascent[style]);
-				stringGraphics.drawGlyphVector(vec, GLYPH_PADDING - bounds.x, GLYPH_PADDING - bounds.y);
-				
-				/*stringGraphics.setColor(Color.cyan);
-				for(int j=0;j<vec.getNumGlyphs();j++) {
-					Rectangle r = vec.getGlyphPixelBounds(j, null, GLYPH_PADDING - bounds.x, GLYPH_PADDING - bounds.y);
-					stringGraphics.drawRect(r.x, r.y, r.width-1, r.height-1);
-				}
-				stringGraphics.setColor(Color.white);
-				frame.updateImageTest(stringVectorImage);*/
 			}
 
 			Rectangle2D r = vec.getGlyphVisualBounds(i).getBounds2D();
@@ -129,8 +129,8 @@ public class GlyphTextureCache {
 			}
 
 			GlyphTexture glyph = new GlyphTexture();
-			glyph.width = (int)r.getWidth() + GLYPH_PADDING * 2;
-			glyph.height = (int)r.getHeight() + GLYPH_PADDING * 2;
+			glyph.width = (int) r.getWidth() + GLYPH_PADDING * 2;
+			glyph.height = (int) r.getHeight() + GLYPH_PADDING * 2;
 			glyph.texture = glyphTexture.getGlTextureId();
 			glyph.u1 = cacheX / (double) TEXTURE_WIDTH;
 			glyph.v1 = cacheY / (double) TEXTURE_HEIGHT;
@@ -141,13 +141,14 @@ public class GlyphTextureCache {
 			final int dy = cacheY;
 			final int dw = glyph.width;
 			final int dh = glyph.height;
-			final int rx = (int)Math.round(r.getX()) - GLYPH_PADDING;
-			final int ry = (int)Math.round(r.getY()) - GLYPH_PADDING;
+			final int rx = (int) Math.round(r.getX()) - GLYPH_PADDING;
+			final int ry = (int) Math.round(r.getY()) - GLYPH_PADDING;
 			glyphTexture.getGraphic().drawImage(stringVectorImage, dx, dy, dx + dw, dy + dh, rx, ry, rx + dw, ry + dh, null);
-			/*Graphics2D g2 = glyphTexture.getGraphic();
-			g2.setColor(Color.green);
-			g2.drawRect(dx + GLYPH_PADDING, dy + GLYPH_PADDING, dw - GLYPH_PADDING*2, dh - GLYPH_PADDING*2);
-			frame2.updateImageTest(glyphTexture.getImage());*/
+			/*
+			 * Graphics2D g2 = glyphTexture.getGraphic(); g2.setColor(Color.green);
+			 * g2.drawRect(dx + GLYPH_PADDING, dy + GLYPH_PADDING, dw - GLYPH_PADDING*2, dh
+			 * - GLYPH_PADDING*2); frame2.updateImageTest(glyphTexture.getImage());
+			 */
 			glyphTexture.updateTexture(dx, dy, dw, dh);
 			glyphCache.put(styleKey | cp, glyph);
 			glyphs.add(glyph);
@@ -155,7 +156,7 @@ public class GlyphTextureCache {
 		}
 		return glyphs.toArray(new GlyphTexture[glyphs.size()]);
 	}
-	
+
 	private void allocateStringImage(int w, int h) {
 		stringVectorImage = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
 		stringGraphics = (Graphics2D) stringVectorImage.getGraphics();
@@ -167,7 +168,7 @@ public class GlyphTextureCache {
 		stringGraphics.setColor(Color.white);
 		stringGraphics.setBackground(Alpha8Texture.TRANSCOLOR);
 	}
-	
+
 	public int getLineHeight(int style) {
 		return ascent[style] + descent[style] + leading[style];
 	}
@@ -175,11 +176,11 @@ public class GlyphTextureCache {
 	public int getMaxHeight() {
 		return ascent[Font.BOLD];
 	}
-	
+
 	public int getAscent(int style) {
 		return ascent[style];
 	}
-	
+
 	public int getDescent(int style) {
 		return descent[style];
 	}

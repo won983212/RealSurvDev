@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.WeakHashMap;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
@@ -24,7 +25,7 @@ public class TrueTypeFont {
 		public int x;
 		public int y;
 		public int advance;
-		public int color;
+		public int colorIndex;
 		public int index;
 		public int affectedStyle;
 		public GlyphTexture texture;
@@ -44,11 +45,11 @@ public class TrueTypeFont {
 	private WeakHashMap<String, String> inUseMap = new WeakHashMap<>();
 	private final Font[] font = new Font[4];
 	private final boolean antialias;
-	private int[] colorCodes = new int[16];
+	private int[] colorCodes = new int[32];
 	private GlyphTextureCache glyphTextures;
 	private int fontStyle = 0;
 	private int specialStyle = 0;
-	private int color = -1;
+	private int colorIdx = -1;
 	private double scaleModifier = 1;
 
 	protected TrueTypeFont(String family, int size, boolean antialias) {
@@ -83,12 +84,11 @@ public class TrueTypeFont {
 		return sb.toString();
 	}
 
-	private void applyColor(int color) {
-		float f3 = (color >> 24 & 255) / 255.0F;
+	private void applyColor(int color, float alpha) {
 		float f = (color >> 16 & 255) / 255.0F;
 		float f1 = (color >> 8 & 255) / 255.0F;
 		float f2 = (color & 255) / 255.0F;
-		GlStateManager.color(f, f1, f2, f3);
+		GlStateManager.color(f, f1, f2, alpha);
 	}
 
 	private boolean applyStyle(char code) {
@@ -109,12 +109,12 @@ public class TrueTypeFont {
 			return true;
 		case 'r':
 			fontStyle = specialStyle = 0;
-			color = 0xffffffff;
+			colorIdx = 15;
 			return true;
 		default:
 			int idx = "0123456789abcdef".indexOf(code);
 			if (idx != -1) {
-				color = colorCodes[idx];
+				colorIdx = idx;
 				return true;
 			}
 			return false;
@@ -131,7 +131,7 @@ public class TrueTypeFont {
 			int lastIndex = 0;
 
 			fontStyle = specialStyle = 0;
-			color = -1;
+			colorIdx = -1;
 			for (int i = 0; i < str.length(); i++) {
 				int cp = str.codePointAt(i);
 				if (cp == '¡×' && i < str.length() - 1) {
@@ -170,8 +170,7 @@ public class TrueTypeFont {
 		GlyphVector vec = glyphTextures.layoutGlyphVector(font[fontStyle], str);
 		Rectangle bounds = vec.getPixelBounds(null, 0, 0);
 		float[] locations = vec.getGlyphPositions(0, str.length() + 1, null);
-		int offsetY = glyphTextures.getAscent(fontStyle) - glyphTextures.getDescent(fontStyle)
-				- glyphTextures.getLeading(fontStyle);
+		int offsetY = glyphTextures.getAscent(fontStyle) - glyphTextures.getDescent(fontStyle) - glyphTextures.getLeading(fontStyle);
 
 		for (int i = 0; i < str.length(); i++) {
 			Rectangle2D pos = vec.getGlyphVisualBounds(i).getBounds2D();
@@ -179,7 +178,7 @@ public class TrueTypeFont {
 			glyph.index = start + i;
 			glyph.x = (int) Math.round(pos.getX() + advance);
 			glyph.y = (int) Math.round(pos.getY() + offsetY);
-			glyph.color = color;
+			glyph.colorIndex = colorIdx;
 			glyph.affectedStyle = fontStyle | specialStyle;
 			glyph.texture = textures[i];
 			glyph.advance = (int) (locations[(i + 1) * 2] - locations[i * 2]);
@@ -189,8 +188,12 @@ public class TrueTypeFont {
 		return (int) locations[locations.length - 2];
 	}
 
-	public int drawString(String str, double x, double y, int color) {
-		applyColor(color);
+	private int renderString(String str, double x, double y, int color, boolean shadow) {
+		if ((color & -67108864) == 0)
+			color |= -16777216;
+
+		float alpha = ((color >> 24) & 0xFF) / 255.0f;
+		applyColor(color, alpha);
 		enableBlend();
 		GlStateManager.enableAlpha();
 
@@ -208,7 +211,7 @@ public class TrueTypeFont {
 
 			if (charAt >= '0' && charAt <= '9') {
 				cacheDigits();
-				ArrangedGlyph digitGlyph = digitCache[glyph.affectedStyle][charAt - '0'];
+				ArrangedGlyph digitGlyph = digitCache[glyph.affectedStyle & (Font.BOLD | Font.ITALIC)][charAt - '0'];
 				tex = digitGlyph.texture;
 				offsetX = (glyph.advance - digitGlyph.advance) >> 1;
 			}
@@ -218,8 +221,8 @@ public class TrueTypeFont {
 			final double maxX = minX + tex.width / scaleModifier;
 			final double maxY = minY + tex.height / scaleModifier;
 
-			if (glyph.color != -1 && lastColor != glyph.color)
-				applyColor(glyph.color);
+			if (glyph.colorIndex != -1 && lastColor != glyph.colorIndex)
+				applyColor(colorCodes[glyph.colorIndex + (shadow ? 16 : 0)], alpha);
 
 			if (charAt != ' ') {
 				GlStateManager.enableTexture2D();
@@ -260,20 +263,22 @@ public class TrueTypeFont {
 		return (int) (cached.advance / scaleModifier);
 	}
 
-	public int drawString(String str, float x, float y, int color, boolean shadow) {
+	public int drawString(String str, double x, double y, int color) {
+		return drawString(str, x, y, color, false);
+	}
+
+	public int drawString(String str, double x, double y, int color, boolean shadow) {
 		if (shadow) {
-			drawString(str, x + 1, y + 1, (color & 16579836) >> 2 | color & -16777216);
-			return drawString(str, x, y, color) + 1;
+			renderString(str, x + 1, y + 1, (color & 16579836) >> 2 | color & -16777216, true);
+			return renderString(str, x, y, color, false) + 1;
 		} else {
-			return drawString(str, x, y, color);
+			return renderString(str, x, y, color, false);
 		}
 	}
 
 	private void enableBlend() {
 		GlStateManager.enableBlend();
-		GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA,
-				GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE,
-				GlStateManager.DestFactor.ZERO);
+		GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
 	}
 
 	public int getCharWidth(char c) {
@@ -298,7 +303,6 @@ public class TrueTypeFont {
 		FormattedString format = cacheString(str);
 		int i = reverse ? format.glyphs.length - 1 : 0;
 
-		wrapWidth = (int) (wrapWidth / scaleModifier);
 		while (reverse ? (i >= 0) : (i < format.glyphs.length)) {
 			ArrangedGlyph glyph = format.glyphs[i];
 			if (total + glyph.advance > wrapWidth) {
@@ -318,11 +322,11 @@ public class TrueTypeFont {
 		int total = 0;
 
 		FormattedString format = cacheString(str);
-		wrapWidth = (int) (wrapWidth / scaleModifier);
 		for (ArrangedGlyph glyph : format.glyphs) {
 			if (total + glyph.advance > wrapWidth) {
 				ret.add(sb.toString());
 				sb = new StringBuilder();
+				total = 0;
 			} else {
 				total += glyph.advance;
 			}
@@ -334,13 +338,26 @@ public class TrueTypeFont {
 	}
 
 	private void makeColorTable() {
-		for (int i = 0; i < 16; ++i) {
+		for (int i = 0; i < 32; ++i) {
 			int j = (i >> 3 & 1) * 85;
 			int k = (i >> 2 & 1) * 170 + j;
 			int l = (i >> 1 & 1) * 170 + j;
 			int i1 = (i >> 0 & 1) * 170 + j;
 			if (i == 6)
 				k += 85;
+			if (Minecraft.getMinecraft().gameSettings.anaglyph) {
+				int j1 = (k * 30 + l * 59 + i1 * 11) / 100;
+				int k1 = (k * 30 + l * 70) / 100;
+				int l1 = (k * 30 + i1 * 70) / 100;
+				k = j1;
+				l = k1;
+				i1 = l1;
+			}
+			if (i >= 16) {
+				k /= 4;
+				l /= 4;
+				i1 /= 4;
+			}
 			colorCodes[i] = 255 << 24 | (k & 255) << 16 | (l & 255) << 8 | i1 & 255;
 		}
 	}
