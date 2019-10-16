@@ -12,6 +12,7 @@ import won983212.guitoolkit.VerticalArrange;
 import won983212.guitoolkit.events.IItemSelectedEvent;
 import won983212.guitoolkit.font.TrueTypeFont;
 
+//TODO Combobox 디자인좀 수정하기
 public class UICombobox extends UIObject implements IItemSelectedEvent {
 	private ArrayList<String> items = new ArrayList<String>();
 	private UIMenu menu = new UIMenu();

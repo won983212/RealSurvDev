@@ -19,7 +19,9 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import won983212.guitoolkit.font.GlyphTextureCache.GlyphTexture;
 
 //TODO BIDI는 렌더링이 안되는듯?
+//TODO 알 수 없는 폰트는 알아서 찾아서 설정하도록
 //TODO 갑자기 black color되어버리는 현상
+//TODO 폰트 고화질 모드도 있게 만들기
 public class TrueTypeFont {
 	private static class ArrangedGlyph {
 		public int x;
@@ -123,35 +125,29 @@ public class TrueTypeFont {
 
 	private FormattedString cacheString(String str) {
 		String key = getGeneralizedKey(str);
+		char[] strc = str.toCharArray();
 		FormattedString value = stringCache.get(key);
 		if (value == null) {
 			ArrayList<ArrangedGlyph> glyphList = new ArrayList<>();
-			StringBuilder cacheList = new StringBuilder();
 			int advance = 0;
-			int lastIndex = 0;
+			int start = 0;
 
 			fontStyle = specialStyle = 0;
 			colorIdx = -1;
-			for (int i = 0; i < str.length(); i++) {
+			for (int i = 0; i < strc.length; i++) {
 				int cp = str.codePointAt(i);
-				if (cp == '§' && i < str.length() - 1) {
-					char next = str.charAt(i + 1);
-					if ("0123456789abcdefmnrlo".indexOf(next) != -1) {
-						advance += cacheString(cacheList.toString(), glyphList, lastIndex, advance);
-						applyStyle(next);
-						lastIndex = ++i + 1;
-						cacheList = new StringBuilder();
-					} else {
-						cacheList.append((char) cp);
+				if (cp == '§' && i < strc.length - 1) {
+					if ("0123456789abcdefmnrlo".indexOf(strc[i+1]) != -1) {
+						advance += cacheString(strc, glyphList, start, i, advance);
+						applyStyle(strc[i+1]);
+						start = ++i + 1;
 					}
-				} else {
-					cacheList.append((char) cp);
 				}
 			}
 			value = new FormattedString();
 			String newKeyString = new String(key);
 			value.keyReference = new WeakReference<String>(newKeyString);
-			value.advance = advance + cacheString(cacheList.toString(), glyphList, lastIndex, advance);
+			value.advance = advance + cacheString(strc, glyphList, start, str.length(), advance);
 			value.glyphs = glyphList.toArray(new ArrangedGlyph[glyphList.size()]);
 			stringCache.put(newKeyString, value);
 		}
@@ -162,17 +158,44 @@ public class TrueTypeFont {
 		return value;
 	}
 
-	private int cacheString(String str, ArrayList<ArrangedGlyph> glyphs, int start, float advance) {
-		if (str.length() == 0)
+	private int cacheString(char[] str, ArrayList<ArrangedGlyph> glyphs, int start, int limit, float advance) {
+		int adv = 0;
+		while(start < limit) {
+			int offset = font[fontStyle].canDisplayUpTo(str, start, limit);
+			if(offset == -1) {
+				adv += cacheString(str, glyphs, start, limit, advance + adv, false);
+				break;
+			}
+			if(offset == start) {
+				adv += cacheString(str, glyphs, start, start + 1, advance + adv, true);
+				start++;
+			} else {
+				adv += cacheString(str, glyphs, start, offset, advance + adv, false);
+				start = offset;
+			}
+		}
+		return adv;
+	}
+	
+	private int cacheString(char[] str, ArrayList<ArrangedGlyph> glyphs, int start, int limit, float advance, boolean useOtherFont) {
+		if (start == limit)
 			return 0;
 
-		GlyphTexture[] textures = glyphTextures.cacheGlyphs(str, fontStyle);
-		GlyphVector vec = glyphTextures.layoutGlyphVector(font[fontStyle], str);
+		GlyphTextureCache cache = glyphTextures;
+		Font font = this.font[fontStyle];
+		if(useOtherFont) {
+			TrueTypeFont ttfont = FontFactory.makeSubstitutionFont(this.font[0].getSize());
+			cache = ttfont.glyphTextures;
+			font = ttfont.font[fontStyle];
+		}
+		
+		GlyphTexture[] textures = cache.cacheGlyphs(str, start, limit, fontStyle);
+		GlyphVector vec = cache.layoutGlyphVector(font, str, start, limit);
 		Rectangle bounds = vec.getPixelBounds(null, 0, 0);
-		float[] locations = vec.getGlyphPositions(0, str.length() + 1, null);
-		int offsetY = glyphTextures.getAscent(fontStyle) - glyphTextures.getDescent(fontStyle) - glyphTextures.getLeading(fontStyle);
+		float[] locations = vec.getGlyphPositions(0, limit - start + 1, null);
+		int offsetY = cache.getAscent(fontStyle) - cache.getDescent(fontStyle);
 
-		for (int i = 0; i < str.length(); i++) {
+		for (int i = 0; i < limit - start; i++) {
 			Rectangle2D pos = vec.getGlyphVisualBounds(i).getBounds2D();
 			ArrangedGlyph glyph = new ArrangedGlyph();
 			glyph.index = start + i;

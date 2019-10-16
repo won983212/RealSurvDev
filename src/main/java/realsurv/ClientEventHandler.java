@@ -40,8 +40,8 @@ public class ClientEventHandler {
 	//TODO To debug - displyscreen on guimainmenu
 	@SubscribeEvent
 	public void onMainScreenEvent(GuiScreenEvent.InitGuiEvent e) {
-		/*if(e.getGui() instanceof GuiMainMenu)
-			Minecraft.getMinecraft().displayGuiScreen(new GuiScreenTablet());*/
+		if(e.getGui() instanceof GuiMainMenu)
+			Minecraft.getMinecraft().displayGuiScreen(new GuiScreenTablet());
 	}
 	
 	@SubscribeEvent

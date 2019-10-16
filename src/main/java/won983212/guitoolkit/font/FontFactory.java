@@ -1,10 +1,23 @@
 package won983212.guitoolkit.font;
 
+import java.awt.Font;
 import java.util.HashMap;
+import java.util.HashSet;
 
+//TODO 안티엘리어싱 기능 정의부가 미흡하다.
 public class FontFactory {
 	private static HashMap<Key, TrueTypeFont> fonts = new HashMap<Key, TrueTypeFont>();
 	private static HashMap<Key, AdaptiveTTF> scaledFonts = new HashMap<Key, AdaptiveTTF>();
+	private static HashSet<String> noAntialiasFonts = new HashSet<>();
+	private static final String SUBSTITUTION_FONT = Font.SANS_SERIF;
+	
+	static {
+		noAntialiasFonts.add(Font.SANS_SERIF);
+	}
+	
+	public static TrueTypeFont makeSubstitutionFont(int size) {
+		return makeFont(SUBSTITUTION_FONT, size);
+	}
 	
 	public static TrueTypeFont makeFont(String family, int size) {
 		Key key = new Key(family, size, 1);

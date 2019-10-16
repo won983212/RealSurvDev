@@ -36,13 +36,13 @@ public class MainScreen extends RootPane {
 		setScaledFactor(2);
 	}
 
-	private TrueTypeFont font = FontFactory.makeFont("���� ����", 14);
-
+	private TrueTypeFont font = FontFactory.makeFont("맑은 고딕", 14);
 	@Override
 	public void render(int mouseX, int mouseY) {
 		super.render(mouseX, mouseY);
-		String str = "��l@���ع�����r ��l��o��λ��r�� ��a������ ��c�⵵�� ��l�ϴ���o���̡�r �����ϻ� �츮 ���󸸼�. 012312312311";
+		//String str = "§l@동해물과§r §l§o백두산§r이 §a마르고 §c닳도록 §l하느§o님이§r 보우하사 우리 나라만세. 012312312311";
 		// String str = "GagPos";
+		String str = "عندما يريد العالم أن ‪يتكلّم ‬ ، فهو يتحدّث بلغة يونيكود. تسجّل الآن لحضور المؤتمر الدولي(Unicode Conference) العاشر ليونيكود";
 		Gui.drawRect(10, 10, 10 + font.getStringWidth(str), 10 + font.getMaxHeight(), 0xff000000);
 		font.drawString(str, 10, 10, 0xffffffff);
 	}
