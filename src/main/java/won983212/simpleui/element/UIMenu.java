@@ -1,12 +1,12 @@
-package won983212.guitoolkit.element;
+package won983212.simpleui.element;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
-import won983212.guitoolkit.HorizontalArrange;
-import won983212.guitoolkit.StackPanel;
-import won983212.guitoolkit.events.IButtonEvent;
-import won983212.guitoolkit.events.IItemSelectedEvent;
+import won983212.simpleui.HorizontalArrange;
+import won983212.simpleui.StackPanel;
+import won983212.simpleui.events.IButtonEvent;
+import won983212.simpleui.events.IItemSelectedEvent;
 
 public class UIMenu extends StackPanel implements IButtonEvent {
 	private ArrayList<String> items = new ArrayList<String>();

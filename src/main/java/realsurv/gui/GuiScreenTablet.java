@@ -26,8 +26,8 @@ import net.minecraft.item.ItemStack;
 import realsurv.ClientEventHandler;
 import realsurv.CommonProxy;
 import realsurv.tabletos.TabletOS;
-import won983212.guitoolkit.font.Alpha8Texture;
-import won983212.guitoolkit.font.TrueTypeFont;
+import won983212.simpleui.font.Alpha8Texture;
+import won983212.simpleui.font.TrueTypeFont;
 
 public class GuiScreenTablet extends GuiScreen {
 	private static TabletOS system = ClientEventHandler.instance.getTabletContext();

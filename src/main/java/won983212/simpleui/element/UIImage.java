@@ -1,4 +1,4 @@
-package won983212.guitoolkit.element;
+package won983212.simpleui.element;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
@@ -9,7 +9,7 @@ import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ResourceLocation;
-import won983212.guitoolkit.UIObject;
+import won983212.simpleui.UIObject;
 
 public class UIImage extends UIObject {
 	private ResourceLocation loc;

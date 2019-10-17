@@ -1,4 +1,4 @@
-package won983212.guitoolkit;
+package won983212.simpleui;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;

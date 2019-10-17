@@ -1,4 +1,4 @@
-package won983212.guitoolkit.font;
+package won983212.simpleui.font;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -56,8 +56,8 @@ public class GlyphTextureCache {
 		}
 	}
 
-	public GlyphVector layoutGlyphVector(Font font, char[] str, int start, int limit) {
-		return font.layoutGlyphVector(stringGraphics.getFontRenderContext(), str, start, limit, Font.LAYOUT_LEFT_TO_RIGHT);
+	public GlyphVector layoutGlyphVector(Font font, char[] str, int start, int limit, int layoutFlag) {
+		return font.layoutGlyphVector(stringGraphics.getFontRenderContext(), str, start, limit, layoutFlag);
 	}
 
 	/*
@@ -82,7 +82,7 @@ public class GlyphTextureCache {
 
 			if (!isInitialized) {
 				isInitialized = true;
-				vec = layoutGlyphVector(font.getJavaFont(style), text, start, limit);
+				vec = layoutGlyphVector(font.getJavaFont(style), text, start, limit, Font.LAYOUT_LEFT_TO_RIGHT);
 
 				for (int j = 0; j < limit - start; j++) {
 					Point2D p = vec.getGlyphPosition(j);
@@ -183,5 +183,9 @@ public class GlyphTextureCache {
 
 	public int getLeading(int style) {
 		return leading[style];
+	}
+
+	public void clear() {
+		glyphCache.clear();
 	}
 }

@@ -1,4 +1,4 @@
-package won983212.guitoolkit.element;
+package won983212.simpleui.element;
 
 import java.awt.Dimension;
 import java.awt.Font;
@@ -7,12 +7,12 @@ import java.awt.Rectangle;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
-import won983212.guitoolkit.DirWeights;
-import won983212.guitoolkit.GuiCompatibleTextfield;
-import won983212.guitoolkit.UIObject;
-import won983212.guitoolkit.font.AdaptiveTTF;
-import won983212.guitoolkit.font.FontFactory;
-import won983212.guitoolkit.font.TrueTypeFont;
+import won983212.simpleui.DirWeights;
+import won983212.simpleui.GuiCompatibleTextfield;
+import won983212.simpleui.UIObject;
+import won983212.simpleui.font.AdaptiveTTF;
+import won983212.simpleui.font.FontFactory;
+import won983212.simpleui.font.TrueTypeFont;
 
 public class UITextfield extends UIObject {
 	private GuiCompatibleTextfield textfield = new GuiCompatibleTextfield(0, makeATTF());

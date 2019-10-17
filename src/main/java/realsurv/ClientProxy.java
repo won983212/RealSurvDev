@@ -7,7 +7,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import won983212.guitoolkit.font.FontFactory;
+import won983212.simpleui.font.FontFactory;
 
 public class ClientProxy extends CommonProxy {
 	@Override
@@ -21,7 +21,7 @@ public class ClientProxy extends CommonProxy {
 	
 	@Override
 	public void postInit(FMLPostInitializationEvent e) {
-		Minecraft.getMinecraft().fontRenderer = FontFactory.makeMinecraftFont("¸¼Àº °íµñ", 14);
+		Minecraft.getMinecraft().fontRenderer = FontFactory.makeMinecraftFont("ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½", 14);
 		ClientEventHandler.initTabletOS();
 	}
 }

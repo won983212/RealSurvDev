@@ -20,7 +20,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent.RenderTickEvent;
 import realsurv.gui.GuiScreenTablet;
 import realsurv.models.TabletModel;
 import realsurv.tabletos.TabletOS;
-import won983212.guitoolkit.font.FontFactory;
+import won983212.simpleui.font.FontFactory;
 
 public class ClientEventHandler {
 	public static final ClientEventHandler instance = new ClientEventHandler();

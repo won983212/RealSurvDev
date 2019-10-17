@@ -1,4 +1,4 @@
-package won983212.guitoolkit.font;
+package won983212.simpleui.font;
 
 import java.awt.Font;
 import java.awt.Rectangle;
@@ -11,17 +11,20 @@ import java.util.List;
 import java.util.Set;
 import java.util.WeakHashMap;
 
+import com.ibm.icu.text.ArabicShaping;
+import com.ibm.icu.text.ArabicShapingException;
+import com.ibm.icu.text.Bidi;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import won983212.guitoolkit.font.GlyphTextureCache.GlyphTexture;
+import won983212.simpleui.font.GlyphTextureCache.GlyphTexture;
 
-//TODO BIDI´Â ·»´õ¸µÀÌ ¾ÈµÇ´Âµí?
-//TODO ¾Ë ¼ö ¾ø´Â ÆùÆ®´Â ¾Ë¾Æ¼­ Ã£¾Æ¼­ ¼³Á¤ÇÏµµ·Ï
-//TODO °©ÀÚ±â black colorµÇ¾î¹ö¸®´Â Çö»ó
-//TODO ÆùÆ® °íÈ­Áú ¸ğµåµµ ÀÖ°Ô ¸¸µé±â
+//TODO BIDIëŠ” ë Œë”ë§ì´ ì•ˆë˜ëŠ”ë“¯?
+//TODO ê°‘ìê¸° black colorë˜ì–´ë²„ë¦¬ëŠ” í˜„ìƒ
+//TODO í°íŠ¸ ê³ í™”ì§ˆ ëª¨ë“œë„ ìˆê²Œ ë§Œë“¤ê¸°
 public class TrueTypeFont {
 	private static class ArrangedGlyph {
 		public int x;
@@ -62,14 +65,21 @@ public class TrueTypeFont {
 		makeColorTable();
 	}
 
+	public void clearCache() {
+		stringCache.clear();
+		inUseMap.clear();
+		glyphTextures.clear();
+		digitCache = null;
+	}
+
 	private void cacheDigits() {
 		if (digitCache != null)
 			return;
 		digitCache = new ArrangedGlyph[4][];
 		digitCache[Font.PLAIN] = cacheString("0123456789").glyphs;
-		digitCache[Font.BOLD] = cacheString("¡×l0123456789").glyphs;
-		digitCache[Font.ITALIC] = cacheString("¡×o0123456789").glyphs;
-		digitCache[Font.BOLD | Font.ITALIC] = cacheString("¡×l¡×o0123456789").glyphs;
+		digitCache[Font.BOLD] = cacheString("Â§l0123456789").glyphs;
+		digitCache[Font.ITALIC] = cacheString("Â§o0123456789").glyphs;
+		digitCache[Font.BOLD | Font.ITALIC] = cacheString("Â§lÂ§o0123456789").glyphs;
 	}
 
 	// All digits will be zero.
@@ -123,31 +133,28 @@ public class TrueTypeFont {
 		}
 	}
 
+	private String bidiReorder(String text) {
+		try {
+			Bidi bidi = new Bidi((new ArabicShaping(8)).shape(text), 127);
+			bidi.setReorderingMode(0);
+			return bidi.writeReordered(2);
+		} catch (ArabicShapingException var3) {
+			return text;
+		}
+	}
+	
+	//TODO Bidiì— ë²„ê·¸ìˆ;;
 	private FormattedString cacheString(String str) {
 		String key = getGeneralizedKey(str);
-		char[] strc = str.toCharArray();
 		FormattedString value = stringCache.get(key);
 		if (value == null) {
+			//str = bidiReorder(str);
 			ArrayList<ArrangedGlyph> glyphList = new ArrayList<>();
-			int advance = 0;
-			int start = 0;
-
-			fontStyle = specialStyle = 0;
-			colorIdx = -1;
-			for (int i = 0; i < strc.length; i++) {
-				int cp = str.codePointAt(i);
-				if (cp == '¡×' && i < strc.length - 1) {
-					if ("0123456789abcdefmnrlo".indexOf(strc[i+1]) != -1) {
-						advance += cacheString(strc, glyphList, start, i, advance);
-						applyStyle(strc[i+1]);
-						start = ++i + 1;
-					}
-				}
-			}
-			value = new FormattedString();
 			String newKeyString = new String(key);
+
+			value = new FormattedString();
 			value.keyReference = new WeakReference<String>(newKeyString);
-			value.advance = advance + cacheString(strc, glyphList, start, str.length(), advance);
+			value.advance = layoutStyle(str.toCharArray(), glyphList, 0, str.length(), 0, Font.LAYOUT_LEFT_TO_RIGHT);
 			value.glyphs = glyphList.toArray(new ArrangedGlyph[glyphList.size()]);
 			stringCache.put(newKeyString, value);
 		}
@@ -158,39 +165,54 @@ public class TrueTypeFont {
 		return value;
 	}
 
-	private int cacheString(char[] str, ArrayList<ArrangedGlyph> glyphs, int start, int limit, float advance) {
-		int adv = 0;
-		while(start < limit) {
-			int offset = font[fontStyle].canDisplayUpTo(str, start, limit);
-			if(offset == -1) {
-				adv += cacheString(str, glyphs, start, limit, advance + adv, false);
-				break;
-			}
-			if(offset == start) {
-				adv += cacheString(str, glyphs, start, start + 1, advance + adv, true);
-				start++;
-			} else {
-				adv += cacheString(str, glyphs, start, offset, advance + adv, false);
-				start = offset;
+	private int layoutStyle(char[] str, ArrayList<ArrangedGlyph> glyphs, int start, int limit, int advance, int layoutFlag) {
+		fontStyle = specialStyle = 0;
+		colorIdx = -1;
+		for (int i = start; i < limit; i++) {
+			if (str[i] == 'Â§' && i < str.length - 1) {
+				if ("0123456789abcdefmnrlo".indexOf(str[i + 1]) != -1) {
+					advance = layoutMissingGlyphs(str, glyphs, start, i, advance, layoutFlag);
+					applyStyle(str[i + 1]);
+					start = ++i + 1;
+				}
 			}
 		}
-		return adv;
+		return layoutMissingGlyphs(str, glyphs, start, limit, advance, layoutFlag);
 	}
-	
-	private int cacheString(char[] str, ArrayList<ArrangedGlyph> glyphs, int start, int limit, float advance, boolean useOtherFont) {
+
+	private int layoutMissingGlyphs(char[] str, ArrayList<ArrangedGlyph> glyphs, int start, int limit, int advance, int layoutFlag) {
+		int end = start;
+		while (start < limit) {
+			int offset = font[fontStyle].canDisplayUpTo(str, start, limit);
+			if (offset == -1) {
+				advance = layoutGlyphs(str, glyphs, start, limit, advance, layoutFlag, false);
+				break;
+			}
+			if (offset == start) {
+				end = start + 1;
+			} else {
+				end = offset;
+			}
+			advance = layoutGlyphs(str, glyphs, start, end, advance, layoutFlag, offset == start);
+			start = end;
+		}
+		return advance;
+	}
+
+	private int layoutGlyphs(char[] str, ArrayList<ArrangedGlyph> glyphs, int start, int limit, int advance, int layoutFlag, boolean useOtherFont) {
 		if (start == limit)
 			return 0;
 
 		GlyphTextureCache cache = glyphTextures;
 		Font font = this.font[fontStyle];
-		if(useOtherFont) {
+		if (useOtherFont) {
 			TrueTypeFont ttfont = FontFactory.makeSubstitutionFont(this.font[0].getSize());
 			cache = ttfont.glyphTextures;
 			font = ttfont.font[fontStyle];
 		}
-		
+
 		GlyphTexture[] textures = cache.cacheGlyphs(str, start, limit, fontStyle);
-		GlyphVector vec = cache.layoutGlyphVector(font, str, start, limit);
+		GlyphVector vec = cache.layoutGlyphVector(font, str, start, limit, layoutFlag);
 		Rectangle bounds = vec.getPixelBounds(null, 0, 0);
 		float[] locations = vec.getGlyphPositions(0, limit - start + 1, null);
 		int offsetY = cache.getAscent(fontStyle) - cache.getDescent(fontStyle);
@@ -208,7 +230,7 @@ public class TrueTypeFont {
 			glyphs.add(glyph);
 		}
 
-		return (int) locations[locations.length - 2];
+		return (int) locations[locations.length - 2] + advance;
 	}
 
 	private int renderString(String str, double x, double y, int color, boolean shadow) {

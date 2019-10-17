@@ -1,10 +1,10 @@
-package won983212.guitoolkit.font;
+package won983212.simpleui.font;
 
 import java.awt.Font;
 import java.util.HashMap;
 import java.util.HashSet;
 
-//TODO ¾ÈÆ¼¿¤¸®¾î½Ì ±â´É Á¤ÀÇºÎ°¡ ¹ÌÈíÇÏ´Ù.
+//TODO ï¿½ï¿½Æ¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ÇºÎ°ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½.
 public class FontFactory {
 	private static HashMap<Key, TrueTypeFont> fonts = new HashMap<Key, TrueTypeFont>();
 	private static HashMap<Key, AdaptiveTTF> scaledFonts = new HashMap<Key, AdaptiveTTF>();

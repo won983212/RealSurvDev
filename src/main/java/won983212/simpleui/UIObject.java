@@ -1,4 +1,4 @@
-package won983212.guitoolkit;
+package won983212.simpleui;
 
 import java.awt.Dimension;
 import java.awt.Point;
@@ -10,8 +10,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
-import won983212.guitoolkit.font.FontFactory;
-import won983212.guitoolkit.font.TrueTypeFont;
+import won983212.simpleui.font.FontFactory;
+import won983212.simpleui.font.TrueTypeFont;
 
 public abstract class UIObject {
 	private HorizontalArrange hArrange = HorizontalArrange.STRECTCH;
@@ -20,7 +20,7 @@ public abstract class UIObject {
 	private Dimension minSize = new Dimension(10, 10);
 	private DirWeights margin = new DirWeights();
 	private DirWeights padding = new DirWeights();
-	private TrueTypeFont font = FontFactory.makeFont("¸¼Àº °íµñ", 14);
+	private TrueTypeFont font = FontFactory.makeFont("ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½", 14);
 	private boolean visible = true;
 	protected int backgroundColor = 0xfff4f4f4;
 	protected int foregroundColor = 0xff000000;

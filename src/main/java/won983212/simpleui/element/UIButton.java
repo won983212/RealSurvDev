@@ -1,13 +1,13 @@
-package won983212.guitoolkit.element;
+package won983212.simpleui.element;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
 
 import net.minecraft.client.gui.Gui;
-import won983212.guitoolkit.DirWeights;
-import won983212.guitoolkit.UIObject;
-import won983212.guitoolkit.events.IButtonEvent;
-import won983212.guitoolkit.font.TrueTypeFont;
+import won983212.simpleui.DirWeights;
+import won983212.simpleui.UIObject;
+import won983212.simpleui.events.IButtonEvent;
+import won983212.simpleui.font.TrueTypeFont;
 
 public class UIButton extends UIObject {
 	private String label;

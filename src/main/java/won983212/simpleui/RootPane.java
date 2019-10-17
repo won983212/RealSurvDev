@@ -1,4 +1,4 @@
-package won983212.guitoolkit;
+package won983212.simpleui;
 
 import java.awt.Dimension;
 import java.awt.Point;
@@ -9,13 +9,13 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.util.math.MathHelper;
 import realsurv.tabletos.TabletOS;
-import won983212.guitoolkit.GridPanel.LengthDefinition;
-import won983212.guitoolkit.GridPanel.LengthType;
-import won983212.guitoolkit.element.UIButton;
-import won983212.guitoolkit.element.UICheckbox;
-import won983212.guitoolkit.element.UIImage;
-import won983212.guitoolkit.element.UIRectangle;
-import won983212.guitoolkit.element.UITextfield;
+import won983212.simpleui.GridPanel.LengthDefinition;
+import won983212.simpleui.GridPanel.LengthType;
+import won983212.simpleui.element.UIButton;
+import won983212.simpleui.element.UICheckbox;
+import won983212.simpleui.element.UIImage;
+import won983212.simpleui.element.UIRectangle;
+import won983212.simpleui.element.UITextfield;
 
 public class RootPane extends UIPanel {
 	private final Minecraft mc = Minecraft.getMinecraft();

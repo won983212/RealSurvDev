@@ -1,10 +1,10 @@
-package won983212.guitoolkit;
+package won983212.simpleui;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 
-import won983212.guitoolkit.StackPanel.Orientation;
+import won983212.simpleui.StackPanel.Orientation;
 
 public class GridPanel extends UIPanel {
 	private ArrayList<CellLength> columns = new ArrayList<CellLength>();

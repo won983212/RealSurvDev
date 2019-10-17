@@ -1,4 +1,4 @@
-package won983212.guitoolkit.element;
+package won983212.simpleui.element;
 
 import java.awt.Dimension;
 import java.awt.Point;
@@ -7,12 +7,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import net.minecraft.client.gui.Gui;
-import won983212.guitoolkit.UIObject;
-import won983212.guitoolkit.VerticalArrange;
-import won983212.guitoolkit.events.IItemSelectedEvent;
-import won983212.guitoolkit.font.TrueTypeFont;
+import won983212.simpleui.UIObject;
+import won983212.simpleui.VerticalArrange;
+import won983212.simpleui.events.IItemSelectedEvent;
+import won983212.simpleui.font.TrueTypeFont;
 
-//TODO Combobox µðÀÚÀÎÁ» ¼öÁ¤ÇÏ±â
+//TODO Combobox ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï±ï¿½
 public class UICombobox extends UIObject implements IItemSelectedEvent {
 	private ArrayList<String> items = new ArrayList<String>();
 	private UIMenu menu = new UIMenu();
