@@ -22,7 +22,7 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import won983212.simpleui.font.GlyphTextureCache.GlyphTexture;
 
-//TODO BIDI는 렌더링이 안되는듯?
+//TODO BIDI는 렌더링이 안되는듯? - 추후에 지원예정
 //TODO 갑자기 black color되어버리는 현상
 //TODO 폰트 고화질 모드도 있게 만들기
 public class TrueTypeFont {
@@ -133,22 +133,10 @@ public class TrueTypeFont {
 		}
 	}
 
-	private String bidiReorder(String text) {
-		try {
-			Bidi bidi = new Bidi((new ArabicShaping(8)).shape(text), 127);
-			bidi.setReorderingMode(0);
-			return bidi.writeReordered(2);
-		} catch (ArabicShapingException var3) {
-			return text;
-		}
-	}
-	
-	//TODO Bidi에 버그있;;
 	private FormattedString cacheString(String str) {
 		String key = getGeneralizedKey(str);
 		FormattedString value = stringCache.get(key);
 		if (value == null) {
-			//str = bidiReorder(str);
 			ArrayList<ArrangedGlyph> glyphList = new ArrayList<>();
 			String newKeyString = new String(key);
 
@@ -165,7 +153,8 @@ public class TrueTypeFont {
 		return value;
 	}
 
-	private int layoutStyle(char[] str, ArrayList<ArrangedGlyph> glyphs, int start, int limit, int advance, int layoutFlag) {
+	private int layoutStyle(char[] str, ArrayList<ArrangedGlyph> glyphs, int start, int limit, int advance,
+			int layoutFlag) {
 		fontStyle = specialStyle = 0;
 		colorIdx = -1;
 		for (int i = start; i < limit; i++) {
@@ -180,7 +169,8 @@ public class TrueTypeFont {
 		return layoutMissingGlyphs(str, glyphs, start, limit, advance, layoutFlag);
 	}
 
-	private int layoutMissingGlyphs(char[] str, ArrayList<ArrangedGlyph> glyphs, int start, int limit, int advance, int layoutFlag) {
+	private int layoutMissingGlyphs(char[] str, ArrayList<ArrangedGlyph> glyphs, int start, int limit, int advance,
+			int layoutFlag) {
 		int end = start;
 		while (start < limit) {
 			int offset = font[fontStyle].canDisplayUpTo(str, start, limit);
@@ -199,7 +189,8 @@ public class TrueTypeFont {
 		return advance;
 	}
 
-	private int layoutGlyphs(char[] str, ArrayList<ArrangedGlyph> glyphs, int start, int limit, int advance, int layoutFlag, boolean useOtherFont) {
+	private int layoutGlyphs(char[] str, ArrayList<ArrangedGlyph> glyphs, int start, int limit, int advance,
+			int layoutFlag, boolean useOtherFont) {
 		if (start == limit)
 			return 0;
 
@@ -323,7 +314,9 @@ public class TrueTypeFont {
 
 	private void enableBlend() {
 		GlStateManager.enableBlend();
-		GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+		GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA,
+				GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE,
+				GlStateManager.DestFactor.ZERO);
 	}
 
 	public int getCharWidth(char c) {
@@ -423,5 +416,9 @@ public class TrueTypeFont {
 	public TrueTypeFont setScaleModifier(double scale) {
 		this.scaleModifier = scale;
 		return this;
+	}
+
+	public double getScaleModifier() {
+		return scaleModifier;
 	}
 }

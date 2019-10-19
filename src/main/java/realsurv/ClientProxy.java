@@ -21,7 +21,7 @@ public class ClientProxy extends CommonProxy {
 	
 	@Override
 	public void postInit(FMLPostInitializationEvent e) {
-		Minecraft.getMinecraft().fontRenderer = FontFactory.makeMinecraftFont("���� ���", 14);
+		Minecraft.getMinecraft().fontRenderer = FontFactory.makeMinecraftFont("맑은 고딕", 14);
 		ClientEventHandler.initTabletOS();
 	}
 }

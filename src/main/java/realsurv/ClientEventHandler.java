@@ -7,6 +7,7 @@ import com.google.common.eventbus.Subscribe;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiMainMenu;
+import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -24,8 +25,10 @@ import won983212.simpleui.font.FontFactory;
 
 public class ClientEventHandler {
 	public static final ClientEventHandler instance = new ClientEventHandler();
+	private Minecraft mc = Minecraft.getMinecraft();
 	private TabletOS ctx;
 	private IBakedModel tablet_model = null;
+	private int prevFactor = -1;
 	
 	private ClientEventHandler() {}
 	
@@ -40,8 +43,8 @@ public class ClientEventHandler {
 	//TODO To debug - displyscreen on guimainmenu
 	@SubscribeEvent
 	public void onMainScreenEvent(GuiScreenEvent.InitGuiEvent e) {
-		if(e.getGui() instanceof GuiMainMenu)
-			Minecraft.getMinecraft().displayGuiScreen(new GuiScreenTablet());
+		/*if(e.getGui() instanceof GuiMainMenu)
+			Minecraft.getMinecraft().displayGuiScreen(new GuiScreenTablet());*/
 	}
 	
 	@SubscribeEvent
@@ -57,6 +60,17 @@ public class ClientEventHandler {
 	public void onRender(RenderTickEvent e) {
 		if(e.phase == Phase.START) {
 			ctx.updateScreen();
+			
+			ScaledResolution res = new ScaledResolution(mc);
+			int factor = res.getScaleFactor();
+			if(prevFactor == -1)
+				prevFactor = factor;
+			else if(prevFactor != factor) {
+				mc.fontRenderer = FontFactory.makeMinecraftFont("맑은 고딕", 7 * factor, factor);
+				if(mc.currentScreen != null)
+		            mc.currentScreen.setWorldAndResolution(mc, res.getScaledWidth(), res.getScaledHeight());
+				prevFactor = factor;
+			}
 		}
 	}
 

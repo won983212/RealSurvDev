@@ -20,7 +20,8 @@ public class AdaptiveTTF extends FontRenderer {
 
 	private AdaptiveTTF(String family, int size, Minecraft mc) {
 		super(mc.gameSettings, new ResourceLocation("textures/font/ascii.png"), mc.getTextureManager(), mc.isUnicode());
-		setFont(family, size);
+		font = new TrueTypeFont(family, size, true);
+		FONT_HEIGHT = (int) (size * 4.0 / 6.0);
 	}
 
 	public AdaptiveTTF setDisableShadow() {
@@ -28,13 +29,9 @@ public class AdaptiveTTF extends FontRenderer {
 		return this;
 	}
 
-	public void setFont(String family, int size) {
-		font = new TrueTypeFont(family, size, true);
-		FONT_HEIGHT = (int) (size * 4.0 / 6.0);
-	}
-	
-	public void setFontScale(int scale) {
+	protected void setFontScale(int scale) {
 		font.setScaleModifier(scale);
+		FONT_HEIGHT = (int) (font.getJavaFont(0).getSize() * 4.0 / 3.0 / font.getScaleModifier());
 	}
 
 	@Override

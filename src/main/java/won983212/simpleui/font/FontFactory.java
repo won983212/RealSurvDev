@@ -4,7 +4,6 @@ import java.awt.Font;
 import java.util.HashMap;
 import java.util.HashSet;
 
-//TODO ��Ƽ������� ��� ���Ǻΰ� �����ϴ�.
 public class FontFactory {
 	private static HashMap<Key, TrueTypeFont> fonts = new HashMap<Key, TrueTypeFont>();
 	private static HashMap<Key, AdaptiveTTF> scaledFonts = new HashMap<Key, AdaptiveTTF>();
@@ -19,6 +18,7 @@ public class FontFactory {
 		return makeFont(SUBSTITUTION_FONT, size);
 	}
 	
+	// it is used for Simple UI Font rendering. 
 	public static TrueTypeFont makeFont(String family, int size) {
 		Key key = new Key(family, size, 1);
 		TrueTypeFont f = fonts.get(key);
@@ -30,6 +30,7 @@ public class FontFactory {
 		return f;
 	}
 	
+	// it is used for minecraft font rendering.
 	public static AdaptiveTTF makeMinecraftFont(String family, int size) {
 		return makeMinecraftFont(family, size, 2);
 	}
