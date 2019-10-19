@@ -54,12 +54,13 @@ public class GuiScreenTablet extends GuiScreen {
 		this.drawDefaultBackground();
 		system.moveMouseTo(mouseX, mouseY);
 
+		ScaledResolution res = new ScaledResolution(mc);
 		Tessellator tes = Tessellator.getInstance();
 		BufferBuilder buf = tes.getBuffer();
-		int minX = (int) ((width - TabletOS.WIDTH / 2) / 2);
-		int maxX = (int) (minX + TabletOS.WIDTH / 2);
-		int minY = (int) ((height - TabletOS.HEIGHT / 2) / 2);
-		int maxY = (int) (minY + TabletOS.HEIGHT / 2);
+		int minX = (int) ((width - TabletOS.WIDTH / res.getScaleFactor()) / 2.0);
+		int maxX = (int) (minX + TabletOS.WIDTH / res.getScaleFactor());
+		int minY = (int) ((height - TabletOS.HEIGHT / res.getScaleFactor()) / 2.0);
+		int maxY = (int) (minY + TabletOS.HEIGHT / res.getScaleFactor());
 
 		GlStateManager.disableTexture2D();
 		GlStateManager.color(0.3f, 0.3f, 0.3f, 1);

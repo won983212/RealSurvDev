@@ -64,7 +64,7 @@ public class GlyphTextureCache {
 	 * private TestFrame frame = new TestFrame("StringCache"); private TestFrame
 	 * frame2 = new TestFrame("GlyphCache");
 	 */
-	public GlyphTexture[] cacheGlyphs(char[] text, int start, int limit, int style) {
+	public GlyphTexture[] cacheGlyphs(Font font, char[] text, int start, int limit, int style) {
 		if (limit - start == 0)
 			return new GlyphTexture[0];
 
@@ -82,7 +82,7 @@ public class GlyphTextureCache {
 
 			if (!isInitialized) {
 				isInitialized = true;
-				vec = layoutGlyphVector(font.getJavaFont(style), text, start, limit, Font.LAYOUT_LEFT_TO_RIGHT);
+				vec = layoutGlyphVector(font, text, start, limit, Font.LAYOUT_LEFT_TO_RIGHT);
 
 				for (int j = 0; j < limit - start; j++) {
 					Point2D p = vec.getGlyphPosition(j);

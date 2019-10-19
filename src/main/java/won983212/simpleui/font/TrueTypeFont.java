@@ -24,7 +24,7 @@ import won983212.simpleui.font.GlyphTextureCache.GlyphTexture;
 
 //TODO BIDI는 렌더링이 안되는듯? - 추후에 지원예정
 //TODO 갑자기 black color되어버리는 현상
-//TODO 폰트 고화질 모드도 있게 만들기
+//TODO 지원 안하는 폰트가 아직도 있어..
 public class TrueTypeFont {
 	private static class ArrangedGlyph {
 		public int x;
@@ -32,7 +32,8 @@ public class TrueTypeFont {
 		public int advance;
 		public int colorIndex;
 		public int index;
-		public int affectedStyle;
+		public int fontStyle;
+		public int specialStyle;
 		public GlyphTexture texture;
 	}
 
@@ -42,8 +43,8 @@ public class TrueTypeFont {
 		public ArrangedGlyph[] glyphs;
 	}
 
-	private static final int UNDERLINE = 4;
-	private static final int STRIKE_THROUGH = 8;
+	private static final int UNDERLINE = 1;
+	private static final int STRIKE_THROUGH = 2;
 
 	private ArrangedGlyph[][] digitCache;
 	private WeakHashMap<String, FormattedString> stringCache = new WeakHashMap<>();
@@ -157,6 +158,9 @@ public class TrueTypeFont {
 			int layoutFlag) {
 		fontStyle = specialStyle = 0;
 		colorIdx = -1;
+		int lastUL = -1;
+		int lastST = -1;
+		
 		for (int i = start; i < limit; i++) {
 			if (str[i] == '§' && i < str.length - 1) {
 				if ("0123456789abcdefmnrlo".indexOf(str[i + 1]) != -1) {
@@ -169,13 +173,16 @@ public class TrueTypeFont {
 		return layoutMissingGlyphs(str, glyphs, start, limit, advance, layoutFlag);
 	}
 
-	private int layoutMissingGlyphs(char[] str, ArrayList<ArrangedGlyph> glyphs, int start, int limit, int advance,
-			int layoutFlag) {
+	private int layoutMissingGlyphs(char[] str, ArrayList<ArrangedGlyph> glyphs, int start, int limit, int advance, int layoutFlag) {
+		if(start == limit)
+			return advance;
+		
 		int end = start;
+		int lastSize = glyphs.size();
 		while (start < limit) {
 			int offset = font[fontStyle].canDisplayUpTo(str, start, limit);
 			if (offset == -1) {
-				advance = layoutGlyphs(str, glyphs, start, limit, advance, layoutFlag, false);
+				advance = layoutGlyphs(str, glyphs, start, limit, advance, layoutFlag, font[fontStyle]);
 				break;
 			}
 			if (offset == start) {
@@ -183,30 +190,31 @@ public class TrueTypeFont {
 			} else {
 				end = offset;
 			}
-			advance = layoutGlyphs(str, glyphs, start, end, advance, layoutFlag, offset == start);
+			Font f = font[fontStyle];
+			if(offset == start)
+				f = FontFactory.findSubstitutionJavaFont(str[start], font[0].getSize(), fontStyle);
+			advance = layoutGlyphs(str, glyphs, start, end, advance, layoutFlag, f);
 			start = end;
+		}
+		if((specialStyle & (UNDERLINE | STRIKE_THROUGH)) > 0) {
+			ArrangedGlyph startGlyph = glyphs.get(lastSize);
+			ArrangedGlyph endGlyph = glyphs.get(glyphs.size() - 1);
+			endGlyph.specialStyle = (startGlyph.x & 0x3FFFFFFF) << 2;
+			endGlyph.specialStyle |= specialStyle & (UNDERLINE | STRIKE_THROUGH);
 		}
 		return advance;
 	}
 
 	private int layoutGlyphs(char[] str, ArrayList<ArrangedGlyph> glyphs, int start, int limit, int advance,
-			int layoutFlag, boolean useOtherFont) {
+			int layoutFlag, Font font) {
 		if (start == limit)
-			return 0;
+			return advance;
 
-		GlyphTextureCache cache = glyphTextures;
-		Font font = this.font[fontStyle];
-		if (useOtherFont) {
-			TrueTypeFont ttfont = FontFactory.makeSubstitutionFont(this.font[0].getSize());
-			cache = ttfont.glyphTextures;
-			font = ttfont.font[fontStyle];
-		}
-
-		GlyphTexture[] textures = cache.cacheGlyphs(str, start, limit, fontStyle);
-		GlyphVector vec = cache.layoutGlyphVector(font, str, start, limit, layoutFlag);
+		GlyphTexture[] textures = glyphTextures.cacheGlyphs(font, str, start, limit, fontStyle);
+		GlyphVector vec = glyphTextures.layoutGlyphVector(font, str, start, limit, layoutFlag);
 		Rectangle bounds = vec.getPixelBounds(null, 0, 0);
 		float[] locations = vec.getGlyphPositions(0, limit - start + 1, null);
-		int offsetY = cache.getAscent(fontStyle) - cache.getDescent(fontStyle);
+		int offsetY = glyphTextures.getAscent(fontStyle) - glyphTextures.getDescent(fontStyle);
 
 		for (int i = 0; i < limit - start; i++) {
 			Rectangle2D pos = vec.getGlyphVisualBounds(i).getBounds2D();
@@ -215,7 +223,7 @@ public class TrueTypeFont {
 			glyph.x = (int) Math.round(pos.getX() + advance);
 			glyph.y = (int) Math.round(pos.getY() + offsetY);
 			glyph.colorIndex = colorIdx;
-			glyph.affectedStyle = fontStyle | specialStyle;
+			glyph.fontStyle = fontStyle;
 			glyph.texture = textures[i];
 			glyph.advance = (int) (locations[(i + 1) * 2] - locations[i * 2]);
 			glyphs.add(glyph);
@@ -247,7 +255,7 @@ public class TrueTypeFont {
 
 			if (charAt >= '0' && charAt <= '9') {
 				cacheDigits();
-				ArrangedGlyph digitGlyph = digitCache[glyph.affectedStyle & (Font.BOLD | Font.ITALIC)][charAt - '0'];
+				ArrangedGlyph digitGlyph = digitCache[glyph.fontStyle][charAt - '0'];
 				tex = digitGlyph.texture;
 				offsetX = (glyph.advance - digitGlyph.advance) >> 1;
 			}
@@ -270,25 +278,25 @@ public class TrueTypeFont {
 				buf.pos(maxX, minY, 0).tex(tex.u2, tex.v1).endVertex();
 				tes.draw();
 			}
-
-			if ((glyph.affectedStyle & (UNDERLINE | STRIKE_THROUGH)) > 0) {
+			if (glyph.specialStyle > 0) {
+				final double startX = x + (glyph.specialStyle >> 2);
 				GlStateManager.disableTexture2D();
-				if ((glyph.affectedStyle & UNDERLINE) > 0) {
-					lineY = y + (glyphTextures.getAscent(0) + 1) / scaleModifier;
+				if ((glyph.specialStyle & UNDERLINE) > 0) {
+					lineY = y + (glyphTextures.getAscent(0) - glyphTextures.getDescent(0) + 1) / scaleModifier;
 					buf.begin(7, DefaultVertexFormats.POSITION);
-					buf.pos(x, lineY - 1 / scaleModifier, 0).endVertex();
-					buf.pos(x, lineY, 0).endVertex();
-					buf.pos(x + glyph.advance / scaleModifier, lineY, 0).endVertex();
-					buf.pos(x + glyph.advance / scaleModifier, lineY - 1 / scaleModifier, 0).endVertex();
+					buf.pos(startX, lineY - 1 / scaleModifier, 0).endVertex();
+					buf.pos(startX, lineY, 0).endVertex();
+					buf.pos(x + (glyph.x + glyph.advance) / scaleModifier, lineY, 0).endVertex();
+					buf.pos(x + (glyph.x + glyph.advance) / scaleModifier, lineY - 1 / scaleModifier, 0).endVertex();
 					tes.draw();
 				}
-				if ((glyph.affectedStyle & STRIKE_THROUGH) > 0) {
-					lineY = y + (glyphTextures.getAscent(0) * 3 / 4) / scaleModifier;
+				if ((glyph.specialStyle & STRIKE_THROUGH) > 0) {
+					lineY = y + ((glyphTextures.getAscent(0) - glyphTextures.getDescent(0)) / 1.5) / scaleModifier;
 					buf.begin(7, DefaultVertexFormats.POSITION);
-					buf.pos(x, lineY - 1 / scaleModifier, 0).endVertex();
-					buf.pos(x, lineY, 0).endVertex();
-					buf.pos(x + glyph.advance / scaleModifier, lineY, 0).endVertex();
-					buf.pos(x + glyph.advance / scaleModifier, lineY - 1 / scaleModifier, 0).endVertex();
+					buf.pos(startX, lineY - 1 / scaleModifier, 0).endVertex();
+					buf.pos(startX, lineY, 0).endVertex();
+					buf.pos(x + (glyph.x + glyph.advance) / scaleModifier, lineY, 0).endVertex();
+					buf.pos(x + (glyph.x + glyph.advance) / scaleModifier, lineY - 1 / scaleModifier, 0).endVertex();
 					tes.draw();
 				}
 			}

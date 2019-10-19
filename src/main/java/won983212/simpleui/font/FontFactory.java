@@ -1,21 +1,32 @@
 package won983212.simpleui.font;
 
 import java.awt.Font;
+import java.awt.GraphicsEnvironment;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 
 public class FontFactory {
-	private static HashMap<Key, TrueTypeFont> fonts = new HashMap<Key, TrueTypeFont>();
-	private static HashMap<Key, AdaptiveTTF> scaledFonts = new HashMap<Key, AdaptiveTTF>();
-	private static HashSet<String> noAntialiasFonts = new HashSet<>();
-	private static final String SUBSTITUTION_FONT = Font.SANS_SERIF;
+	private static final HashMap<Key, TrueTypeFont> fonts = new HashMap<Key, TrueTypeFont>();
+	private static final HashMap<Key, AdaptiveTTF> scaledFonts = new HashMap<Key, AdaptiveTTF>();
 	
-	static {
-		noAntialiasFonts.add(Font.SANS_SERIF);
-	}
+	private static final List<Font> allFonts = Arrays.asList(GraphicsEnvironment.getLocalGraphicsEnvironment().getAllFonts());
+	private static final Font sans_serif_font = new Font(Font.SANS_SERIF, 0, 1);
 	
-	public static TrueTypeFont makeSubstitutionFont(int size) {
-		return makeFont(SUBSTITUTION_FONT, size);
+	public static Font findSubstitutionJavaFont(char c, int size, int style) {
+		if(sans_serif_font.canDisplay(c))
+			return sans_serif_font.deriveFont(style, size);
+		
+		Iterator<Font> iter = allFonts.iterator();
+		while(iter.hasNext()) {
+			Font f = iter.next();
+			if(f.canDisplay(c))
+				return f.deriveFont(style, size);
+		}
+		
+		return sans_serif_font.deriveFont(style, size);
 	}
 	
 	// it is used for Simple UI Font rendering. 

@@ -57,6 +57,10 @@ public class RootPane extends UIPanel {
 		this.autoConvert = true;
 	}
 
+	/**
+	 * Factor is used for calculate click position. if factor is less than 1, factor
+	 * will be set properly value automatically.
+	 **/
 	public void setScaledFactor(double factor) {
 		this.scaledFactor = factor;
 		if (factor <= 0)
