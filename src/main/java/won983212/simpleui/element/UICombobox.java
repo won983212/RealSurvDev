@@ -12,7 +12,7 @@ import won983212.simpleui.VerticalArrange;
 import won983212.simpleui.events.IItemSelectedEvent;
 import won983212.simpleui.font.TrueTypeFont;
 
-//TODO Combobox �������� �����ϱ�
+//TODO Combobox design change ok?
 public class UICombobox extends UIObject implements IItemSelectedEvent {
 	private ArrayList<String> items = new ArrayList<String>();
 	private UIMenu menu = new UIMenu();

@@ -6,10 +6,10 @@ import java.awt.font.GlyphVector;
 import java.awt.geom.Rectangle2D;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.WeakHashMap;
+
+import org.lwjgl.opengl.GL11;
 
 import com.ibm.icu.text.ArabicShaping;
 import com.ibm.icu.text.ArabicShapingException;
@@ -22,16 +22,13 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import won983212.simpleui.font.GlyphTextureCache.GlyphTexture;
 
-//TODO BIDI는 렌더링이 안되는듯? - 추후에 지원예정
-//TODO 갑자기 black color되어버리는 현상
-//TODO 지원 안하는 폰트가 아직도 있어..
 public class TrueTypeFont {
 	private static class ArrangedGlyph {
 		public int x;
 		public int y;
 		public int advance;
 		public int colorIndex;
-		public int index;
+		public int codeIndex;
 		public int fontStyle;
 		public int specialStyle;
 		public GlyphTexture texture;
@@ -134,12 +131,23 @@ public class TrueTypeFont {
 		}
 	}
 
+	private String bidiReorder(String text) {
+		try {
+			Bidi bidi = new Bidi((new ArabicShaping(8)).shape(text), 127);
+			bidi.setReorderingMode(0);
+			return bidi.writeReordered(2);
+		} catch (ArabicShapingException var3) {
+			return text;
+		}
+	}
+	
 	private FormattedString cacheString(String str) {
 		String key = getGeneralizedKey(str);
 		FormattedString value = stringCache.get(key);
 		if (value == null) {
 			ArrayList<ArrangedGlyph> glyphList = new ArrayList<>();
 			String newKeyString = new String(key);
+			str = bidiReorder(str);
 
 			value = new FormattedString();
 			value.keyReference = new WeakReference<String>(newKeyString);
@@ -158,9 +166,6 @@ public class TrueTypeFont {
 			int layoutFlag) {
 		fontStyle = specialStyle = 0;
 		colorIdx = -1;
-		int lastUL = -1;
-		int lastST = -1;
-		
 		for (int i = start; i < limit; i++) {
 			if (str[i] == '§' && i < str.length - 1) {
 				if ("0123456789abcdefmnrlo".indexOf(str[i + 1]) != -1) {
@@ -196,12 +201,14 @@ public class TrueTypeFont {
 			advance = layoutGlyphs(str, glyphs, start, end, advance, layoutFlag, f);
 			start = end;
 		}
+		
 		if((specialStyle & (UNDERLINE | STRIKE_THROUGH)) > 0) {
 			ArrangedGlyph startGlyph = glyphs.get(lastSize);
 			ArrangedGlyph endGlyph = glyphs.get(glyphs.size() - 1);
 			endGlyph.specialStyle = (startGlyph.x & 0x3FFFFFFF) << 2;
 			endGlyph.specialStyle |= specialStyle & (UNDERLINE | STRIKE_THROUGH);
 		}
+		
 		return advance;
 	}
 
@@ -219,7 +226,7 @@ public class TrueTypeFont {
 		for (int i = 0; i < limit - start; i++) {
 			Rectangle2D pos = vec.getGlyphVisualBounds(i).getBounds2D();
 			ArrangedGlyph glyph = new ArrangedGlyph();
-			glyph.index = start + i;
+			glyph.codeIndex = str[start + i];
 			glyph.x = (int) Math.round(pos.getX() + advance);
 			glyph.y = (int) Math.round(pos.getY() + offsetY);
 			glyph.colorIndex = colorIdx;
@@ -240,7 +247,8 @@ public class TrueTypeFont {
 		applyColor(color, alpha);
 		enableBlend();
 		GlStateManager.enableAlpha();
-
+		GlStateManager.glTexEnvi(GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_MODULATE);
+		
 		Tessellator tes = Tessellator.getInstance();
 		BufferBuilder buf = tes.getBuffer();
 		FormattedString cached = cacheString(str);
@@ -250,12 +258,11 @@ public class TrueTypeFont {
 		for (int i = 0; i < cached.glyphs.length; i++) {
 			int offsetX = 0;
 			ArrangedGlyph glyph = cached.glyphs[i];
-			char charAt = str.charAt(glyph.index);
 			GlyphTexture tex = glyph.texture;
 
-			if (charAt >= '0' && charAt <= '9') {
+			if (glyph.codeIndex >= '0' && glyph.codeIndex <= '9') {
 				cacheDigits();
-				ArrangedGlyph digitGlyph = digitCache[glyph.fontStyle][charAt - '0'];
+				ArrangedGlyph digitGlyph = digitCache[glyph.fontStyle][glyph.codeIndex - '0'];
 				tex = digitGlyph.texture;
 				offsetX = (glyph.advance - digitGlyph.advance) >> 1;
 			}
@@ -268,16 +275,15 @@ public class TrueTypeFont {
 			if (glyph.colorIndex != -1 && lastColor != glyph.colorIndex)
 				applyColor(colorCodes[glyph.colorIndex + (shadow ? 16 : 0)], alpha);
 
-			if (charAt != ' ') {
-				GlStateManager.enableTexture2D();
-				GlStateManager.bindTexture(tex.texture);
-				buf.begin(7, DefaultVertexFormats.POSITION_TEX);
-				buf.pos(minX, minY, 0).tex(tex.u1, tex.v1).endVertex();
-				buf.pos(minX, maxY, 0).tex(tex.u1, tex.v2).endVertex();
-				buf.pos(maxX, maxY, 0).tex(tex.u2, tex.v2).endVertex();
-				buf.pos(maxX, minY, 0).tex(tex.u2, tex.v1).endVertex();
-				tes.draw();
-			}
+			GlStateManager.enableTexture2D();
+			GlStateManager.bindTexture(tex.texture);
+			buf.begin(7, DefaultVertexFormats.POSITION_TEX);
+			buf.pos(minX, minY, 0).tex(tex.u1, tex.v1).endVertex();
+			buf.pos(minX, maxY, 0).tex(tex.u1, tex.v2).endVertex();
+			buf.pos(maxX, maxY, 0).tex(tex.u2, tex.v2).endVertex();
+			buf.pos(maxX, minY, 0).tex(tex.u2, tex.v1).endVertex();
+			tes.draw();
+			
 			if (glyph.specialStyle > 0) {
 				final double startX = x + (glyph.specialStyle >> 2);
 				GlStateManager.disableTexture2D();
@@ -356,7 +362,7 @@ public class TrueTypeFont {
 			} else {
 				total += glyph.advance;
 			}
-			sb.append((char) str.charAt(glyph.index));
+			sb.append((char) glyph.codeIndex);
 			i += reverse ? -1 : 1;
 		}
 		return sb.toString();
@@ -376,7 +382,7 @@ public class TrueTypeFont {
 			} else {
 				total += glyph.advance;
 			}
-			sb.append((char) str.charAt(glyph.index));
+			sb.append((char) glyph.codeIndex);
 		}
 		if (sb.length() > 0)
 			ret.add(sb.toString());

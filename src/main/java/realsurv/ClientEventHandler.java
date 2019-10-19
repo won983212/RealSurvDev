@@ -43,8 +43,8 @@ public class ClientEventHandler {
 	//TODO To debug - displyscreen on guimainmenu
 	@SubscribeEvent
 	public void onMainScreenEvent(GuiScreenEvent.InitGuiEvent e) {
-		/*if(e.getGui() instanceof GuiMainMenu)
-			Minecraft.getMinecraft().displayGuiScreen(new GuiScreenTablet());*/
+		if(e.getGui() instanceof GuiMainMenu)
+			Minecraft.getMinecraft().displayGuiScreen(new GuiScreenTablet());
 	}
 	
 	@SubscribeEvent
@@ -63,9 +63,7 @@ public class ClientEventHandler {
 			
 			ScaledResolution res = new ScaledResolution(mc);
 			int factor = res.getScaleFactor();
-			if(prevFactor == -1)
-				prevFactor = factor;
-			else if(prevFactor != factor) {
+			if(prevFactor != factor) {
 				mc.fontRenderer = FontFactory.makeMinecraftFont("맑은 고딕", 7 * factor, factor);
 				if(mc.currentScreen != null)
 		            mc.currentScreen.setWorldAndResolution(mc, res.getScaledWidth(), res.getScaledHeight());

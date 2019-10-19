@@ -40,7 +40,8 @@ public class MainScreen extends RootPane {
 	@Override
 	public void render(int mouseX, int mouseY) {
 		super.render(mouseX, mouseY);
-		String str = "§l@동해물§r과 §l§m§o백두산§r이 §a마르고 §c닳도록 §l하느§o님이§r 보우하사 우리 나라만세. 012312312311";
+		//String str = "§l@동해물§r과 §l§m§o백두산§r이 §a마르고 §c닳도록 §l하느§o님이§r 보우하사 우리 나라만세. 012312312311";
+		String str = "تسجّل الآن لحضور المؤتمر الدولي العاشر ليونيكود (Unicode Conference)،";
 		// String str = "GagPos";
 		Gui.drawRect(10, 10, 10 + font.getStringWidth(str), 10 + font.getMaxHeight(), 0xff000000);
 		font.drawString(str, 10, 10, 0xffffffff);

@@ -2,13 +2,13 @@
 {
   "modid": "realsurvmod",
   "name": "realsurvmod",
-  "description": "서버 전용 모드",
+  "description": "Server mod",
   "version": "${version}",
   "mcversion": "${mcversion}",
   "url": "",
   "updateUrl": "",
-  "authorList": ["won983212", ""],
-  "credits": "서버 전용 모드",
+  "authorList": ["won983212", "tadroid"],
+  "credits": "",
   "logoFile": "",
   "screenshots": [],
   "dependencies": []

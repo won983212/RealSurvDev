@@ -49,7 +49,8 @@ public class TabletModel implements IBakedModel {
 			if (side == null) {
 				renderModel(baseModel);
 				RenderHelper.disableStandardItemLighting();
-				GL11.glPushAttrib(GL11.GL_TEXTURE_BIT);
+				GL11.glPushAttrib(GL11.GL_TEXTURE_BIT | GL11.GL_ENABLE_BIT);
+				GlStateManager.disableBlend();
 				ClientEventHandler.instance.bindTabletScreenTexture();
 				float bx = OpenGlHelper.lastBrightnessX;
 				float by = OpenGlHelper.lastBrightnessY;
@@ -61,7 +62,7 @@ public class TabletModel implements IBakedModel {
 				final float zMax = zMin + 10.75f * unit;
 
 				GlStateManager.disableTexture2D();
-				GlStateManager.color(0.08f, 0.08f, 0.08f, 1);
+				GlStateManager.color(1, 1, 1, 1);
 				GlStateManager.glBegin(7);
 				GlStateManager.glVertex3f(xMin, zlevel, zMax);
 				GlStateManager.glVertex3f(xMax, zlevel, zMax);
