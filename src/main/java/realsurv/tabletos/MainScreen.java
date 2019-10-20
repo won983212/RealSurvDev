@@ -28,6 +28,7 @@ import won983212.simpleui.element.UIRectangle;
 import won983212.simpleui.element.UITextfield;
 import won983212.simpleui.events.IButtonEvent;
 import won983212.simpleui.font.FontFactory;
+import won983212.simpleui.font.StringCache;
 import won983212.simpleui.font.TrueTypeFont;
 
 public class MainScreen extends RootPane {
@@ -36,7 +37,7 @@ public class MainScreen extends RootPane {
 		setScaledFactor(0);
 	}
 
-	private TrueTypeFont font = FontFactory.makeFont("맑은 고딕", 14);
+	private TrueTypeFont font = FontFactory.makeFont(Font.SANS_SERIF, 14);
 	@Override
 	public void render(int mouseX, int mouseY) {
 		super.render(mouseX, mouseY);
@@ -50,8 +51,8 @@ public class MainScreen extends RootPane {
 		};
 		for(int i=0;i<str.length;i++) {
 			String ent = str[i];
-			Gui.drawRect(10, 10 + i * font.getMaxHeight(), 10 + font.getStringWidth(ent), 10 + (i + 1) * font.getMaxHeight(), 0xff000000);
-			font.drawString(ent, 10, 10 + i * font.getMaxHeight(), 0xffffffff);
+			Gui.drawRect(10, 10 + i * 15, 10 + font.getStringWidth(ent), 10 + (i + 1) * 15, 0xff000000);
+			font.drawString(ent, 10, 10 + i * 15, 0xffffffff);
 		}
 	}
 

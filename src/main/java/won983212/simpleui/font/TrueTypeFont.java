@@ -3,6 +3,7 @@ package won983212.simpleui.font;
 import java.awt.Font;
 import java.awt.Rectangle;
 import java.awt.font.GlyphVector;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -20,7 +21,6 @@ import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import scala.actors.threadpool.Arrays;
 import won983212.simpleui.font.GlyphTextureCache.GlyphTexture;
 
 public class TrueTypeFont {
@@ -232,19 +232,21 @@ public class TrueTypeFont {
 		int offsetY = glyphTextures.getAscent(fontStyle) - glyphTextures.getDescent(fontStyle);
 
 		for (int i = 0; i < limit - start; i++) {
+			Point2D actLoc = vec.getGlyphPosition(i);
 			Rectangle2D pos = vec.getGlyphVisualBounds(i).getBounds2D();
 			ArrangedGlyph glyph = new ArrangedGlyph();
 			glyph.index = bidiIdxMap[start + i];
-			glyph.x = (int) Math.round(pos.getX() + advance);
-			glyph.y = (int) Math.round(pos.getY() + offsetY);
+			glyph.x = (int) Math.round(pos.getX() - actLoc.getX() + advance);
+			glyph.y = (int) Math.round(pos.getY() - actLoc.getY() + offsetY);
 			glyph.colorIndex = colorIdx;
 			glyph.fontStyle = fontStyle;
 			glyph.texture = textures[i];
-			glyph.advance = (int) (locations[(i + 1) * 2] - locations[i * 2]);
+			glyph.advance = (int) vec.getGlyphMetrics(i).getAdvanceX();
+			advance += glyph.advance;
 			glyphs.add(glyph);
 		}
 
-		return (int) locations[locations.length - 2] + advance;
+		return (int) advance;
 	}
 
 	private int renderString(String str, double x, double y, int color, boolean shadow) {
@@ -277,8 +279,6 @@ public class TrueTypeFont {
 					cacheDigits();
 					ArrangedGlyph digitGlyph = digitCache[glyph.fontStyle][charAt - '0'];
 					tex = digitGlyph.texture;
-					if(glyph.advance != digitGlyph.advance)
-						System.out.println("?");
 					offsetX = (glyph.advance - digitGlyph.advance) / 2.0;
 				}
 				
