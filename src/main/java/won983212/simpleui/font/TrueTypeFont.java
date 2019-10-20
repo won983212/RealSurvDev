@@ -20,6 +20,7 @@ import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import scala.actors.threadpool.Arrays;
 import won983212.simpleui.font.GlyphTextureCache.GlyphTexture;
 
 public class TrueTypeFont {
@@ -28,10 +29,10 @@ public class TrueTypeFont {
 		public int y;
 		public int advance;
 		public int colorIndex;
-		public int codeIndex;
 		public int fontStyle;
 		public int specialStyle;
 		public GlyphTexture texture;
+		public int index;
 	}
 
 	private static class FormattedString {
@@ -131,27 +132,36 @@ public class TrueTypeFont {
 		}
 	}
 
-	private String bidiReorder(String text) {
-		try {
-			Bidi bidi = new Bidi((new ArabicShaping(8)).shape(text), 127);
-			bidi.setReorderingMode(0);
-			return bidi.writeReordered(2);
-		} catch (ArabicShapingException var3) {
-			return text;
-		}
-	}
-	
 	private FormattedString cacheString(String str) {
 		String key = getGeneralizedKey(str);
 		FormattedString value = stringCache.get(key);
 		if (value == null) {
 			ArrayList<ArrangedGlyph> glyphList = new ArrayList<>();
 			String newKeyString = new String(key);
-			str = bidiReorder(str);
 
+			int bidiIndexMap[] = null;
+			try {
+				int prevLen = str.length();
+				Bidi bidi = new Bidi((new ArabicShaping(8)).shape(str), Bidi.DIRECTION_DEFAULT_RIGHT_TO_LEFT);
+				bidi.setReorderingMode(Bidi.OPTION_DEFAULT);
+				str = bidi.writeReordered(Bidi.DO_MIRRORING);
+				bidiIndexMap = bidi.getVisualMap();
+				
+				prevLen -= bidi.getProcessedLength();
+				for(int i=0;i<bidiIndexMap.length;i++)
+					bidiIndexMap[i] += prevLen;
+			} catch (ArabicShapingException e) {
+				e.printStackTrace();
+			}
+			if(bidiIndexMap == null) {
+				bidiIndexMap = new int[str.length()];
+				for(int i=0;i<bidiIndexMap.length;i++)
+					bidiIndexMap[i] = i;
+			}
+			
 			value = new FormattedString();
 			value.keyReference = new WeakReference<String>(newKeyString);
-			value.advance = layoutStyle(str.toCharArray(), glyphList, 0, str.length(), 0, Font.LAYOUT_LEFT_TO_RIGHT);
+			value.advance = layoutStyle(str.toCharArray(), glyphList, 0, str.length(), 0, bidiIndexMap);
 			value.glyphs = glyphList.toArray(new ArrangedGlyph[glyphList.size()]);
 			stringCache.put(newKeyString, value);
 		}
@@ -162,23 +172,22 @@ public class TrueTypeFont {
 		return value;
 	}
 
-	private int layoutStyle(char[] str, ArrayList<ArrangedGlyph> glyphs, int start, int limit, int advance,
-			int layoutFlag) {
+	private int layoutStyle(char[] str, ArrayList<ArrangedGlyph> glyphs, int start, int limit, int advance, int[] bidiIdxMap) {
 		fontStyle = specialStyle = 0;
 		colorIdx = -1;
 		for (int i = start; i < limit; i++) {
 			if (str[i] == '§' && i < str.length - 1) {
 				if ("0123456789abcdefmnrlo".indexOf(str[i + 1]) != -1) {
-					advance = layoutMissingGlyphs(str, glyphs, start, i, advance, layoutFlag);
+					advance = layoutMissingGlyphs(str, glyphs, start, i, advance, bidiIdxMap);
 					applyStyle(str[i + 1]);
 					start = ++i + 1;
 				}
 			}
 		}
-		return layoutMissingGlyphs(str, glyphs, start, limit, advance, layoutFlag);
+		return layoutMissingGlyphs(str, glyphs, start, limit, advance, bidiIdxMap);
 	}
 
-	private int layoutMissingGlyphs(char[] str, ArrayList<ArrangedGlyph> glyphs, int start, int limit, int advance, int layoutFlag) {
+	private int layoutMissingGlyphs(char[] str, ArrayList<ArrangedGlyph> glyphs, int start, int limit, int advance, int[] bidiIdxMap) {
 		if(start == limit)
 			return advance;
 		
@@ -187,7 +196,7 @@ public class TrueTypeFont {
 		while (start < limit) {
 			int offset = font[fontStyle].canDisplayUpTo(str, start, limit);
 			if (offset == -1) {
-				advance = layoutGlyphs(str, glyphs, start, limit, advance, layoutFlag, font[fontStyle]);
+				advance = layoutGlyphs(str, glyphs, start, limit, advance, bidiIdxMap, font[fontStyle]);
 				break;
 			}
 			if (offset == start) {
@@ -198,7 +207,7 @@ public class TrueTypeFont {
 			Font f = font[fontStyle];
 			if(offset == start)
 				f = FontFactory.findSubstitutionJavaFont(str[start], font[0].getSize(), fontStyle);
-			advance = layoutGlyphs(str, glyphs, start, end, advance, layoutFlag, f);
+			advance = layoutGlyphs(str, glyphs, start, end, advance, bidiIdxMap, f);
 			start = end;
 		}
 		
@@ -212,13 +221,12 @@ public class TrueTypeFont {
 		return advance;
 	}
 
-	private int layoutGlyphs(char[] str, ArrayList<ArrangedGlyph> glyphs, int start, int limit, int advance,
-			int layoutFlag, Font font) {
+	private int layoutGlyphs(char[] str, ArrayList<ArrangedGlyph> glyphs, int start, int limit, int advance, int[] bidiIdxMap, Font font) {
 		if (start == limit)
 			return advance;
 
 		GlyphTexture[] textures = glyphTextures.cacheGlyphs(font, str, start, limit, fontStyle);
-		GlyphVector vec = glyphTextures.layoutGlyphVector(font, str, start, limit, layoutFlag);
+		GlyphVector vec = glyphTextures.layoutGlyphVector(font, str, start, limit, Font.LAYOUT_LEFT_TO_RIGHT);
 		Rectangle bounds = vec.getPixelBounds(null, 0, 0);
 		float[] locations = vec.getGlyphPositions(0, limit - start + 1, null);
 		int offsetY = glyphTextures.getAscent(fontStyle) - glyphTextures.getDescent(fontStyle);
@@ -226,7 +234,7 @@ public class TrueTypeFont {
 		for (int i = 0; i < limit - start; i++) {
 			Rectangle2D pos = vec.getGlyphVisualBounds(i).getBounds2D();
 			ArrangedGlyph glyph = new ArrangedGlyph();
-			glyph.codeIndex = str[start + i];
+			glyph.index = bidiIdxMap[start + i];
 			glyph.x = (int) Math.round(pos.getX() + advance);
 			glyph.y = (int) Math.round(pos.getY() + offsetY);
 			glyph.colorIndex = colorIdx;
@@ -256,33 +264,38 @@ public class TrueTypeFont {
 		int lastColor = color;
 
 		for (int i = 0; i < cached.glyphs.length; i++) {
-			int offsetX = 0;
 			ArrangedGlyph glyph = cached.glyphs[i];
-			GlyphTexture tex = glyph.texture;
-
-			if (glyph.codeIndex >= '0' && glyph.codeIndex <= '9') {
-				cacheDigits();
-				ArrangedGlyph digitGlyph = digitCache[glyph.fontStyle][glyph.codeIndex - '0'];
-				tex = digitGlyph.texture;
-				offsetX = (glyph.advance - digitGlyph.advance) >> 1;
-			}
-
-			final double minX = x + (glyph.x - GlyphTextureCache.GLYPH_PADDING + offsetX) / scaleModifier;
-			final double minY = y + (glyph.y - GlyphTextureCache.GLYPH_PADDING) / scaleModifier;
-			final double maxX = minX + tex.width / scaleModifier;
-			final double maxY = minY + tex.height / scaleModifier;
-
+			char charAt = str.charAt(glyph.index);
+			
 			if (glyph.colorIndex != -1 && lastColor != glyph.colorIndex)
 				applyColor(colorCodes[glyph.colorIndex + (shadow ? 16 : 0)], alpha);
 
-			GlStateManager.enableTexture2D();
-			GlStateManager.bindTexture(tex.texture);
-			buf.begin(7, DefaultVertexFormats.POSITION_TEX);
-			buf.pos(minX, minY, 0).tex(tex.u1, tex.v1).endVertex();
-			buf.pos(minX, maxY, 0).tex(tex.u1, tex.v2).endVertex();
-			buf.pos(maxX, maxY, 0).tex(tex.u2, tex.v2).endVertex();
-			buf.pos(maxX, minY, 0).tex(tex.u2, tex.v1).endVertex();
-			tes.draw();
+			if (charAt != ' ') {
+				double offsetX = 0;
+				GlyphTexture tex = glyph.texture;
+				if (charAt >= '0' && charAt <= '9') {
+					cacheDigits();
+					ArrangedGlyph digitGlyph = digitCache[glyph.fontStyle][charAt - '0'];
+					tex = digitGlyph.texture;
+					if(glyph.advance != digitGlyph.advance)
+						System.out.println("?");
+					offsetX = (glyph.advance - digitGlyph.advance) / 2.0;
+				}
+				
+				final double minX = x + (glyph.x - GlyphTextureCache.GLYPH_PADDING + offsetX) / scaleModifier;
+				final double minY = y + (glyph.y - GlyphTextureCache.GLYPH_PADDING) / scaleModifier;
+				final double maxX = minX + tex.width / scaleModifier;
+				final double maxY = minY + tex.height / scaleModifier;
+
+				GlStateManager.enableTexture2D();
+				GlStateManager.bindTexture(tex.texture);
+				buf.begin(7, DefaultVertexFormats.POSITION_TEX);
+				buf.pos(minX, minY, 0).tex(tex.u1, tex.v1).endVertex();
+				buf.pos(minX, maxY, 0).tex(tex.u1, tex.v2).endVertex();
+				buf.pos(maxX, maxY, 0).tex(tex.u2, tex.v2).endVertex();
+				buf.pos(maxX, minY, 0).tex(tex.u2, tex.v1).endVertex();
+				tes.draw();
+			}
 			
 			if (glyph.specialStyle > 0) {
 				final double startX = x + (glyph.specialStyle >> 2);
@@ -362,7 +375,7 @@ public class TrueTypeFont {
 			} else {
 				total += glyph.advance;
 			}
-			sb.append((char) glyph.codeIndex);
+			sb.append((char) str.charAt(glyph.index));
 			i += reverse ? -1 : 1;
 		}
 		return sb.toString();
@@ -382,7 +395,7 @@ public class TrueTypeFont {
 			} else {
 				total += glyph.advance;
 			}
-			sb.append((char) glyph.codeIndex);
+			sb.append((char) str.charAt(glyph.index));
 		}
 		if (sb.length() > 0)
 			ret.add(sb.toString());

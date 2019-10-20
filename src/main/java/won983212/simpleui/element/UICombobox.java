@@ -12,9 +12,9 @@ import won983212.simpleui.VerticalArrange;
 import won983212.simpleui.events.IItemSelectedEvent;
 import won983212.simpleui.font.TrueTypeFont;
 
-//TODO Combobox design change ok?
 public class UICombobox extends UIObject implements IItemSelectedEvent {
 	private ArrayList<String> items = new ArrayList<String>();
+	private IItemSelectedEvent event;
 	private UIMenu menu = new UIMenu();
 	private int selected = 0;
 	private int maxLength = 10;
@@ -69,6 +69,11 @@ public class UICombobox extends UIObject implements IItemSelectedEvent {
 		return this;
 	}
 
+	public UICombobox setItemSelectedEvent(IItemSelectedEvent e) {
+		this.event = e;
+		return this;
+	}
+	
 	public String getSelectedItem() {
 		return items.size() > selected ? items.get(selected) : null;
 	}
@@ -93,7 +98,8 @@ public class UICombobox extends UIObject implements IItemSelectedEvent {
 
 	@Override
 	public void onSelected(UIObject obj, Object item) {
-		System.out.println(item);
 		selected = (int) item;
+		if(event != null)
+			event.onSelected(this, item);
 	}
 }

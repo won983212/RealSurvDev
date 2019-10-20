@@ -40,11 +40,19 @@ public class MainScreen extends RootPane {
 	@Override
 	public void render(int mouseX, int mouseY) {
 		super.render(mouseX, mouseY);
-		//String str = "§l@동해물§r과 §l§m§o백두산§r이 §a마르고 §c닳도록 §l하느§o님이§r 보우하사 우리 나라만세. 012312312311";
-		String str = "تسجّل الآن لحضور المؤتمر الدولي العاشر ليونيكود (Unicode Conference)،";
-		// String str = "GagPos";
-		Gui.drawRect(10, 10, 10 + font.getStringWidth(str), 10 + font.getMaxHeight(), 0xff000000);
-		font.drawString(str, 10, 10, 0xffffffff);
+		String str[] = {
+			"§l@동해물§r과 §l§m§o백두산§r이 §a마르고 §c닳도록 §l하느§o님이§r 보우하사 우리 나라만세. 012312312311",
+			"دّث بلغة يونيكود. تسجّل الآن لحضور المؤتمر الدولي العاشر ليونيكود (Unicode Conference)، الذ",
+			"Item1",
+			"Item2",
+			"Item3",
+			"<Player175436> Nice to meet you?"
+		};
+		for(int i=0;i<str.length;i++) {
+			String ent = str[i];
+			Gui.drawRect(10, 10 + i * font.getMaxHeight(), 10 + font.getStringWidth(ent), 10 + (i + 1) * font.getMaxHeight(), 0xff000000);
+			font.drawString(ent, 10, 10 + i * font.getMaxHeight(), 0xffffffff);
+		}
 	}
 
 	@Override
@@ -74,11 +82,13 @@ public class MainScreen extends RootPane {
 		loginForm.addRow(new LengthDefinition(LengthType.ALLOCATED, 1));
 		loginForm.addRow(new LengthDefinition(LengthType.ALLOCATED, 1));
 		loginForm.addRow(new LengthDefinition(LengthType.ALLOCATED, 1));
-		loginForm.add(new UIRectangle().setBackgroundColor(0xffcccccc).setLayoutSpan(2, 3));
+		loginForm.addRow(new LengthDefinition(LengthType.ALLOCATED, 1));
+		loginForm.add(new UIRectangle().setBackgroundColor(0xffcccccc).setLayoutSpan(2, 4));
 		loginForm.add(new UITextfield().setHint("ID").setMargin(new DirWeights(4, 0, 4, 0)).setVerticalArrange(VerticalArrange.CENTER));
 		loginForm.add(new UITextfield().setHint("Password").setMargin(new DirWeights(4, 0, 4, 0)).setLayoutPosition(0, 1).setVerticalArrange(VerticalArrange.CENTER));
 		loginForm.add(new UICheckbox().setLabel("Remember").setMargin(new DirWeights(0, 0, 4, 0)).setVerticalArrange(VerticalArrange.CENTER).setLayoutPosition(0, 2));
 		loginForm.add(new UIButton("Login").setMargin(new DirWeights(4)).setLayoutPosition(1, 0).setLayoutSpan(1, 3));
+		loginForm.add(new UICombobox().add("Item1").add("Item2").add("Item3").setMargin(new DirWeights(0, 0, 4, 4)).setLayoutSpan(2, 1).setLayoutPosition(0, 3));
 		contents.add(loginForm);
 		add(contents);
 	}
