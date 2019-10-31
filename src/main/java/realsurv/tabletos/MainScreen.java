@@ -42,11 +42,13 @@ public class MainScreen extends RootPane {
 	public void render(int mouseX, int mouseY) {
 		super.render(mouseX, mouseY);
 		String str[] = {
-			"§l@동해물§r과 §l§m§o백두산§r이 §a마르고 §c닳도록 §l하느§o님이§r 보우하사 우리 나라만세. 012312312311",
+			"§l@동해물§r과 §l§m§o백두산§r이 §a마르고 §c닳도록 §l하느§o님이§r 보우하사 우리 나라만세.",
 			"دّث بلغة يونيكود. تسجّل الآن لحضور المؤتمر الدولي العاشر ليونيكود (Unicode Conference)، الذ",
 			"Item1",
 			"Item2",
 			"Item3",
+			"29135690123589235",
+			"00000000000000000",
 			"<Player175436> Nice to meet you?"
 		};
 		for(int i=0;i<str.length;i++) {

@@ -1,6 +1,7 @@
 package won983212.simpleui.font;
 
 import java.awt.Font;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.font.GlyphVector;
 import java.awt.geom.Point2D;
@@ -55,7 +56,7 @@ public class TrueTypeFont {
 	private int specialStyle = 0;
 	private int colorIdx = -1;
 	private double scaleModifier = 1;
-
+	
 	protected TrueTypeFont(String family, int size, boolean antialias) {
 		for (int i = 0; i < 4; i++)
 			font[i] = new Font(family, i, size);
@@ -70,15 +71,23 @@ public class TrueTypeFont {
 		glyphTextures.clear();
 		digitCache = null;
 	}
-
+	
 	private void cacheDigits() {
 		if (digitCache != null)
 			return;
+		specialStyle = 0;
+		colorIdx = -1;
 		digitCache = new ArrangedGlyph[4][];
-		digitCache[Font.PLAIN] = cacheString("0123456789").glyphs;
-		digitCache[Font.BOLD] = cacheString("§l0123456789").glyphs;
-		digitCache[Font.ITALIC] = cacheString("§o0123456789").glyphs;
-		digitCache[Font.BOLD | Font.ITALIC] = cacheString("§l§o0123456789").glyphs;
+		ArrayList<ArrangedGlyph> glyphs = new ArrayList<TrueTypeFont.ArrangedGlyph>();
+		int[] bidiDigits = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};	
+		char[] digitChars = "0123456789".toCharArray();
+		
+		for (int i = 0; i < 4; i++) {
+			glyphs.clear();
+			fontStyle = i;
+			layoutMissingGlyphs(digitChars, glyphs, 0, 10, 0, bidiDigits);
+			digitCache[i] = glyphs.toArray(new ArrangedGlyph[glyphs.size()]);
+		}
 	}
 
 	// All digits will be zero.
@@ -133,11 +142,11 @@ public class TrueTypeFont {
 	}
 
 	private FormattedString cacheString(String str) {
-		String key = getGeneralizedKey(str);
-		FormattedString value = stringCache.get(key);
+		str = getGeneralizedKey(str);
+		FormattedString value = stringCache.get(str);
 		if (value == null) {
 			ArrayList<ArrangedGlyph> glyphList = new ArrayList<>();
-			String newKeyString = new String(key);
+			String newKeyString = new String(str);
 
 			int bidiIndexMap[] = null;
 			try {
@@ -227,26 +236,23 @@ public class TrueTypeFont {
 
 		GlyphTexture[] textures = glyphTextures.cacheGlyphs(font, str, start, limit, fontStyle);
 		GlyphVector vec = glyphTextures.layoutGlyphVector(font, str, start, limit, Font.LAYOUT_LEFT_TO_RIGHT);
-		Rectangle bounds = vec.getPixelBounds(null, 0, 0);
 		float[] locations = vec.getGlyphPositions(0, limit - start + 1, null);
 		int offsetY = glyphTextures.getAscent(fontStyle) - glyphTextures.getDescent(fontStyle);
 
 		for (int i = 0; i < limit - start; i++) {
-			Point2D actLoc = vec.getGlyphPosition(i);
-			Rectangle2D pos = vec.getGlyphVisualBounds(i).getBounds2D();
+			Point pos = vec.getGlyphPixelBounds(i, null, advance, offsetY).getLocation();
 			ArrangedGlyph glyph = new ArrangedGlyph();
 			glyph.index = bidiIdxMap[start + i];
-			glyph.x = (int) Math.round(pos.getX() - actLoc.getX() + advance);
-			glyph.y = (int) Math.round(pos.getY() - actLoc.getY() + offsetY);
+			glyph.x = pos.x;
+			glyph.y = pos.y;
 			glyph.colorIndex = colorIdx;
 			glyph.fontStyle = fontStyle;
 			glyph.texture = textures[i];
-			glyph.advance = (int) vec.getGlyphMetrics(i).getAdvanceX();
-			advance += glyph.advance;
+			glyph.advance = (int)(locations[i * 2 + 2] - locations[i * 2]);
 			glyphs.add(glyph);
 		}
 
-		return (int) advance;
+		return (int) locations[locations.length - 2] + advance;
 	}
 
 	private int renderString(String str, double x, double y, int color, boolean shadow) {
@@ -279,7 +285,7 @@ public class TrueTypeFont {
 					cacheDigits();
 					ArrangedGlyph digitGlyph = digitCache[glyph.fontStyle][charAt - '0'];
 					tex = digitGlyph.texture;
-					offsetX = (glyph.advance - digitGlyph.advance) / 2.0;
+					offsetX = (glyph.texture.width - tex.width) / 2.0;
 				}
 				
 				final double minX = x + (glyph.x - GlyphTextureCache.GLYPH_PADDING + offsetX) / scaleModifier;
