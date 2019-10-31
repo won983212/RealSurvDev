@@ -11,6 +11,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.util.math.MathHelper;
 import won983212.simpleui.font.FontFactory;
 import won983212.simpleui.font.TrueTypeFont;
 
@@ -23,7 +24,7 @@ public abstract class UIObject {
 	private DirWeights padding = new DirWeights();
 	private TrueTypeFont font = FontFactory.makeFont(Font.SANS_SERIF, 14);
 	private boolean visible = true;
-	protected int backgroundColor = 0xfff4f4f4;
+	protected int backgroundColor = 0xffffffff;
 	protected int foregroundColor = 0xff000000;
 	protected int arc = 2;
 	protected boolean showShadow = true;
@@ -253,11 +254,15 @@ public abstract class UIObject {
 		return this;
 	}
 	
+	public static int getMouseOverColor(int color) {
+		return offsetColor(color, -15);
+	}
+	
 	public static int offsetColor(int color, int offset) {
 		int a = (color >> 24) & 0xff;
-		int r = Math.min(((color >> 16) & 0xff) + offset, 0xff);
-		int g = Math.min(((color >> 8) & 0xff) + offset, 0xff);
-		int b = Math.min((color & 0xff) + offset, 0xff);
+		int r = MathHelper.clamp(((color >> 16) & 0xff) + offset, 0, 0xff);
+		int g = MathHelper.clamp(((color >> 8) & 0xff) + offset, 0, 0xff);
+		int b = MathHelper.clamp((color & 0xff) + offset, 0, 0xff);
 		return (a << 24) + (r << 16) + (g << 8) + b;
 	}
 	
@@ -275,13 +280,13 @@ public abstract class UIObject {
 	}
 	
 	public static void renderArcRect(int x1, int y1, int x2, int y2, int arc, int color, boolean shadow) {
+		if(shadow) {
+			renderArcRect(x1+1, y1+1, x2--, y2--, arc, 0xff999999, false);
+		}
+		
 		if(arc == 0) {
 			Gui.drawRect(x1, y1, x2, y2, color);
 			return;
-		}
-		
-		if(shadow) {
-			renderArcRect(x1+1, y1+1, x2--, y2--, arc, 0xff999999, false);
 		}
 		
 		Gui.drawRect(x1 + arc, y1, x2 - arc, y1 + arc, color);

@@ -57,12 +57,11 @@ public class GlyphTextureCache {
 	}
 
 	public GlyphVector layoutGlyphVector(Font font, char[] str, int start, int limit, int layoutFlag) {
-		return font.layoutGlyphVector(stringGraphics.getFontRenderContext(), str, start, limit, layoutFlag);
+		return font.layoutGlyphVector(glyphTexture.getFontRenderContext(), str, start, limit, layoutFlag);
 	}
 
-	
-	private TestFrame frame = new TestFrame("StringCache");
-	private TestFrame frame2 = new TestFrame("GlyphCache");
+	/*private TestFrame frame = new TestFrame("StringCache");
+	private TestFrame frame2 = new TestFrame("GlyphCache");*/
 
 	public GlyphTexture[] cacheGlyphs(Font font, char[] text, int start, int limit, int style) {
 		if (limit - start == 0)
@@ -72,6 +71,7 @@ public class GlyphTextureCache {
 		GlyphVector vec = layoutGlyphVector(font, text, start, limit, Font.LAYOUT_LEFT_TO_RIGHT);
 		Rectangle bounds = null;
 		boolean isInitialized = false;
+		
 		long styleKey = (long) style << 32;
 		int countGlyphs = vec.getNumGlyphs();
 		int[] textData = vec.getGlyphCodes(0, countGlyphs, null);
@@ -103,18 +103,15 @@ public class GlyphTextureCache {
 				stringGraphics.clearRect(0, 0, boundsMaxW, boundsMaxH + ascent[style]);
 				stringGraphics.drawGlyphVector(vec, GLYPH_PADDING - bounds.x, GLYPH_PADDING - bounds.y);
 
-				stringGraphics.setColor(Color.cyan);
+				/*stringGraphics.setColor(Color.cyan);
 				for (int j = 0; j < vec.getNumGlyphs(); j++) {
 					Rectangle r = vec.getGlyphPixelBounds(j, null, GLYPH_PADDING - bounds.x, GLYPH_PADDING - bounds.y);
 					stringGraphics.drawRect(r.x, r.y, r.width - 1, r.height - 1);
 				}
 				stringGraphics.setColor(Color.white);
-				frame.updateImageTest(stringVectorImage);
+				frame.updateImageTest(stringVectorImage);*/
 			}
 			
-			/*Rectangle2D r = vec.getGlyphVisualBounds(i).getBounds2D();
-			r.setRect(r.getX() + GLYPH_PADDING - bounds.x, r.getY() + GLYPH_PADDING - bounds.y, r.getWidth(), r.getHeight());
-*/
 			Rectangle r = vec.getGlyphPixelBounds(i, null, GLYPH_PADDING - bounds.x, GLYPH_PADDING - bounds.y);
 			
 			if (cacheX + r.getWidth() + GLYPH_PADDING * 2 > TEXTURE_WIDTH) {
@@ -140,16 +137,10 @@ public class GlyphTextureCache {
 			final int dy = cacheY;
 			final int dw = glyph.width;
 			final int dh = glyph.height;
-			/*final int rx = (int) Math.round(r.getX()) - GLYPH_PADDING;
-			final int ry = (int) Math.round(r.getY()) - GLYPH_PADDING;*/
 			final int rx = r.x - GLYPH_PADDING;
 			final int ry = r.y - GLYPH_PADDING;
-			glyphTexture.getGraphic().drawImage(stringVectorImage, dx, dy, dx + dw, dy + dh, rx, ry, rx + dw, ry + dh, null);
 			
-			/*Graphics2D g2 = glyphTexture.getGraphic();
-			g2.setColor(Color.green);
-			g2.drawRect(dx, dy, dw, dh);*/
-			 
+			glyphTexture.getGraphic().drawImage(stringVectorImage, dx, dy, dx + dw, dy + dh, rx, ry, rx + dw, ry + dh, null);
 			glyphTexture.updateTexture(dx, dy, dw, dh);
 			glyphCache.put(styleKey | textData[i], glyph);
 			glyphs.add(glyph);

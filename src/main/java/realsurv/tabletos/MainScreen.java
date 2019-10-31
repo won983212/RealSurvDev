@@ -37,7 +37,7 @@ public class MainScreen extends RootPane {
 		setScaledFactor(0);
 	}
 
-	private TrueTypeFont font = FontFactory.makeFont(Font.SANS_SERIF, 14);
+	private TrueTypeFont font = FontFactory.makeFont("맑은 고딕", 14);
 	@Override
 	public void render(int mouseX, int mouseY) {
 		super.render(mouseX, mouseY);

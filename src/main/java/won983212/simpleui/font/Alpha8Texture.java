@@ -2,6 +2,7 @@ package won983212.simpleui.font;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.font.FontRenderContext;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -23,6 +24,7 @@ public class Alpha8Texture extends AbstractTexture {
 
 	private BufferedImage image;
 	private Graphics2D graphic = null;
+	private FontRenderContext ctx = null;
 	private boolean allocated = false;
 
 	public Alpha8Texture(int width, int height) {
@@ -43,6 +45,7 @@ public class Alpha8Texture extends AbstractTexture {
 		imageBuffer = ByteBuffer.allocateDirect(4 * width * height).order(ByteOrder.BIG_ENDIAN).asIntBuffer();
 
 		graphic = image.createGraphics();
+		ctx = graphic.getFontRenderContext();
 		graphic.setBackground(TRANSCOLOR);
 		allocated = false;
 		glTextureId = -1;
@@ -89,5 +92,9 @@ public class Alpha8Texture extends AbstractTexture {
 
 	public BufferedImage getImage() {
 		return image;
+	}
+
+	public FontRenderContext getFontRenderContext() {
+		return ctx;
 	}
 }

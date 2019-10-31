@@ -91,7 +91,11 @@ public class UICombobox extends UIObject implements IItemSelectedEvent {
 		TrueTypeFont font = getFont();
 		String item = getSelectedItem();
 		
-		renderArcRect(0, 0, size.width, size.height, arc, backgroundColor, showShadow);
+		int color = backgroundColor;
+		if(containsRelative(mouseX, mouseY))
+			color = getMouseOverColor(color);
+		
+		renderArcRect(0, 0, size.width, size.height, arc, color, showShadow);
 		if(items.size() > selected)
 			font.drawString(item, (size.width - font.getStringWidth(item)) / 2, (size.height - font.getMaxHeight()) / 2, foregroundColor);
 	}

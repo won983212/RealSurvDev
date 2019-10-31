@@ -39,7 +39,7 @@ public class UICheckbox extends UIObject {
 		int y = (h - 9) / 2;
 		int color = backgroundColor;
 		if(containsRelative(mouseX, mouseY))
-			color = offsetColor(color, 20);
+			color = getMouseOverColor(color);
 		
 		renderArcRect(0, y, 9, y + 9, arc, color, showShadow);
 		if(checked)

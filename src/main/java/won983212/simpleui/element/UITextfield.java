@@ -44,7 +44,7 @@ public class UITextfield extends UIObject {
 		int color = backgroundColor;
 
 		if (containsRelative(mouseX, mouseY))
-			color = offsetColor(color, 20);
+			color = getMouseOverColor(color);
 
 		if (isFocusd()) {
 			int offset = 0;

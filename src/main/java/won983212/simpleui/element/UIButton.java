@@ -41,7 +41,7 @@ public class UIButton extends UIObject {
 		int offset = showShadow && clicking ? 1 : 0;
 		
 		if(containsRelative(mx, my))
-			color = offsetColor(color, 20);
+			color = getMouseOverColor(color);
 		renderArcRect(offset, offset, size.width, size.height, arc, color, showShadow && !clicking);
 		font.drawString(label, offset + (size.width - fontWidth) / 2, offset + (size.height - font.getMaxHeight()) / 2, foregroundColor);
 	}

@@ -14,6 +14,7 @@ public class UIMenu extends StackPanel implements IButtonEvent {
 	
 	public UIMenu() {
 		setHorizontalArrange(HorizontalArrange.LEFT);
+		setShadowVisible(true);
 	}
 	
 	public UIMenu setItemSelectedEvent(IItemSelectedEvent e) {
@@ -22,7 +23,7 @@ public class UIMenu extends StackPanel implements IButtonEvent {
 	}
 	
 	public void addItem(String item) {
-		add(new UIButton(item).setClickEvent(this).setMetadata(items.size()));
+		add(new UIButton(item).setClickEvent(this).setShadowVisible(false).setRadius(0).setMetadata(items.size()));
 		items.add(item);
 	}
 	
