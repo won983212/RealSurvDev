@@ -1,7 +1,5 @@
 package won983212.simpleui.element;
 
-import java.awt.Rectangle;
-
 import won983212.simpleui.UIObject;
 import won983212.simpleui.font.TrueTypeFont;
 

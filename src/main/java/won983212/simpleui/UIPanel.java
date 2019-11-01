@@ -2,7 +2,6 @@ package won983212.simpleui;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
-import java.io.IOException;
 import java.util.ArrayList;
 
 import net.minecraft.client.renderer.GlStateManager;
@@ -23,6 +22,7 @@ public class UIPanel extends UIObject {
 			parentPanel.addPopup(obj);
 	}
 	
+	@Override
 	public void requestLayout() {
 		if(parentPanel == null) {
 			invalidateSize();

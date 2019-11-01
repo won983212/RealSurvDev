@@ -4,8 +4,6 @@ import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 
-import won983212.simpleui.StackPanel.Orientation;
-
 public class GridPanel extends UIPanel {
 	private ArrayList<CellLength> columns = new ArrayList<CellLength>();
 	private ArrayList<CellLength> rows = new ArrayList<CellLength>();

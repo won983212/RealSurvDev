@@ -1,9 +1,5 @@
 package won983212.simpleui.element;
 
-import java.awt.Font;
-import java.awt.Rectangle;
-
-import net.minecraft.client.gui.Gui;
 import won983212.simpleui.UIObject;
 import won983212.simpleui.font.TrueTypeFont;
 

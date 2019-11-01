@@ -2,7 +2,6 @@ package won983212.simpleui.font;
 
 import java.awt.Font;
 import java.awt.GraphicsEnvironment;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;

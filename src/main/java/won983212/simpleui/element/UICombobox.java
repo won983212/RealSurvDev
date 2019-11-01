@@ -6,7 +6,6 @@ import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import net.minecraft.client.gui.Gui;
 import won983212.simpleui.UIObject;
 import won983212.simpleui.VerticalArrange;
 import won983212.simpleui.events.IItemSelectedEvent;

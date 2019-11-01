@@ -1,33 +1,18 @@
 package realsurv.gui;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.Graphics2D;
-import java.awt.Point;
 import java.io.IOException;
-
-import javax.vecmath.Point2d;
 
 import org.lwjgl.input.Keyboard;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.item.ItemStack;
 import realsurv.ClientEventHandler;
-import realsurv.CommonProxy;
 import realsurv.tabletos.TabletOS;
-import won983212.simpleui.font.Alpha8Texture;
-import won983212.simpleui.font.TrueTypeFont;
 
 public class GuiScreenTablet extends GuiScreen {
 	private static TabletOS system = ClientEventHandler.instance.getTabletContext();

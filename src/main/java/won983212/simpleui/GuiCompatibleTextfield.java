@@ -2,13 +2,7 @@ package won983212.simpleui;
 
 import java.awt.Rectangle;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiTextField;
-import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.client.settings.GameSettings;
-import net.minecraft.util.ResourceLocation;
 import won983212.simpleui.font.AdaptiveTTF;
 
 public class GuiCompatibleTextfield extends GuiTextField {

@@ -1,17 +1,10 @@
 package realsurv.tabletos;
 
-import java.util.ArrayList;
-
-
-import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.shader.Framebuffer;
-import won983212.simpleui.UIPanel;
 
 public class TabletOS {
 	public static final int WIDTH = 640;

@@ -2,10 +2,7 @@ package won983212.simpleui.font;
 
 import java.awt.Font;
 import java.awt.Point;
-import java.awt.Rectangle;
 import java.awt.font.GlyphVector;
-import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
@@ -372,16 +369,19 @@ public class TrueTypeFont {
 		StringBuilder sb = new StringBuilder();
 		int total = 0;
 		FormattedString format = cacheString(str);
+		
+		if(format.advance / scaleModifier < wrapWidth)
+			return str;
+		
 		int i = reverse ? format.glyphs.length - 1 : 0;
-
 		while (reverse ? (i >= 0) : (i < format.glyphs.length)) {
 			ArrangedGlyph glyph = format.glyphs[i];
-			if (total + glyph.advance > wrapWidth) {
+			if (total + glyph.advance / scaleModifier > wrapWidth) {
 				return sb.toString();
 			} else {
-				total += glyph.advance;
+				total += glyph.advance / scaleModifier;
 			}
-			sb.append((char) str.charAt(glyph.index));
+			sb.append(str.charAt(glyph.index));
 			i += reverse ? -1 : 1;
 		}
 		return sb.toString();
@@ -394,14 +394,14 @@ public class TrueTypeFont {
 
 		FormattedString format = cacheString(str);
 		for (ArrangedGlyph glyph : format.glyphs) {
-			if (total + glyph.advance > wrapWidth) {
+			if (total + glyph.advance / scaleModifier > wrapWidth) {
 				ret.add(sb.toString());
 				sb = new StringBuilder();
 				total = 0;
 			} else {
-				total += glyph.advance;
+				total += glyph.advance / scaleModifier;
 			}
-			sb.append((char) str.charAt(glyph.index));
+			sb.append(str.charAt(glyph.index));
 		}
 		if (sb.length() > 0)
 			ret.add(sb.toString());

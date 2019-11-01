@@ -1,9 +1,7 @@
 package won983212.simpleui.element;
 
 import java.awt.Dimension;
-import java.awt.Rectangle;
 
-import net.minecraft.client.gui.Gui;
 import won983212.simpleui.UIObject;
 
 public class UIRectangle extends UIObject {

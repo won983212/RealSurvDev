@@ -1,34 +1,24 @@
 package realsurv.tabletos;
 
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.Rectangle;
-import java.util.ArrayList;
-
 import org.lwjgl.input.Keyboard;
 
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.renderer.GlStateManager;
 import won983212.simpleui.DirWeights;
 import won983212.simpleui.GridPanel;
-import won983212.simpleui.HorizontalArrange;
-import won983212.simpleui.RootPane;
-import won983212.simpleui.UIObject;
-import won983212.simpleui.UIPanel;
-import won983212.simpleui.VerticalArrange;
 import won983212.simpleui.GridPanel.LengthDefinition;
 import won983212.simpleui.GridPanel.LengthType;
+import won983212.simpleui.HorizontalArrange;
+import won983212.simpleui.RootPane;
+import won983212.simpleui.UIPanel;
+import won983212.simpleui.VerticalArrange;
 import won983212.simpleui.element.UIButton;
 import won983212.simpleui.element.UICheckbox;
 import won983212.simpleui.element.UICombobox;
 import won983212.simpleui.element.UIImage;
-import won983212.simpleui.element.UILabel;
 import won983212.simpleui.element.UIRectangle;
 import won983212.simpleui.element.UITextfield;
-import won983212.simpleui.events.IButtonEvent;
 import won983212.simpleui.font.FontFactory;
-import won983212.simpleui.font.StringCache;
 import won983212.simpleui.font.TrueTypeFont;
 
 public class MainScreen extends RootPane {

@@ -8,12 +8,9 @@ import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.font.GlyphVector;
 import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.HashMap;
-
-import realsurv.TestFrame;
 
 public class GlyphTextureCache {
 	public static class GlyphTexture {

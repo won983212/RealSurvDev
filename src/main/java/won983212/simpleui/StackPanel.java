@@ -3,8 +3,6 @@ package won983212.simpleui;
 import java.awt.Dimension;
 import java.awt.Rectangle;
 
-import won983212.simpleui.element.UIButton;
-
 public class StackPanel extends UIPanel {
 	private Orientation orientation;
 	
