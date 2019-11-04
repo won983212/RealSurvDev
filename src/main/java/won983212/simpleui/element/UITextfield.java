@@ -4,16 +4,20 @@ import java.awt.Rectangle;
 
 import org.lwjgl.input.Keyboard;
 
+import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.util.ChatAllowedCharacters;
 import won983212.simpleui.DirWeights;
 import won983212.simpleui.UIObject;
 import won983212.simpleui.font.TrueTypeFont;
 
 //TODO Implement it without Guitextfield.
 public class UITextfield extends UIObject {
+	private static final int LineOffsetAmount = 5;
+	
 	private String hint = null;
 	private String text = "";
 	private int cursorStart = 0;
@@ -31,10 +35,44 @@ public class UITextfield extends UIObject {
 		if(!isFocusd()) {
 			return;
 		}
-		if(i == Keyboard.KEY_BACK) {
+		if(GuiScreen.isShiftKeyDown()) {
+			if(i == Keyboard.KEY_LEFT){
+				if(cursorEnd > 0)
+					cursorEnd--;
+			} else if(i == Keyboard.KEY_RIGHT) {
+				if(cursorEnd < text.length())
+					cursorEnd++;
+			}
+		} else if(GuiScreen.isCtrlKeyDown()) {
+			if(i == Keyboard.KEY_A) { //TODO bug
+				cursorStart = 0;
+				cursorEnd = text.length();
+			}
+		} else if (i == Keyboard.KEY_BACK) {
 			remove(1);
-		} else {
+		} else if (i == Keyboard.KEY_LEFT) {
+			if (cursorStart != cursorEnd) {
+				cursorEnd = cursorStart;
+			} else if (cursorStart > 0) {
+				cursorStart = cursorEnd = cursorStart - 1;
+			}
+		} else if (i == Keyboard.KEY_RIGHT) {
+			if (cursorStart != cursorEnd) {
+				cursorEnd = cursorStart;
+			} else if (cursorStart < text.length()) {
+				cursorStart = cursorEnd = cursorStart + 1;
+			}
+		} else if(ChatAllowedCharacters.isAllowedCharacter(c)){
 			write(c);
+		}
+		
+		Rectangle actBounds = getPadding().getContentRect(getInnerBounds());
+		String str = getFont().trimStringToWidth(text.substring(lineOffset), actBounds.width, false);
+		if(cursorEnd < lineOffset) {
+			lineOffset = Math.max(0, cursorEnd - 2);
+		}
+		if(cursorEnd > lineOffset + str.length()) {
+			lineOffset = Math.max(0, cursorEnd - str.length());
 		}
 	}
 
@@ -61,48 +99,56 @@ public class UITextfield extends UIObject {
 		}
 
 		if (text.length() > 0) {
-			font.drawString(getRenderingText(font, actBounds.width), actBounds.x, actBounds.y, foregroundColor);
-		} else if (hint != null)
+			String str = font.trimStringToWidth(text.substring(lineOffset), actBounds.width, false);
+			font.drawString(str, actBounds.x, actBounds.y, foregroundColor);
+		} else if (hint != null) {
 			font.drawString(hint, actBounds.x, actBounds.y, hintTextColor);
+		}
 		drawSelectionBox(font);
 	}
 	
-	private String getRenderingText(TrueTypeFont font, int width) {
-		return font.trimStringToWidth(text.substring(lineOffset), width, false);
-	}
-	
 	private void remove(int amount) {
-		amount = cursorStart != cursorEnd ? 0 : amount;
-		String s1 = text.substring(0, Math.max(0, cursorStart - amount));
+		int newcw = Math.max(0, Math.min(cursorStart, cursorEnd) - (cursorStart != cursorEnd ? 0 : amount));
+		String s1 = text.substring(0, newcw);
 		String s2 = text.substring(cursorEnd);
 		text = s1 + s2;
+		cursorStart = cursorEnd = newcw;
 	}
 	
 	private void write(char c) {
-		String s1 = text.substring(0, cursorStart);
-		String s2 = text.substring(cursorEnd);
+		int newcw = Math.min(cursorStart, cursorEnd);
+		String s1 = text.substring(0, newcw);
+		String s2 = text.substring(Math.max(cursorStart, cursorEnd));
 		text = s1 + c + s2;
-		cursorStart = cursorEnd = cursorStart + 1;
+		cursorStart = cursorEnd = newcw + 1;
 	}
 
 	private void drawSelectionBox(TrueTypeFont font) {
 		Rectangle actBounds = getPadding().getContentRect(getInnerBounds());
-		int startX = actBounds.x + font.getStringWidth(text.substring(lineOffset, cursorStart));
+		int start = Math.min(cursorStart, cursorEnd);
+		int end = Math.max(cursorStart, cursorEnd);
+		
+		if(lineOffset > start && lineOffset > end)
+			return;
+		
+		int startX = actBounds.x + font.getStringWidth(text.substring(lineOffset, Math.max(lineOffset, start)));
 		int startY = actBounds.y;
-		int endX = actBounds.x + font.getStringWidth(text.substring(lineOffset, cursorEnd));
+		int endX = actBounds.x + font.getStringWidth(text.substring(lineOffset, Math.max(lineOffset, end)));
 		int endY = actBounds.y + actBounds.height;
+		int w = actBounds.x + actBounds.width;
 
-		if (endX > actBounds.x + actBounds.width) {
-			endX = actBounds.x + actBounds.width;
-		}
-
-		if (startX > actBounds.x + actBounds.width) {
-			startX = actBounds.x + actBounds.width;
-		}
-
+		if (text.length() == 0)
+			return;
+		if (endX > w)
+			endX = w;
+		if (startX < 0)
+			startX = 0;
+		if (startX == endX)
+			endX += 1;
+		
 		Tessellator tessellator = Tessellator.getInstance();
 		BufferBuilder bufferbuilder = tessellator.getBuffer();
-		GlStateManager.color(0.0F, 0.0F, 255.0F, 255.0F);
+		GlStateManager.color(0, 0, 0, 255);
 		GlStateManager.disableTexture2D();
 		GlStateManager.enableColorLogic();
 		GlStateManager.colorLogicOp(GlStateManager.LogicOp.OR_REVERSE);
