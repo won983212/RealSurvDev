@@ -10,6 +10,7 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ChatAllowedCharacters;
+import net.minecraft.util.math.MathHelper;
 import won983212.simpleui.DirWeights;
 import won983212.simpleui.UIObject;
 import won983212.simpleui.font.TrueTypeFont;
@@ -35,44 +36,63 @@ public class UITextfield extends UIObject {
 		if(!isFocusd()) {
 			return;
 		}
-		if(GuiScreen.isShiftKeyDown()) {
-			if(i == Keyboard.KEY_LEFT){
+		if(i == Keyboard.KEY_LEFT){
+			if(GuiScreen.isShiftKeyDown()) {
 				if(cursorEnd > 0)
 					cursorEnd--;
-			} else if(i == Keyboard.KEY_RIGHT) {
-				if(cursorEnd < text.length())
-					cursorEnd++;
-			}
-		} else if(GuiScreen.isCtrlKeyDown()) {
-			if(i == Keyboard.KEY_A) { //TODO bug
-				cursorStart = 0;
-				cursorEnd = text.length();
-			}
-		} else if (i == Keyboard.KEY_BACK) {
-			remove(1);
-		} else if (i == Keyboard.KEY_LEFT) {
-			if (cursorStart != cursorEnd) {
+			} else if (cursorStart != cursorEnd) {
 				cursorEnd = cursorStart;
 			} else if (cursorStart > 0) {
 				cursorStart = cursorEnd = cursorStart - 1;
 			}
-		} else if (i == Keyboard.KEY_RIGHT) {
-			if (cursorStart != cursorEnd) {
+		} else if(i == Keyboard.KEY_RIGHT) {
+			if(GuiScreen.isShiftKeyDown()) {
+				if(cursorEnd < text.length())
+					cursorEnd++;
+			} else if (cursorStart != cursorEnd) {
 				cursorEnd = cursorStart;
 			} else if (cursorStart < text.length()) {
 				cursorStart = cursorEnd = cursorStart + 1;
 			}
+		} else if(GuiScreen.isKeyComboCtrlA(i)) {
+			cursorStart = 0;
+			cursorEnd = text.length();
+		} else if(GuiScreen.isKeyComboCtrlC(i) || GuiScreen.isKeyComboCtrlX(i)) {
+			int start = Math.min(cursorStart, cursorEnd);
+			int end = Math.max(cursorStart, cursorEnd);
+			if(start != end) {
+				GuiScreen.setClipboardString(text.substring(start, end));
+				if(GuiScreen.isKeyComboCtrlX(i))
+					remove(0);
+			}
+		} else if(GuiScreen.isKeyComboCtrlV(i)) {
+			write(GuiScreen.getClipboardString());
+		} else if (i == Keyboard.KEY_BACK) {
+			remove(1);
+		} else if (i == Keyboard.KEY_DELETE) {
+			remove(-1);
 		} else if(ChatAllowedCharacters.isAllowedCharacter(c)){
-			write(c);
+			write(String.valueOf(c));
 		}
 		
-		Rectangle actBounds = getPadding().getContentRect(getInnerBounds());
-		String str = getFont().trimStringToWidth(text.substring(lineOffset), actBounds.width, false);
 		if(cursorEnd < lineOffset) {
 			lineOffset = Math.max(0, cursorEnd - 2);
+		} else {
+			Rectangle actBounds = getPadding().getContentRect(getInnerBounds());
+			String txt = text.substring(lineOffset);
+			String str = getFont().trimStringToWidth(txt, actBounds.width, false);
+			if(cursorEnd > lineOffset + str.length()) {
+				lineOffset = Math.max(0, cursorEnd - str.length());
+			}
 		}
-		if(cursorEnd > lineOffset + str.length()) {
-			lineOffset = Math.max(0, cursorEnd - str.length());
+	}
+	
+	@Override
+	public void onPress(int x, int y, int bt) {
+		Rectangle actBounds = getPadding().getContentRect(getInnerBounds());
+		if(x > actBounds.x && x < actBounds.x + actBounds.width) {
+			String str = getFont().trimStringToWidth(text.substring(lineOffset), x - actBounds.x, false);
+			cursorStart = cursorEnd = str.length() + lineOffset;
 		}
 	}
 
@@ -104,47 +124,59 @@ public class UITextfield extends UIObject {
 		} else if (hint != null) {
 			font.drawString(hint, actBounds.x, actBounds.y, hintTextColor);
 		}
-		drawSelectionBox(font);
+		
+		if(isFocusd()) {
+			int start = Math.min(cursorStart, cursorEnd);
+			int end = Math.max(cursorStart, cursorEnd);
+			if(lineOffset <= start || lineOffset <= end) {
+				int sx = actBounds.x + getViewStringWidth(font, start);
+				int ex = actBounds.x + getViewStringWidth(font, end);
+				drawSelectionBox(sx, ex);
+			}
+		}
 	}
 	
 	private void remove(int amount) {
-		int newcw = Math.max(0, Math.min(cursorStart, cursorEnd) - (cursorStart != cursorEnd ? 0 : amount));
-		String s1 = text.substring(0, newcw);
-		String s2 = text.substring(cursorEnd);
-		text = s1 + s2;
-		cursorStart = cursorEnd = newcw;
+		int sub1, sub2;
+		if(cursorStart != cursorEnd) {
+			sub1 = Math.max(0, Math.min(cursorStart, cursorEnd));
+			sub2 = Math.max(cursorStart, cursorEnd);
+		} else if(amount < 0){
+			sub1 = Math.min(cursorStart, cursorEnd);
+			sub2 = Math.min(text.length(), Math.max(cursorStart, cursorEnd) - amount);
+		} else {
+			sub1 = Math.max(0, Math.min(cursorStart, cursorEnd) - amount);
+			sub2 = Math.max(cursorStart, cursorEnd);
+		}
+		text = text.substring(0, sub1) + text.substring(sub2);
+		cursorStart = cursorEnd = sub1;
 	}
 	
-	private void write(char c) {
+	private void write(String str) {
 		int newcw = Math.min(cursorStart, cursorEnd);
 		String s1 = text.substring(0, newcw);
 		String s2 = text.substring(Math.max(cursorStart, cursorEnd));
-		text = s1 + c + s2;
-		cursorStart = cursorEnd = newcw + 1;
+		text = s1 + str + s2;
+		cursorStart = cursorEnd = newcw + str.length();
 	}
 
-	private void drawSelectionBox(TrueTypeFont font) {
+	private int getViewStringWidth(TrueTypeFont font, int index) {
+		return font.getStringWidth(text.substring(lineOffset, Math.max(lineOffset, index)));
+	}
+	
+	private void drawSelectionBox(int startX, int endX) {
 		Rectangle actBounds = getPadding().getContentRect(getInnerBounds());
-		int start = Math.min(cursorStart, cursorEnd);
-		int end = Math.max(cursorStart, cursorEnd);
-		
-		if(lineOffset > start && lineOffset > end)
-			return;
-		
-		int startX = actBounds.x + font.getStringWidth(text.substring(lineOffset, Math.max(lineOffset, start)));
 		int startY = actBounds.y;
-		int endX = actBounds.x + font.getStringWidth(text.substring(lineOffset, Math.max(lineOffset, end)));
 		int endY = actBounds.y + actBounds.height;
 		int w = actBounds.x + actBounds.width;
 
 		if (text.length() == 0)
 			return;
-		if (endX > w)
-			endX = w;
-		if (startX < 0)
-			startX = 0;
-		if (startX == endX)
-			endX += 1;
+		
+		endX = MathHelper.clamp(endX, 0, w);
+		startX = MathHelper.clamp(startX, 0, w);
+		if (startX >= endX)
+			endX = startX + 1;
 		
 		Tessellator tessellator = Tessellator.getInstance();
 		BufferBuilder bufferbuilder = tessellator.getBuffer();
