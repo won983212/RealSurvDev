@@ -15,10 +15,7 @@ import won983212.simpleui.DirWeights;
 import won983212.simpleui.UIObject;
 import won983212.simpleui.font.TrueTypeFont;
 
-//TODO Implement it without Guitextfield.
 public class UITextfield extends UIObject {
-	private static final int LineOffsetAmount = 5;
-	
 	private String hint = null;
 	private String text = "";
 	private int cursorStart = 0;
@@ -38,30 +35,38 @@ public class UITextfield extends UIObject {
 		}
 		if(i == Keyboard.KEY_LEFT){
 			if(GuiScreen.isShiftKeyDown()) {
-				if(cursorEnd > 0)
-					cursorEnd--;
+				if(GuiScreen.isCtrlKeyDown()) {
+					setMovingCursor(getNextWordPos(-1, cursorEnd));
+				} else {
+					setMovingCursor(cursorEnd - 1);
+				}
+			} else if(GuiScreen.isCtrlKeyDown()) {
+				setCursorPosition(getNextWordPos(-1, cursorEnd));
 			} else if (cursorStart != cursorEnd) {
-				cursorEnd = cursorStart;
+				setCursorPosition(Math.min(cursorStart, cursorEnd));
 			} else if (cursorStart > 0) {
-				cursorStart = cursorEnd = cursorStart - 1;
+				setCursorPosition(cursorStart - 1);
 			}
 		} else if(i == Keyboard.KEY_RIGHT) {
 			if(GuiScreen.isShiftKeyDown()) {
-				if(cursorEnd < text.length())
-					cursorEnd++;
+				if(GuiScreen.isCtrlKeyDown()) {
+					setMovingCursor(getNextWordPos(1, cursorEnd));
+				} else {
+					setMovingCursor(cursorEnd + 1);
+				}
+			} else if(GuiScreen.isCtrlKeyDown()) {
+				setCursorPosition(getNextWordPos(1, cursorEnd));
 			} else if (cursorStart != cursorEnd) {
-				cursorEnd = cursorStart;
+				setCursorPosition(Math.max(cursorStart, cursorEnd));
 			} else if (cursorStart < text.length()) {
-				cursorStart = cursorEnd = cursorStart + 1;
+				setCursorPosition(cursorStart + 1);
 			}
 		} else if(GuiScreen.isKeyComboCtrlA(i)) {
-			cursorStart = 0;
-			cursorEnd = text.length();
+			setAnchorCursor(0);
+			setMovingCursor(text.length());
 		} else if(GuiScreen.isKeyComboCtrlC(i) || GuiScreen.isKeyComboCtrlX(i)) {
-			int start = Math.min(cursorStart, cursorEnd);
-			int end = Math.max(cursorStart, cursorEnd);
-			if(start != end) {
-				GuiScreen.setClipboardString(text.substring(start, end));
+			if(cursorStart != cursorEnd) {
+				GuiScreen.setClipboardString(getSelectedString());
 				if(GuiScreen.isKeyComboCtrlX(i))
 					remove(0);
 			}
@@ -74,17 +79,6 @@ public class UITextfield extends UIObject {
 		} else if(ChatAllowedCharacters.isAllowedCharacter(c)){
 			write(String.valueOf(c));
 		}
-		
-		if(cursorEnd < lineOffset) {
-			lineOffset = Math.max(0, cursorEnd - 2);
-		} else {
-			Rectangle actBounds = getPadding().getContentRect(getInnerBounds());
-			String txt = text.substring(lineOffset);
-			String str = getFont().trimStringToWidth(txt, actBounds.width, false);
-			if(cursorEnd > lineOffset + str.length()) {
-				lineOffset = Math.max(0, cursorEnd - str.length());
-			}
-		}
 	}
 	
 	@Override
@@ -92,7 +86,7 @@ public class UITextfield extends UIObject {
 		Rectangle actBounds = getPadding().getContentRect(getInnerBounds());
 		if(x > actBounds.x && x < actBounds.x + actBounds.width) {
 			String str = getFont().trimStringToWidth(text.substring(lineOffset), x - actBounds.x, false);
-			cursorStart = cursorEnd = str.length() + lineOffset;
+			setCursorPosition(str.length() + lineOffset);
 		}
 	}
 
@@ -136,6 +130,26 @@ public class UITextfield extends UIObject {
 		}
 	}
 	
+	private int getNextWordPos(int n, int pos) {
+		int i = pos;
+		boolean flag = n < 0;
+		int j = Math.abs(n);
+		for (int k = 0; k < j; ++k) {
+			if (!flag) {
+				int l = this.text.length();
+				i = this.text.indexOf(32, i);
+				if (i == -1)
+					i = l;
+				else while (i < l && this.text.charAt(i) == ' ') ++i;
+			} else {
+				while (i > 0 && this.text.charAt(i - 1) == ' ') --i;
+				while (i > 0 && this.text.charAt(i - 1) != ' ') --i;
+			}
+		}
+
+		return i;
+	}
+	
 	private void remove(int amount) {
 		int sub1, sub2;
 		if(cursorStart != cursorEnd) {
@@ -149,7 +163,7 @@ public class UITextfield extends UIObject {
 			sub2 = Math.max(cursorStart, cursorEnd);
 		}
 		text = text.substring(0, sub1) + text.substring(sub2);
-		cursorStart = cursorEnd = sub1;
+		setCursorPosition(sub1);
 	}
 	
 	private void write(String str) {
@@ -157,7 +171,7 @@ public class UITextfield extends UIObject {
 		String s1 = text.substring(0, newcw);
 		String s2 = text.substring(Math.max(cursorStart, cursorEnd));
 		text = s1 + str + s2;
-		cursorStart = cursorEnd = newcw + str.length();
+		setCursorPosition(newcw + str.length());
 	}
 
 	private int getViewStringWidth(TrueTypeFont font, int index) {
@@ -194,6 +208,44 @@ public class UITextfield extends UIObject {
 		GlStateManager.enableTexture2D();
 	}
 
+	public void setAnchorCursor(int pos) {
+		if(pos < 0)
+			pos = 0;
+		if(pos > text.length())
+			pos = text.length();
+		cursorStart = pos;
+	}
+	
+	public void setMovingCursor(int pos) {
+		if(pos < 0)
+			pos = 0;
+		if(pos > text.length())
+			pos = text.length();
+		
+		cursorEnd = pos;
+		if(cursorEnd < lineOffset) {
+			lineOffset = Math.max(0, cursorEnd - 2);
+		} else {
+			Rectangle actBounds = getPadding().getContentRect(getInnerBounds());
+			String txt = text.substring(lineOffset);
+			String str = getFont().trimStringToWidth(txt, actBounds.width, false);
+			if(cursorEnd > lineOffset + str.length()) {
+				lineOffset = Math.max(0, cursorEnd - str.length());
+			}
+		}
+	}
+	
+	public void setCursorPosition(int pos) {
+		setAnchorCursor(pos);
+		setMovingCursor(pos);
+	}
+	
+	public String getSelectedString() {
+		int start = Math.min(cursorStart, cursorEnd);
+		int end = Math.max(cursorStart, cursorEnd);
+		return text.substring(start, end);
+	}
+	
 	public UITextfield setHint(String hint) {
 		this.hint = hint;
 		return this;

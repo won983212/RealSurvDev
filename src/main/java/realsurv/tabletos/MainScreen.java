@@ -27,27 +27,6 @@ public class MainScreen extends RootPane {
 		setScaledFactor(0);
 	}
 
-	private TrueTypeFont font = FontFactory.makeFont("맑은 고딕", 14);
-	@Override
-	public void render(int mouseX, int mouseY) {
-		super.render(mouseX, mouseY);
-		String str[] = {
-			"§l@동해물§r과 §l§m§o백두산§r이 §a마르고 §c닳도록 §l하느§o님이§r 보우하사 우리 나라만세.",
-			"دّث بلغة يونيكود. تسجّل الآن لحضور المؤتمر الدولي العاشر ليونيكود (Unicode Conference)، الذ",
-			"Item1",
-			"Item2",
-			"Item3",
-			"29135690123589235",
-			"00000000000000000",
-			"<Player175436> Nice to meet you?"
-		};
-		for(int i=0;i<str.length;i++) {
-			String ent = str[i];
-			Gui.drawRect(10, 10 + i * 15, 10 + font.getStringWidth(ent), 10 + (i + 1) * 15, 0xff000000);
-			font.drawString(ent, 10, 10 + i * 15, 0xffffffff);
-		}
-	}
-
 	@Override
 	protected void initGui() {
 		add(new UIImage("realsurv:ui/wallpaper.png"));
@@ -93,7 +72,7 @@ public class MainScreen extends RootPane {
 			if (keyCode == Keyboard.KEY_T) {
 				initializePanel();
 			} else if (keyCode == Keyboard.KEY_R) {
-				font.clearCache();
+				//font.clearCache();
 			}
 		}
 		super.onKeyTyped(keyCode, typedChar);
