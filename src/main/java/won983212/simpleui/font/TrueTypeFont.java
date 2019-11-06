@@ -2,6 +2,7 @@ package won983212.simpleui.font;
 
 import java.awt.Font;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.font.GlyphVector;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ import com.ibm.icu.text.ArabicShapingException;
 import com.ibm.icu.text.Bidi;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
@@ -36,7 +38,13 @@ public class TrueTypeFont {
 	private static class FormattedString {
 		public WeakReference<String> keyReference;
 		public int advance;
+		public int maxHeight;
 		public ArrangedGlyph[] glyphs;
+	}
+	
+	private static class FormattedChunkInfo {
+		public int advance;
+		public int maxHeight;
 	}
 
 	private static final int UNDERLINE = 1;
@@ -165,10 +173,13 @@ public class TrueTypeFont {
 					bidiIndexMap[i] = i;
 			}
 			
+			FormattedChunkInfo info;
 			value = new FormattedString();
 			value.keyReference = new WeakReference<String>(newKeyString);
-			value.advance = layoutStyle(str.toCharArray(), glyphList, 0, str.length(), 0, bidiIndexMap);
+			info = layoutStyle(str.toCharArray(), glyphList, 0, str.length(), 0, bidiIndexMap);
 			value.glyphs = glyphList.toArray(new ArrangedGlyph[glyphList.size()]);
+			value.advance = info.advance;
+			value.maxHeight = info.maxHeight;
 			stringCache.put(newKeyString, value);
 		}
 		String keyRef = value.keyReference.get();
@@ -178,31 +189,44 @@ public class TrueTypeFont {
 		return value;
 	}
 
-	private int layoutStyle(char[] str, ArrayList<ArrangedGlyph> glyphs, int start, int limit, int advance, int[] bidiIdxMap) {
+	private FormattedChunkInfo layoutStyle(char[] str, ArrayList<ArrangedGlyph> glyphs, int start, int limit, int advance, int[] bidiIdxMap) {
+		FormattedChunkInfo ret = new FormattedChunkInfo();
+		ret.advance = advance;
+		ret.maxHeight = 0;
+		
 		fontStyle = specialStyle = 0;
 		colorIdx = -1;
+		
 		for (int i = start; i < limit; i++) {
 			if (str[i] == '§' && i < str.length - 1) {
 				if ("0123456789abcdefmnrlo".indexOf(str[i + 1]) != -1) {
-					advance = layoutMissingGlyphs(str, glyphs, start, i, advance, bidiIdxMap);
+					FormattedChunkInfo info = layoutMissingGlyphs(str, glyphs, start, i, ret.advance, bidiIdxMap);
+					ret.advance = info.advance;
+					ret.maxHeight = Math.max(ret.maxHeight, info.maxHeight);
 					applyStyle(str[i + 1]);
 					start = ++i + 1;
 				}
 			}
 		}
-		return layoutMissingGlyphs(str, glyphs, start, limit, advance, bidiIdxMap);
+		return layoutMissingGlyphs(str, glyphs, start, limit, ret.advance, bidiIdxMap);
 	}
 
-	private int layoutMissingGlyphs(char[] str, ArrayList<ArrangedGlyph> glyphs, int start, int limit, int advance, int[] bidiIdxMap) {
+	private FormattedChunkInfo layoutMissingGlyphs(char[] str, ArrayList<ArrangedGlyph> glyphs, int start, int limit, int advance, int[] bidiIdxMap) {
+		FormattedChunkInfo ret = new FormattedChunkInfo();
+		ret.advance = advance;
+		ret.maxHeight = 0;
+		
 		if(start == limit)
-			return advance;
+			return ret;
 		
 		int end = start;
 		int lastSize = glyphs.size();
 		while (start < limit) {
 			int offset = font[fontStyle].canDisplayUpTo(str, start, limit);
 			if (offset == -1) {
-				advance = layoutGlyphs(str, glyphs, start, limit, advance, bidiIdxMap, font[fontStyle]);
+				FormattedChunkInfo info = layoutGlyphs(str, glyphs, start, limit, ret.advance, bidiIdxMap, font[fontStyle]);
+				ret.advance = info.advance;
+				ret.maxHeight = Math.max(ret.maxHeight, info.maxHeight);
 				break;
 			}
 			if (offset == start) {
@@ -211,9 +235,12 @@ public class TrueTypeFont {
 				end = offset;
 			}
 			Font f = font[fontStyle];
-			if(offset == start)
+			if(offset == start) {
 				f = FontFactory.findSubstitutionJavaFont(str[start], font[0].getSize(), fontStyle);
-			advance = layoutGlyphs(str, glyphs, start, end, advance, bidiIdxMap, f);
+			}
+			FormattedChunkInfo info = layoutGlyphs(str, glyphs, start, end, ret.advance, bidiIdxMap, f);
+			ret.advance = info.advance;
+			ret.maxHeight = Math.max(ret.maxHeight, info.maxHeight);
 			start = end;
 		}
 		
@@ -224,24 +251,29 @@ public class TrueTypeFont {
 			endGlyph.specialStyle |= specialStyle & (UNDERLINE | STRIKE_THROUGH);
 		}
 		
-		return advance;
+		return ret;
 	}
 
-	private int layoutGlyphs(char[] str, ArrayList<ArrangedGlyph> glyphs, int start, int limit, int advance, int[] bidiIdxMap, Font font) {
+	private FormattedChunkInfo layoutGlyphs(char[] str, ArrayList<ArrangedGlyph> glyphs, int start, int limit, int advance, int[] bidiIdxMap, Font font) {
+		FormattedChunkInfo ret = new FormattedChunkInfo();
+		ret.advance = advance;
+		ret.maxHeight = 0;
+		
 		if (start == limit)
-			return advance;
+			return ret;
 
 		GlyphTexture[] textures = glyphTextures.cacheGlyphs(font, str, start, limit, fontStyle);
 		GlyphVector vec = glyphTextures.layoutGlyphVector(font, str, start, limit, Font.LAYOUT_LEFT_TO_RIGHT);
 		float[] locations = vec.getGlyphPositions(0, limit - start + 1, null);
 		int offsetY = glyphTextures.getAscent(fontStyle) - glyphTextures.getDescent(fontStyle);
-
+		int maxHeight = vec.getPixelBounds(null, 0, 0).height;
+		
 		for (int i = 0; i < limit - start; i++) {
-			Point pos = vec.getGlyphPixelBounds(i, null, advance, offsetY).getLocation();
+			Rectangle bounds = vec.getGlyphPixelBounds(i, null, advance, offsetY);
 			ArrangedGlyph glyph = new ArrangedGlyph();
 			glyph.index = bidiIdxMap[start + i];
-			glyph.x = pos.x;
-			glyph.y = pos.y;
+			glyph.x = bounds.x;
+			glyph.y = bounds.y;
 			glyph.colorIndex = colorIdx;
 			glyph.fontStyle = fontStyle;
 			glyph.texture = textures[i];
@@ -249,7 +281,9 @@ public class TrueTypeFont {
 			glyphs.add(glyph);
 		}
 
-		return (int) locations[locations.length - 2] + advance;
+		ret.advance = (int) locations[locations.length - 2] + advance;
+		ret.maxHeight = maxHeight;
+		return ret;
 	}
 
 	private int renderString(String str, double x, double y, int color, boolean shadow) {
@@ -286,7 +320,7 @@ public class TrueTypeFont {
 				}
 				
 				final double minX = x + (glyph.x - GlyphTextureCache.GLYPH_PADDING + offsetX) / scaleModifier;
-				final double minY = y + (glyph.y - GlyphTextureCache.GLYPH_PADDING) / scaleModifier;
+				final double minY = y - 1 + (glyph.y - GlyphTextureCache.GLYPH_PADDING) / scaleModifier;
 				final double maxX = minX + tex.width / scaleModifier;
 				final double maxY = minY + tex.height / scaleModifier;
 
@@ -363,6 +397,10 @@ public class TrueTypeFont {
 
 	public int getStringWidth(String str) {
 		return (int) (cacheString(str).advance / scaleModifier);
+	}
+	
+	public int getStringHeight(String str) {
+		return (int) (cacheString(str).maxHeight / scaleModifier);
 	}
 
 	public String trimStringToWidth(String str, int wrapWidth, boolean reverse) {

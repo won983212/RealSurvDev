@@ -2,26 +2,32 @@ package realsurv.tabletos;
 
 import org.lwjgl.input.Keyboard;
 
-import net.minecraft.client.gui.Gui;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.World;
 import won983212.simpleui.DirWeights;
 import won983212.simpleui.GridPanel;
 import won983212.simpleui.GridPanel.LengthDefinition;
 import won983212.simpleui.GridPanel.LengthType;
 import won983212.simpleui.HorizontalArrange;
 import won983212.simpleui.RootPane;
+import won983212.simpleui.StackPanel;
+import won983212.simpleui.StackPanel.Orientation;
 import won983212.simpleui.UIPanel;
 import won983212.simpleui.VerticalArrange;
 import won983212.simpleui.element.UIButton;
 import won983212.simpleui.element.UICheckbox;
 import won983212.simpleui.element.UICombobox;
 import won983212.simpleui.element.UIImage;
+import won983212.simpleui.element.UILabel;
 import won983212.simpleui.element.UIRectangle;
 import won983212.simpleui.element.UITextfield;
-import won983212.simpleui.font.FontFactory;
-import won983212.simpleui.font.TrueTypeFont;
 
 public class MainScreen extends RootPane {
+	private UIImage timeTexture;
+	private UILabel timeLabel;
+	
 	public MainScreen() {
 		super(TabletOS.WIDTH, TabletOS.HEIGHT);
 		setScaledFactor(0);
@@ -32,16 +38,26 @@ public class MainScreen extends RootPane {
 		add(new UIImage("realsurv:ui/wallpaper.png"));
 
 		GridPanel contents = new GridPanel();
-		contents.addRow(new LengthDefinition(LengthType.FIXED, 20));
+		contents.addRow(new LengthDefinition(LengthType.FIXED, 24));
 		contents.addRow(new LengthDefinition(LengthType.ALLOCATED, 1));
 		contents.addEmptyColumn();
 
 		UIPanel taskbar = new UIPanel();
-		// taskbar.add(new
-		// UILabel().setLabel("Remember").setForegroundColor(0xffffffff));
-		// taskbar.add(new
-		// UIRectangle().setShadowVisible(false).setRadius(0).setBackgroundColor(0xaa000000).setLayoutSpan(2,
-		// 1));
+		taskbar.add(new UIRectangle().setShadowVisible(false).setRadius(0).setBackgroundColor(0xcc000000)
+				.setLayoutSpan(2, 1));
+		taskbar.add(new UILabel().setLabel("§lApp Internet").setVerticalArrange(VerticalArrange.CENTER)
+				.setHorizontalArrange(HorizontalArrange.CENTER).setForegroundColor(0xffffffff));
+		
+		StackPanel timePanel = new StackPanel();
+		timePanel.setOrientation(Orientation.HORIZONTAL);
+		
+		timeTexture = new UIImage("minecraft:textures/items/clock_00.png");
+		timePanel.add(timeTexture.setMinimumSize(16, 16));
+		
+		timeLabel = new UILabel().setLabel("Unknown");
+		timePanel.add(timeLabel.setVerticalArrange(VerticalArrange.CENTER).setMargin(new DirWeights(0, 0, 2, 3)).setForegroundColor(0xffffffff));
+		
+		taskbar.add(timePanel.setVerticalArrange(VerticalArrange.CENTER).setHorizontalArrange(HorizontalArrange.RIGHT));
 		contents.add(taskbar);
 
 		GridPanel loginForm = new GridPanel();
@@ -63,6 +79,18 @@ public class MainScreen extends RootPane {
 		loginForm.add(new UICombobox().add("Item1").add("Item2").add("Item3").setMargin(new DirWeights(0, 0, 4, 4)).setLayoutSpan(2, 1).setLayoutPosition(0, 3));
 		contents.add(loginForm);
 		add(contents);
+	}
+	
+	@Override
+	public void render(int mouseX, int mouseY) {
+		World world = Minecraft.getMinecraft().world;
+		if(world != null) {
+			int id = (int) MathHelper.clamp(TimeUtil.getTimeAngle(world) * 64, 0, 63);
+			String idText = id < 10 ? ("0" + id) : String.valueOf(id);
+			timeLabel.setLabel(String.valueOf(world.getWorldTime())); // TODO Time to formatted time.
+			timeTexture.setImage("minecraft:textures/items/clock_" + idText + ".png");
+		}
+		super.render(mouseX, mouseY);
 	}
 
 	@Override
