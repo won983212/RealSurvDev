@@ -4,17 +4,16 @@ import java.awt.Dimension;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ResourceLocation;
 import won983212.simpleui.UIObject;
+import won983212.simpleui.UVBounds;
 
 public class UIImage extends UIObject {
 	private ResourceLocation loc;
-	private double minU = 0;
-	private double minV = 0;
-	private double maxU = 1;
-	private double maxV = 1;
+	private UVBounds uv = new UVBounds();
 	private int texWidth = 0;
 	private int texHeight = 0;
 	
@@ -27,11 +26,13 @@ public class UIImage extends UIObject {
 		return this;
 	}
 
+	public UIImage setUV(UVBounds bounds) {
+		uv = new UVBounds(bounds);
+		return this;
+	}
+	
 	public UIImage setUVArea(double minU, double minV, double maxU, double maxV) {
-		this.minU = minU;
-		this.minV = minV;
-		this.maxU = maxU;
-		this.maxV = maxV;
+		uv.setUV(minU, minV, maxU, maxV);
 		return this;
 	}
 
@@ -46,13 +47,9 @@ public class UIImage extends UIObject {
 	 */
 	public UIImage setUVAreaPixel(int u, int v, int width, int height) {
 		if(texWidth < 1 || texHeight < 1) {
-			minU = minV = 0;
-			maxU = maxV = 1;
+			uv.setUV(0, 0, 1, 1);
 		} else {
-			minU = u / (double) texWidth;
-			minV = v / (double) texHeight;
-			maxU = (u + width) / (double) texWidth;
-			maxV = (v + height) / (double) texHeight;
+			uv.setUVPixel(u, v, width, height, texWidth, texHeight);
 		}
 		return this;
 	}
@@ -63,11 +60,13 @@ public class UIImage extends UIObject {
 		Minecraft.getMinecraft().getTextureManager().bindTexture(loc);
 		Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder bufferbuilder = tessellator.getBuffer();
+        GlStateManager.enableTexture2D();
+        GlStateManager.color(1, 1, 1, 1);
         bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX);
-        bufferbuilder.pos(0, 0, 0).tex(minU, minV).endVertex();
-        bufferbuilder.pos(0, size.height, 0).tex(minU, maxV).endVertex();
-        bufferbuilder.pos(size.width, size.height, 0).tex(maxU, maxV).endVertex();
-        bufferbuilder.pos(size.width, 0, 0).tex(maxU, minV).endVertex();
+        bufferbuilder.pos(0, 0, 0).tex(uv.minU, uv.minV).endVertex();
+        bufferbuilder.pos(0, size.height, 0).tex(uv.minU, uv.maxV).endVertex();
+        bufferbuilder.pos(size.width, size.height, 0).tex(uv.maxU, uv.maxV).endVertex();
+        bufferbuilder.pos(size.width, 0, 0).tex(uv.maxU, uv.minV).endVertex();
         tessellator.draw();
 	}
 }

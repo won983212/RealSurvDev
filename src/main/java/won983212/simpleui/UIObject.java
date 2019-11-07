@@ -20,7 +20,7 @@ public abstract class UIObject {
 	private Dimension minSize = new Dimension(10, 10);
 	private DirWeights margin = new DirWeights();
 	private DirWeights padding = new DirWeights();
-	private TrueTypeFont font = FontFactory.makeFont(Font.SANS_SERIF, 14);
+	private TrueTypeFont font = FontFactory.makeFont(Font.SANS_SERIF, 12);
 	private boolean visible = true;
 	protected int backgroundColor = 0xffffffff;
 	protected int foregroundColor = 0xff000000;

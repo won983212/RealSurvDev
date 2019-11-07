@@ -18,7 +18,6 @@ public class RootPane extends UIPanel {
 
 	public RootPane(int width, int height) {
 		screenSize = new Dimension(width, height);
-		initializePanel();
 	}
 
 	private Point getCenteredGuiCoords(int x, int y, boolean clamp) {
