@@ -8,7 +8,10 @@ import java.awt.Rectangle;
 import org.lwjgl.opengl.GL11;
 
 import net.minecraft.client.gui.Gui;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.math.MathHelper;
 import won983212.simpleui.font.FontFactory;
 import won983212.simpleui.font.TrueTypeFont;
@@ -266,15 +269,18 @@ public abstract class UIObject {
 	
 	private static void pushVertexArc(int x, int y, int fromDegree, int toDegree, int r) {
 		final int step = (int)(r * Math.PI / 2);
-		GlStateManager.glBegin(GL11.GL_POLYGON);
-		GlStateManager.glVertex3f(x, y, 0);
+		Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder bufferbuilder = tessellator.getBuffer();
+        
+		bufferbuilder.begin(GL11.GL_POLYGON, DefaultVertexFormats.POSITION);
+		bufferbuilder.pos(x, y, 0).endVertex();
 		for(int t=0;t<=step;t++) {
 			double theta = (fromDegree+((toDegree-fromDegree)/(double)step)*t)*Math.PI/180;
 			float xf = (float)(x + r*Math.cos(theta));
 			float yf = (float)(y + r*Math.sin(theta));
-			GlStateManager.glVertex3f(xf, yf, 0);
+			bufferbuilder.pos(xf, yf, 0).endVertex();
 		}
-		GlStateManager.glEnd();
+		tessellator.draw();
 	}
 	
 	public static void renderArcRect(int x1, int y1, int x2, int y2, int arc, int color, boolean shadow) {
@@ -292,7 +298,7 @@ public abstract class UIObject {
 		Gui.drawRect(x1, y1 + arc, x1 + arc, y2 - arc, color);
 		Gui.drawRect(x2 - arc, y1 + arc, x2, y2 - arc, color);
 		Gui.drawRect(x1 + arc, y1 + arc, x2 - arc, y2 - arc, color);
-		
+
 		GlStateManager.disableTexture2D();
 		GlStateManager.enableBlend();
 		GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);

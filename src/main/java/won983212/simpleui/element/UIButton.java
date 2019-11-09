@@ -13,7 +13,7 @@ public class UIButton extends UIObject {
 	private String label;
 	private IButtonEvent event;
 	private boolean clicking = false;
-	private ColorAnimation hoverColorAnimation = new ColorAnimation(Animation.MOUSEOVER_DURATION);
+	private ColorAnimation hoverColorAnimation = new ColorAnimation(Animation.MOUSELEAVE_DURATION);
 	private boolean isEnteredMouse = false;
 	
 	public UIButton(String label) {
@@ -45,6 +45,8 @@ public class UIButton extends UIObject {
 		hoverColorAnimation.setRange(backgroundColor, getMouseOverColor(backgroundColor));
 		if(isEnteredMouse != isIn) {
 			isEnteredMouse = isIn;
+			if(isIn)
+				hoverColorAnimation.setTime(0);
 			hoverColorAnimation.play(!isIn);
 		}
 		

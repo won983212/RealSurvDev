@@ -3,8 +3,11 @@ package won983212.simpleui.animation;
 import net.minecraft.util.math.MathHelper;
 
 public abstract class Animation<T> {
-	public static final int MOUSEOVER_DURATION = 200;
+	public static final int MOUSELEAVE_DURATION = 200;
 	public static final int FOCUS_DURATION = 200;
+	public static final int MENUOPEN_DURATION = 200;
+	public static final int STATECHANGE_DURATION = 200;
+	
 	private int duration = 0;
 	private float time = 0; // [0;1]
 	private long lastTick = 0;
@@ -16,6 +19,14 @@ public abstract class Animation<T> {
 	
 	public void setDuration(int millis) {
 		this.duration = millis;
+	}
+	
+	public void setTime(float time) {
+		if(time < 0)
+			time = 0;
+		if(time > 1)
+			time = 1;
+		lastTick = System.currentTimeMillis() - (long) (time * duration);
 	}
 	
 	public boolean isAnimating() {

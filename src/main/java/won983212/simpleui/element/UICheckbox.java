@@ -8,8 +8,10 @@ import won983212.simpleui.font.TrueTypeFont;
 public class UICheckbox extends UIObject {
 	private boolean checked = false;
 	private String label;
-	private ColorAnimation hoverColorAnimation = new ColorAnimation(Animation.MOUSEOVER_DURATION);
+	private ColorAnimation hoverColorAnimation = new ColorAnimation(Animation.MOUSELEAVE_DURATION);
+	private ColorAnimation checkAnimation = new ColorAnimation(Animation.STATECHANGE_DURATION);
 	private boolean isEnteredMouse = false;
+	private boolean lastChecked = false;
 	
 	public boolean isChecked() {
 		return checked;
@@ -42,12 +44,19 @@ public class UICheckbox extends UIObject {
 		hoverColorAnimation.setRange(backgroundColor, getMouseOverColor(backgroundColor));
 		if(isEnteredMouse != isIn) {
 			isEnteredMouse = isIn;
+			if(isIn)
+				hoverColorAnimation.setTime(0);
 			hoverColorAnimation.play(!isIn);
 		}
 		
 		renderArcRect(0, y, 9, y + 9, arc, hoverColorAnimation.get(), showShadow);
-		if(checked)
-			renderArcRect(1, y + 1, showShadow ? 7 : 8, y + (showShadow ? 7 : 8), arc, 0xff000000, false);
+		if(lastChecked != checked) {
+			lastChecked = checked;
+			checkAnimation.setRange(backgroundColor, 0xff000000);
+			checkAnimation.play(!checked);
+		}
+		
+		renderArcRect(1, y + 1, showShadow ? 7 : 8, y + (showShadow ? 7 : 8), arc, checkAnimation.get(), false);
 		getFont().drawString(label, 11, (h - font.getMaxHeight()) / 2 + 1, foregroundColor);
 	}
 }

@@ -24,7 +24,7 @@ public class UITextfield extends UIObject {
 	private int cursorEnd = 0;
 	private int lineOffset = 0;
 	private int hintTextColor = 0xff999999;
-	private ColorAnimation hoverColorAnimation = new ColorAnimation(Animation.MOUSEOVER_DURATION);
+	private ColorAnimation hoverColorAnimation = new ColorAnimation(Animation.MOUSELEAVE_DURATION);
 	private ColorAnimation focusColorAnimation = new ColorAnimation(Animation.FOCUS_DURATION);
 	private boolean isEnteredMouse = false;
 
@@ -105,6 +105,8 @@ public class UITextfield extends UIObject {
 		hoverColorAnimation.setRange(backgroundColor, getMouseOverColor(backgroundColor));
 		if(isEnteredMouse != isIn) {
 			isEnteredMouse = isIn;
+			if(isIn)
+				hoverColorAnimation.setTime(0);
 			hoverColorAnimation.play(!isIn);
 		}
 		

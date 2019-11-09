@@ -7,7 +7,7 @@ public class ColorAnimation extends Animation<Integer> {
 	public ColorAnimation(int duration) {
 		super(duration);
 	}
-
+	
 	public void setRange(int start, int end) {
 		this.startColor = start;
 		this.endColor = end;

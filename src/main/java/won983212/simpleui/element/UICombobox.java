@@ -26,7 +26,7 @@ public class UICombobox extends UIObject implements IItemSelectedEvent {
 	private UIMenu menu = new UIMenu();
 	private int selected = 0;
 	private int maxLength = 10;
-	private ColorAnimation hoverColorAnimation = new ColorAnimation(Animation.MOUSEOVER_DURATION);
+	private ColorAnimation hoverColorAnimation = new ColorAnimation(Animation.MOUSELEAVE_DURATION);
 	private boolean isEnteredMouse = false;
 
 	public UICombobox() {
@@ -105,6 +105,8 @@ public class UICombobox extends UIObject implements IItemSelectedEvent {
 		hoverColorAnimation.setRange(backgroundColor, getMouseOverColor(backgroundColor));
 		if(isEnteredMouse != isIn) {
 			isEnteredMouse = isIn;
+			if(isIn)
+				hoverColorAnimation.setTime(0);
 			hoverColorAnimation.play(!isIn);
 		}
 		
