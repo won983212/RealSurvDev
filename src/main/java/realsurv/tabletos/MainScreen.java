@@ -16,9 +16,13 @@ import won983212.simpleui.StackPanel.Orientation;
 import won983212.simpleui.UIPanel;
 import won983212.simpleui.UVBounds;
 import won983212.simpleui.VerticalArrange;
+import won983212.simpleui.element.UIButton;
+import won983212.simpleui.element.UICheckbox;
+import won983212.simpleui.element.UICombobox;
 import won983212.simpleui.element.UIImage;
 import won983212.simpleui.element.UILabel;
 import won983212.simpleui.element.UIRectangle;
+import won983212.simpleui.element.UITextfield;
 
 public class MainScreen extends RootPane {
 	private ArrayList<DesktopAppInfo> desktopApps = new ArrayList<>();
@@ -28,15 +32,19 @@ public class MainScreen extends RootPane {
 	public MainScreen() {
 		super(TabletOS.WIDTH, TabletOS.HEIGHT);
 		setScaledFactor(0);
-		addDesktopApp("Banking0", 0, 0);
-		addDesktopApp("Banking1", 0, 0);
-		addDesktopApp("Banking2", 0, 0);
-		addDesktopApp("Banking3", 0, 0);
+		registerDesktopApps();
 		initializePanel();
 	}
 	
+	private void registerDesktopApps() {
+		addDesktopApp("Banking", 0, 0);
+		addDesktopApp("인터넷뱅킹", 0, 0);
+		addDesktopApp("은행", 0, 0);
+		addDesktopApp("BANK", 0, 0);
+	}
+	
 	private void addDesktopApp(String name, int iconX, int iconY) {
-		desktopApps.add(new DesktopAppInfo(name, new UVBounds(iconX, iconY, 64, 64, 512, 512)));
+		desktopApps.add(new DesktopAppInfo(name, new UVBounds(iconX, iconY, 48, 48, 512, 512)));
 	}
 
 	@Override
@@ -79,16 +87,17 @@ public class MainScreen extends RootPane {
 			}
 			for (int i = 0; i < desktopApps.size(); i++) {
 				DesktopAppInfo app = desktopApps.get(i);
-				apps.add(new UIImage("realsurv:ui/appIcons.png").setUV(app.appIcon).setMinimumSize(64, 64)
+				apps.add(new UIImage("realsurv:ui/appIcons.png").setUV(app.appIcon).setMinimumSize(48, 48)
 						.setHorizontalArrange(HorizontalArrange.CENTER).setVerticalArrange(VerticalArrange.CENTER)
 						.setLayoutPosition(i, 0));
-				apps.add(new UILabel().setLabel(app.appName).setHorizontalArrange(HorizontalArrange.CENTER)
-						.setVerticalArrange(VerticalArrange.CENTER).setLayoutPosition(i, 1));
+				apps.add(new UILabel().setLabel(app.appName).setMargin(new DirWeights(5))
+						.setHorizontalArrange(HorizontalArrange.CENTER).setVerticalArrange(VerticalArrange.CENTER)
+						.setLayoutPosition(i, 1));
 			}
 			contents.add(apps);
 		}
 
-		/*GridPanel loginForm = new GridPanel();
+		GridPanel loginForm = new GridPanel();
 		loginForm.setMinimumSize(130, 50);
 		loginForm.setHorizontalArrange(HorizontalArrange.CENTER);
 		loginForm.setVerticalArrange(VerticalArrange.CENTER);
@@ -105,7 +114,7 @@ public class MainScreen extends RootPane {
 		loginForm.add(new UICheckbox().setLabel("Remember").setMargin(new DirWeights(0, 0, 4, 0)).setVerticalArrange(VerticalArrange.CENTER).setLayoutPosition(0, 2));
 		loginForm.add(new UIButton("Login").setMargin(new DirWeights(4)).setLayoutPosition(1, 0).setLayoutSpan(1, 3));
 		loginForm.add(new UICombobox().add("Item1").add("Item2").add("Item3").setMargin(new DirWeights(0, 0, 4, 4)).setLayoutSpan(2, 1).setLayoutPosition(0, 3));
-		contents.add(loginForm);*/
+		contents.add(loginForm);
 		add(contents);
 	}
 	
@@ -122,8 +131,6 @@ public class MainScreen extends RootPane {
 		if (GuiScreen.isCtrlKeyDown()) {
 			if (keyCode == Keyboard.KEY_T) {
 				initializePanel();
-			} else if (keyCode == Keyboard.KEY_R) {
-				//font.clearCache();
 			}
 		}
 		super.onKeyTyped(keyCode, typedChar);

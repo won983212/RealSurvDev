@@ -15,6 +15,7 @@ import com.ibm.icu.text.ArabicShaping;
 import com.ibm.icu.text.ArabicShapingException;
 import com.ibm.icu.text.Bidi;
 
+import it.unimi.dsi.fastutil.Arrays;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -24,18 +25,18 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import won983212.simpleui.font.GlyphTextureCache.GlyphTexture;
 
 public class TrueTypeFont {
-	private static class ArrangedGlyph {
+	protected static class ArrangedGlyph {
 		public int x;
 		public int y;
 		public int advance;
 		public int colorIndex;
-		public int fontStyle;
-		public int specialStyle;
+		public int fontStyle; // [Random Char Flag: 1Bit][Flag: 2Bits]
+		public int specialStyle; // [Xpos: 30Bits][Flag: 2Bits]
 		public GlyphTexture texture;
 		public int index;
 	}
 
-	private static class FormattedString {
+	protected static class FormattedString {
 		public WeakReference<String> keyReference;
 		public int advance;
 		public int maxHeight;
@@ -49,8 +50,11 @@ public class TrueTypeFont {
 
 	private static final int UNDERLINE = 1;
 	private static final int STRIKE_THROUGH = 2;
-
+	
+	private static final int RANDOM_STYLE_FLAG = 4;
+	
 	private ArrangedGlyph[][] digitCache;
+	private ObfuscatedCache obfuscatedCache = new ObfuscatedCache(this);
 	private WeakHashMap<String, FormattedString> stringCache = new WeakHashMap<>();
 	private WeakHashMap<String, String> inUseMap = new WeakHashMap<>();
 	private final Font[] font = new Font[4];
@@ -119,6 +123,7 @@ public class TrueTypeFont {
 	private boolean applyStyle(char code) {
 		switch (code) {
 		case 'k':
+			fontStyle |= RANDOM_STYLE_FLAG;
 			return true;
 		case 'l':
 			fontStyle |= Font.BOLD;
@@ -146,7 +151,7 @@ public class TrueTypeFont {
 		}
 	}
 
-	private FormattedString cacheString(String str) {
+	protected FormattedString cacheString(String str) {
 		str = getGeneralizedKey(str);
 		FormattedString value = stringCache.get(str);
 		if (value == null) {
@@ -199,7 +204,7 @@ public class TrueTypeFont {
 		
 		for (int i = start; i < limit; i++) {
 			if (str[i] == '§' && i < str.length - 1) {
-				if ("0123456789abcdefmnrlo".indexOf(str[i + 1]) != -1) {
+				if ("0123456789abcdefmnrlok".indexOf(str[i + 1]) != -1) {
 					FormattedChunkInfo info = layoutMissingGlyphs(str, glyphs, start, i, ret.advance, bidiIdxMap);
 					ret.advance = info.advance;
 					ret.maxHeight = Math.max(ret.maxHeight, info.maxHeight);
@@ -222,9 +227,10 @@ public class TrueTypeFont {
 		int end = start;
 		int lastSize = glyphs.size();
 		while (start < limit) {
-			int offset = font[fontStyle].canDisplayUpTo(str, start, limit);
+			int fontFlags = fontStyle & 3;
+			int offset = font[fontFlags].canDisplayUpTo(str, start, limit);
 			if (offset == -1) {
-				FormattedChunkInfo info = layoutGlyphs(str, glyphs, start, limit, ret.advance, bidiIdxMap, font[fontStyle]);
+				FormattedChunkInfo info = layoutGlyphs(str, glyphs, start, limit, ret.advance, bidiIdxMap, font[fontFlags]);
 				ret.advance = info.advance;
 				ret.maxHeight = Math.max(ret.maxHeight, info.maxHeight);
 				break;
@@ -234,9 +240,9 @@ public class TrueTypeFont {
 			} else {
 				end = offset;
 			}
-			Font f = font[fontStyle];
+			Font f = font[fontFlags];
 			if(offset == start) {
-				f = FontFactory.findSubstitutionJavaFont(str[start], font[0].getSize(), fontStyle);
+				f = FontFactory.findSubstitutionJavaFont(str[start], font[0].getSize(), fontFlags);
 			}
 			FormattedChunkInfo info = layoutGlyphs(str, glyphs, start, end, ret.advance, bidiIdxMap, f);
 			ret.advance = info.advance;
@@ -244,11 +250,12 @@ public class TrueTypeFont {
 			start = end;
 		}
 		
-		if((specialStyle & (UNDERLINE | STRIKE_THROUGH)) > 0) {
+		int styleFlags = specialStyle & (UNDERLINE | STRIKE_THROUGH);
+		if(styleFlags > 0) {
 			ArrangedGlyph startGlyph = glyphs.get(lastSize);
 			ArrangedGlyph endGlyph = glyphs.get(glyphs.size() - 1);
 			endGlyph.specialStyle = (startGlyph.x & 0x3FFFFFFF) << 2;
-			endGlyph.specialStyle |= specialStyle & (UNDERLINE | STRIKE_THROUGH);
+			endGlyph.specialStyle |= styleFlags;
 		}
 		
 		return ret;
@@ -262,10 +269,11 @@ public class TrueTypeFont {
 		if (start == limit)
 			return ret;
 
-		GlyphTexture[] textures = glyphTextures.cacheGlyphs(font, str, start, limit, fontStyle);
+		int fontFlags = fontStyle & 3;
+		GlyphTexture[] textures = glyphTextures.cacheGlyphs(font, str, start, limit, fontFlags);
 		GlyphVector vec = glyphTextures.layoutGlyphVector(font, str, start, limit, Font.LAYOUT_LEFT_TO_RIGHT);
 		float[] locations = vec.getGlyphPositions(0, limit - start + 1, null);
-		int offsetY = glyphTextures.getAscent(fontStyle) - glyphTextures.getDescent(fontStyle);
+		int offsetY = glyphTextures.getAscent(fontFlags) - glyphTextures.getDescent(fontFlags);
 		int maxHeight = vec.getPixelBounds(null, 0, 0).height;
 		
 		for (int i = 0; i < limit - start; i++) {
@@ -308,14 +316,20 @@ public class TrueTypeFont {
 			
 			if (glyph.colorIndex != -1 && lastColor != glyph.colorIndex)
 				applyColor(colorCodes[glyph.colorIndex + (shadow ? 16 : 0)], alpha);
-
+			
 			if (charAt != ' ') {
 				double offsetX = 0;
 				GlyphTexture tex = glyph.texture;
+				
 				if (charAt >= '0' && charAt <= '9') {
 					cacheDigits();
-					ArrangedGlyph digitGlyph = digitCache[glyph.fontStyle][charAt - '0'];
+					ArrangedGlyph digitGlyph = digitCache[glyph.fontStyle & 3][charAt - '0'];
 					tex = digitGlyph.texture;
+					offsetX = (glyph.texture.width - tex.width) / 2.0;
+				}
+				
+				if((glyph.fontStyle & RANDOM_STYLE_FLAG) > 0) {
+					tex = obfuscatedCache.getSuitableGlyph(glyph.fontStyle & 3, tex.width);
 					offsetX = (glyph.texture.width - tex.width) / 2.0;
 				}
 				
@@ -334,7 +348,7 @@ public class TrueTypeFont {
 				tes.draw();
 			}
 			
-			if (glyph.specialStyle > 0) {
+			if ((glyph.specialStyle & (UNDERLINE | STRIKE_THROUGH)) > 0) {
 				final double startX = x + (glyph.specialStyle >> 2);
 				GlStateManager.disableTexture2D();
 				if ((glyph.specialStyle & UNDERLINE) > 0) {

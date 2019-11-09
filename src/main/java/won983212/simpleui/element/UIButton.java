@@ -4,6 +4,8 @@ import java.awt.Dimension;
 
 import won983212.simpleui.DirWeights;
 import won983212.simpleui.UIObject;
+import won983212.simpleui.animation.Animation;
+import won983212.simpleui.animation.ColorAnimation;
 import won983212.simpleui.events.IButtonEvent;
 import won983212.simpleui.font.TrueTypeFont;
 
@@ -11,6 +13,8 @@ public class UIButton extends UIObject {
 	private String label;
 	private IButtonEvent event;
 	private boolean clicking = false;
+	private ColorAnimation hoverColorAnimation = new ColorAnimation(300);
+	private boolean isEnteredMouse = false;
 	
 	public UIButton(String label) {
 		setPadding(new DirWeights(2));
@@ -35,12 +39,16 @@ public class UIButton extends UIObject {
 		Dimension size = getBoundsSize();
 		TrueTypeFont font = getFont();
 		int fontWidth = font.getStringWidth(label);
-		int color = backgroundColor;
 		int offset = showShadow && clicking ? 1 : 0;
+		boolean isIn = containsRelative(mx, my);
 		
-		if(containsRelative(mx, my))
-			color = getMouseOverColor(color);
-		renderArcRect(offset, offset, size.width, size.height, arc, color, showShadow && !clicking);
+		hoverColorAnimation.setRange(backgroundColor, getMouseOverColor(backgroundColor));
+		if(isEnteredMouse != isIn) {
+			isEnteredMouse = isIn;
+			hoverColorAnimation.play(!isIn);
+		}
+		
+		renderArcRect(offset, offset, size.width, size.height, arc, hoverColorAnimation.get(), showShadow && !clicking);
 		font.drawString(label, offset + (size.width - fontWidth) / 2, offset + (size.height - font.getMaxHeight()) / 2, foregroundColor);
 	}
 
