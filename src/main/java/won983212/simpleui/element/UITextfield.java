@@ -13,6 +13,8 @@ import net.minecraft.util.ChatAllowedCharacters;
 import net.minecraft.util.math.MathHelper;
 import won983212.simpleui.DirWeights;
 import won983212.simpleui.UIObject;
+import won983212.simpleui.animation.Animation;
+import won983212.simpleui.animation.ColorAnimation;
 import won983212.simpleui.font.TrueTypeFont;
 
 public class UITextfield extends UIObject {
@@ -22,6 +24,9 @@ public class UITextfield extends UIObject {
 	private int cursorEnd = 0;
 	private int lineOffset = 0;
 	private int hintTextColor = 0xff999999;
+	private ColorAnimation hoverColorAnimation = new ColorAnimation(Animation.MOUSEOVER_DURATION);
+	private ColorAnimation focusColorAnimation = new ColorAnimation(Animation.FOCUS_DURATION);
+	private boolean isEnteredMouse = false;
 
 	public UITextfield() {
 		setPadding(new DirWeights(3));
@@ -95,22 +100,24 @@ public class UITextfield extends UIObject {
 		Rectangle bounds = getInnerBounds();
 		Rectangle actBounds = getPadding().getContentRect(bounds);
 		TrueTypeFont font = getFont();
-		int color = backgroundColor;
-
-		if (containsRelative(mouseX, mouseY))
-			color = getMouseOverColor(color);
-
-		if (isFocusd()) {
-			int offset = 0;
-			if (showShadow) {
-				renderArcRect(1, 1, bounds.width, bounds.height, arc, 0xff999999, false);
-				offset++;
-			}
-			renderArcRect(0, 0, bounds.width - offset, bounds.height - offset, arc, 0xff99ccff, false);
-			renderArcRect(1, 1, bounds.width - offset - 1, bounds.height - offset - 1, arc, color, false);
-		} else {
-			renderArcRect(0, 0, bounds.width, bounds.height, arc, color, showShadow);
+		
+		boolean isIn = containsRelative(mouseX, mouseY);
+		hoverColorAnimation.setRange(backgroundColor, getMouseOverColor(backgroundColor));
+		if(isEnteredMouse != isIn) {
+			isEnteredMouse = isIn;
+			hoverColorAnimation.play(!isIn);
 		}
+		
+		int color = hoverColorAnimation.get();
+		focusColorAnimation.setRange(color, 0xff99ccff);
+		
+		int offset = 0;
+		if (showShadow) {
+			renderArcRect(1, 1, bounds.width, bounds.height, arc, 0xff999999, false);
+			offset++;
+		}
+		renderArcRect(0, 0, bounds.width - offset, bounds.height - offset, arc, focusColorAnimation.get(), false);
+		renderArcRect(1, 1, bounds.width - offset - 1, bounds.height - offset - 1, arc, color, false);
 
 		if (text.length() > 0) {
 			String str = font.trimStringToWidth(text.substring(lineOffset), actBounds.width, false);
@@ -263,5 +270,17 @@ public class UITextfield extends UIObject {
 
 	public String getText() {
 		return text;
+	}
+	
+	@Override
+	public void onGotFocus() {
+		super.onGotFocus();
+		focusColorAnimation.play(false);
+	}
+	
+	@Override
+	public void onLostFocus() {
+		super.onLostFocus();
+		focusColorAnimation.play(true);
 	}
 }

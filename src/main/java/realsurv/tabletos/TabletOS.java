@@ -13,39 +13,41 @@ public class TabletOS {
 	private MainScreen mainScreen = new MainScreen();
 	private int lastMouseX = 0;
 	private int lastMouseY = 0;
-	
+
 	private void initializeFramebuffer() {
-		if(fbo == null) {
+		if (fbo == null) {
 			fbo = new Framebuffer(WIDTH, HEIGHT, true);
 		}
 	}
-	
+
 	public void bindFrameBufferTexture() {
 		initializeFramebuffer();
 		fbo.bindFramebufferTexture();
 	}
-	
+
 	public void moveMouseTo(int x, int y) {
-		lastMouseX = x;
-		lastMouseY = y;
+		if (lastMouseX != x || lastMouseY != y) {
+			lastMouseX = x;
+			lastMouseY = y;
+		}
 	}
-	
+
 	public void updateScreen() {
 		initializeFramebuffer();
 		fbo.bindFramebuffer(true);
 		GlStateManager.matrixMode(5889);
-        GlStateManager.loadIdentity();
-        GlStateManager.ortho(0.0D, WIDTH, HEIGHT, 0.0D, 1000.0D, 3000.0D);
-        GlStateManager.matrixMode(5888);
-        GlStateManager.loadIdentity();
-        GlStateManager.clearColor(0, 0, 0, 0);
-        GlStateManager.clear(GL11.GL_COLOR_BUFFER_BIT);
-        GlStateManager.translate(0.0F, 0.0F, -2000.0F);
-        GlStateManager.enableTexture2D();
-        mainScreen.render(lastMouseX, lastMouseY);
-        Minecraft.getMinecraft().getFramebuffer().bindFramebuffer(true);
+		GlStateManager.loadIdentity();
+		GlStateManager.ortho(0.0D, WIDTH, HEIGHT, 0.0D, 1000.0D, 3000.0D);
+		GlStateManager.matrixMode(5888);
+		GlStateManager.loadIdentity();
+		GlStateManager.clearColor(0, 0, 0, 0);
+		GlStateManager.clear(GL11.GL_COLOR_BUFFER_BIT);
+		GlStateManager.translate(0.0F, 0.0F, -2000.0F);
+		GlStateManager.enableTexture2D();
+		mainScreen.render(lastMouseX, lastMouseY);
+		Minecraft.getMinecraft().getFramebuffer().bindFramebuffer(true);
 	}
-	
+
 	public void keyTyped(int keyCode, char typedChar) {
 		mainScreen.onKeyTyped(keyCode, typedChar);
 	}
@@ -66,4 +68,3 @@ public class TabletOS {
 		mainScreen.setNativeWindowSize(w, h);
 	}
 }
- 

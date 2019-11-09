@@ -1,11 +1,15 @@
 package won983212.simpleui.element;
 
 import won983212.simpleui.UIObject;
+import won983212.simpleui.animation.Animation;
+import won983212.simpleui.animation.ColorAnimation;
 import won983212.simpleui.font.TrueTypeFont;
 
 public class UICheckbox extends UIObject {
 	private boolean checked = false;
 	private String label;
+	private ColorAnimation hoverColorAnimation = new ColorAnimation(Animation.MOUSEOVER_DURATION);
+	private boolean isEnteredMouse = false;
 	
 	public boolean isChecked() {
 		return checked;
@@ -33,11 +37,15 @@ public class UICheckbox extends UIObject {
 		TrueTypeFont font = getFont();
 		int h = Math.max(9, font.getMaxHeight());
 		int y = (h - 9) / 2;
-		int color = backgroundColor;
-		if(containsRelative(mouseX, mouseY))
-			color = getMouseOverColor(color);
+
+		boolean isIn = containsRelative(mouseX, mouseY);
+		hoverColorAnimation.setRange(backgroundColor, getMouseOverColor(backgroundColor));
+		if(isEnteredMouse != isIn) {
+			isEnteredMouse = isIn;
+			hoverColorAnimation.play(!isIn);
+		}
 		
-		renderArcRect(0, y, 9, y + 9, arc, color, showShadow);
+		renderArcRect(0, y, 9, y + 9, arc, hoverColorAnimation.get(), showShadow);
 		if(checked)
 			renderArcRect(1, y + 1, showShadow ? 7 : 8, y + (showShadow ? 7 : 8), arc, 0xff000000, false);
 		getFont().drawString(label, 11, (h - font.getMaxHeight()) / 2 + 1, foregroundColor);

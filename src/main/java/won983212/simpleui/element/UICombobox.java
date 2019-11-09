@@ -15,6 +15,8 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import won983212.simpleui.UIObject;
 import won983212.simpleui.VerticalArrange;
+import won983212.simpleui.animation.Animation;
+import won983212.simpleui.animation.ColorAnimation;
 import won983212.simpleui.events.IItemSelectedEvent;
 import won983212.simpleui.font.TrueTypeFont;
 
@@ -24,6 +26,8 @@ public class UICombobox extends UIObject implements IItemSelectedEvent {
 	private UIMenu menu = new UIMenu();
 	private int selected = 0;
 	private int maxLength = 10;
+	private ColorAnimation hoverColorAnimation = new ColorAnimation(Animation.MOUSEOVER_DURATION);
+	private boolean isEnteredMouse = false;
 
 	public UICombobox() {
 		menu.setVisible(false);
@@ -97,11 +101,14 @@ public class UICombobox extends UIObject implements IItemSelectedEvent {
 		TrueTypeFont font = getFont();
 		String item = getSelectedItem();
 		
-		int color = backgroundColor;
-		if(containsRelative(mouseX, mouseY))
-			color = getMouseOverColor(color);
+		boolean isIn = containsRelative(mouseX, mouseY);
+		hoverColorAnimation.setRange(backgroundColor, getMouseOverColor(backgroundColor));
+		if(isEnteredMouse != isIn) {
+			isEnteredMouse = isIn;
+			hoverColorAnimation.play(!isIn);
+		}
 		
-		renderArcRect(0, 0, size.width, size.height, arc, color, showShadow);
+		renderArcRect(0, 0, size.width, size.height, arc, hoverColorAnimation.get(), showShadow);
 		if(items.size() > selected)
 			font.drawString(item, (size.width - font.getStringWidth(item)) / 2, (size.height - font.getMaxHeight()) / 2, foregroundColor);
 		renderTriangle(size.width - size.height / 2, size.height / 2, 7, menu.isVisible());

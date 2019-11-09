@@ -13,7 +13,7 @@ public class UIButton extends UIObject {
 	private String label;
 	private IButtonEvent event;
 	private boolean clicking = false;
-	private ColorAnimation hoverColorAnimation = new ColorAnimation(300);
+	private ColorAnimation hoverColorAnimation = new ColorAnimation(Animation.MOUSEOVER_DURATION);
 	private boolean isEnteredMouse = false;
 	
 	public UIButton(String label) {
@@ -40,8 +40,8 @@ public class UIButton extends UIObject {
 		TrueTypeFont font = getFont();
 		int fontWidth = font.getStringWidth(label);
 		int offset = showShadow && clicking ? 1 : 0;
-		boolean isIn = containsRelative(mx, my);
 		
+		boolean isIn = containsRelative(mx, my);
 		hoverColorAnimation.setRange(backgroundColor, getMouseOverColor(backgroundColor));
 		if(isEnteredMouse != isIn) {
 			isEnteredMouse = isIn;

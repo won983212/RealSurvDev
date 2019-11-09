@@ -253,7 +253,7 @@ public abstract class UIObject {
 	}
 	
 	public static int getMouseOverColor(int color) {
-		return offsetColor(color, -40);
+		return offsetColor(color, -30);
 	}
 	
 	public static int offsetColor(int color, int offset) {
