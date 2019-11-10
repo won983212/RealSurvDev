@@ -102,7 +102,7 @@ public class UITextfield extends UIObject {
 		TrueTypeFont font = getFont();
 		
 		boolean isIn = containsRelative(mouseX, mouseY);
-		hoverColorAnimation.setRange(backgroundColor, getMouseOverColor(backgroundColor));
+		hoverColorAnimation.setRange(backgroundColor, mouseOverColor);
 		if(isEnteredMouse != isIn) {
 			isEnteredMouse = isIn;
 			if(isIn)

@@ -9,27 +9,18 @@ import won983212.simpleui.animation.ColorAnimation;
 import won983212.simpleui.events.IButtonEvent;
 import won983212.simpleui.font.TrueTypeFont;
 
-public class UIButton extends UIObject {
-	private String label;
+public class UIAbstractButton extends UIObject {
 	private IButtonEvent event;
 	private boolean clicking = false;
 	private ColorAnimation hoverColorAnimation = new ColorAnimation(Animation.MOUSELEAVE_DURATION);
 	private boolean isEnteredMouse = false;
 	
-	public UIButton(String label) {
+	public UIAbstractButton() {
 		setPadding(new DirWeights(2));
 		setShadowVisible(true);
-		setLabel(label);
 	}
 	
-	public UIButton setLabel(String label) {
-		TrueTypeFont font = getFont();
-		this.label = label;
-		setMinimumSize(font.getStringWidth(label), font.getMaxHeight());
-		return this;
-	}
-	
-	public UIButton setClickEvent(IButtonEvent e) {
+	public UIAbstractButton setClickEvent(IButtonEvent e) {
 		this.event = e;
 		return this;
 	}
@@ -37,12 +28,10 @@ public class UIButton extends UIObject {
 	@Override
 	public void render(int mx, int my) {
 		Dimension size = getBoundsSize();
-		TrueTypeFont font = getFont();
-		int fontWidth = font.getStringWidth(label);
 		int offset = showShadow && clicking ? 1 : 0;
 		
 		boolean isIn = containsRelative(mx, my);
-		hoverColorAnimation.setRange(backgroundColor, getMouseOverColor(backgroundColor));
+		hoverColorAnimation.setRange(backgroundColor, mouseOverColor);
 		if(isEnteredMouse != isIn) {
 			isEnteredMouse = isIn;
 			if(isIn)
@@ -51,7 +40,6 @@ public class UIButton extends UIObject {
 		}
 		
 		renderArcRect(offset, offset, size.width, size.height, arc, hoverColorAnimation.get(), showShadow && !clicking);
-		font.drawString(label, offset + (size.width - fontWidth) / 2, offset + (size.height - font.getMaxHeight()) / 2, foregroundColor);
 	}
 
 	@Override
@@ -64,5 +52,9 @@ public class UIButton extends UIObject {
 	@Override
 	public void onRelease(int x, int y, int bt) {
 		clicking = false;
+	}
+
+	public boolean isClicking() {
+		return clicking;
 	}
 }

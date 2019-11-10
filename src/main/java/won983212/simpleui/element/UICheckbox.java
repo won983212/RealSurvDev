@@ -41,7 +41,7 @@ public class UICheckbox extends UIObject {
 		int y = (h - 9) / 2;
 
 		boolean isIn = containsRelative(mouseX, mouseY);
-		hoverColorAnimation.setRange(backgroundColor, getMouseOverColor(backgroundColor));
+		hoverColorAnimation.setRange(backgroundColor, mouseOverColor);
 		if(isEnteredMouse != isIn) {
 			isEnteredMouse = isIn;
 			if(isIn)

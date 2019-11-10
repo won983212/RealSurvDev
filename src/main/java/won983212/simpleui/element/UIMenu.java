@@ -29,13 +29,13 @@ public class UIMenu extends StackPanel implements IButtonEvent {
 	}
 
 	public void addItem(String item) {
-		add(new UIButton(item).setClickEvent(this).setShadowVisible(false).setRadius(0).setMetadata(items.size()));
+		add(new UITextButton(item).setClickEvent(this).setShadowVisible(false).setRadius(0).setMetadata(items.size()));
 		items.add(item);
 	}
 
 	public void addAll(Collection<? extends String> col) {
 		for (String str : col)
-			add(new UIButton(str).setMetadata(uiList.size()));
+			add(new UITextButton(str).setMetadata(uiList.size()));
 		items.addAll(col);
 	}
 
@@ -45,7 +45,7 @@ public class UIMenu extends StackPanel implements IButtonEvent {
 	}
 
 	@Override
-	public void onClicked(UIButton button, int buttontype) {
+	public void onClicked(UIAbstractButton button, int buttontype) {
 		setVisible(false);
 		if (event != null) {
 			event.onSelected(this, button.metadata);

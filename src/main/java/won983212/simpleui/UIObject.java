@@ -27,6 +27,7 @@ public abstract class UIObject {
 	private boolean visible = true;
 	protected int backgroundColor = 0xffffffff;
 	protected int foregroundColor = 0xff000000;
+	protected int mouseOverColor = offsetColor(backgroundColor, -30);
 	protected int arc = 2;
 	protected boolean showShadow = true;
 	
@@ -210,6 +211,11 @@ public abstract class UIObject {
 		this.foregroundColor = color;
 		return this;
 	}
+	
+	public UIObject setMouseOverColor(int color) {
+		this.mouseOverColor = color;
+		return this;
+	}
 
 	public UIObject setMinimumSize(int minWidth, int minHeight) {
 		minSize.setSize(minWidth, minHeight);
@@ -253,10 +259,6 @@ public abstract class UIObject {
 	public UIObject setVerticalArrange(VerticalArrange arr) {
 		this.vArrange = arr;
 		return this;
-	}
-	
-	public static int getMouseOverColor(int color) {
-		return offsetColor(color, -30);
 	}
 	
 	public static int offsetColor(int color, int offset) {

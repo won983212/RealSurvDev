@@ -102,7 +102,7 @@ public class UICombobox extends UIObject implements IItemSelectedEvent {
 		String item = getSelectedItem();
 		
 		boolean isIn = containsRelative(mouseX, mouseY);
-		hoverColorAnimation.setRange(backgroundColor, getMouseOverColor(backgroundColor));
+		hoverColorAnimation.setRange(backgroundColor, mouseOverColor);
 		if(isEnteredMouse != isIn) {
 			isEnteredMouse = isIn;
 			if(isIn)
