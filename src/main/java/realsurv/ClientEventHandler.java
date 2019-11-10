@@ -2,7 +2,9 @@ package realsurv;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiMainMenu;
+import net.minecraft.client.gui.GuiScreenAddServer;
 import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.client.event.ModelBakeEvent;
@@ -31,11 +33,11 @@ public class ClientEventHandler {
 		ctx.bindFrameBufferTexture();
 	}
 	
-	//TODO To debug - displyscreen on guimainmenu
+	//TODO To debug - displyscreen on guimainmenu / guiscreentablet
 	@SubscribeEvent
 	public void onMainScreenEvent(GuiScreenEvent.InitGuiEvent e) {
 		if(e.getGui() instanceof GuiMainMenu)
-			Minecraft.getMinecraft().displayGuiScreen(new GuiScreenTablet());
+			Minecraft.getMinecraft().displayGuiScreen(new GuiScreenAddServer(e.getGui(), new ServerData("Minecraft server", "", false)));
 	}
 	
 	@SubscribeEvent
