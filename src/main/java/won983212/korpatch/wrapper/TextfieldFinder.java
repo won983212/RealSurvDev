@@ -3,15 +3,15 @@ package won983212.korpatch.wrapper;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiTextField;
-import scala.annotation.meta.field;
 
 public class TextfieldFinder {
 	private static HashMap<Class, Field[]> fieldsCache = new HashMap<>();
 
-	public static GuiTextfieldWrapper getTextfieldWrapper(GuiScreen screen) {
+	public static List<GuiTextfieldWrapper> getTextfieldWrappers(GuiScreen screen) {
 		try {
 			Class screenCls = screen.getClass();
 			Field[] textfields = fieldsCache.get(screenCls);
@@ -29,15 +29,14 @@ public class TextfieldFinder {
 				}
 			}
 			if (textfields != null) {
+				ArrayList<GuiTextfieldWrapper> wrappers = new ArrayList<>();
 				for (Field field : textfields) {
 					Object obj = field.get(screen);
 					if (obj != null && obj instanceof GuiTextField) {
-						GuiTextField textfield = (GuiTextField) obj;
-						if(textfield.isFocused()) {
-							return new GuiTextfieldWrapper(textfield);
-						}
+						wrappers.add(new GuiTextfieldWrapper((GuiTextField) obj));
 					}
 				}
+				return wrappers;
 			}
 		} catch (IllegalArgumentException e) {
 			e.printStackTrace();
