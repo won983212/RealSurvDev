@@ -1,6 +1,7 @@
 package realsurv;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.gui.GuiMainMenu;
 import net.minecraft.client.gui.GuiScreenAddServer;
 import net.minecraft.client.gui.ScaledResolution;
@@ -38,6 +39,8 @@ public class ClientEventHandler {
 	public void onMainScreenEvent(GuiScreenEvent.InitGuiEvent e) {
 		if(e.getGui() instanceof GuiMainMenu)
 			Minecraft.getMinecraft().displayGuiScreen(new GuiScreenAddServer(e.getGui(), new ServerData("Minecraft server", "", false)));
+		/*if(e.getGui() instanceof GuiMainMenu)
+			Minecraft.getMinecraft().displayGuiScreen(new GuiScreenTablet());*/
 	}
 	
 	@SubscribeEvent

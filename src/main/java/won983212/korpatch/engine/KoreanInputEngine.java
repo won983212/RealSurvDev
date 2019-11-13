@@ -1,6 +1,8 @@
 package won983212.korpatch.engine;
 
 import java.awt.event.KeyEvent;
+import java.awt.im.InputContext;
+import java.util.Locale;
 
 import org.lwjgl.input.Keyboard;
 

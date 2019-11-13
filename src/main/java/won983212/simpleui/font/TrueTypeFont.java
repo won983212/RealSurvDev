@@ -157,20 +157,23 @@ public class TrueTypeFont {
 		if (value == null) {
 			ArrayList<ArrangedGlyph> glyphList = new ArrayList<>();
 			String newKeyString = new String(str);
+			char[] strChars = str.toCharArray();
 
 			int bidiIndexMap[] = null;
-			try {
-				int prevLen = str.length();
-				Bidi bidi = new Bidi((new ArabicShaping(8)).shape(str), Bidi.DIRECTION_DEFAULT_RIGHT_TO_LEFT);
-				bidi.setReorderingMode(Bidi.OPTION_DEFAULT);
-				str = bidi.writeReordered(Bidi.DO_MIRRORING);
-				bidiIndexMap = bidi.getVisualMap();
-				
-				prevLen -= bidi.getProcessedLength();
-				for(int i=0;i<bidiIndexMap.length;i++)
-					bidiIndexMap[i] += prevLen;
-			} catch (ArabicShapingException e) {
-				e.printStackTrace();
+			if (Bidi.requiresBidi(strChars, 0, strChars.length)) {
+				try {
+					int prevLen = str.length();
+					Bidi bidi = new Bidi((new ArabicShaping(8)).shape(str), Bidi.DIRECTION_DEFAULT_RIGHT_TO_LEFT);
+					bidi.setReorderingMode(Bidi.OPTION_DEFAULT);
+					str = bidi.writeReordered(Bidi.DO_MIRRORING);
+					bidiIndexMap = bidi.getVisualMap();
+
+					prevLen -= bidi.getProcessedLength();
+					for (int i = 0; i < bidiIndexMap.length; i++)
+						bidiIndexMap[i] += prevLen;
+				} catch (ArabicShapingException e) {
+					e.printStackTrace();
+				}
 			}
 			if(bidiIndexMap == null) {
 				bidiIndexMap = new int[str.length()];
@@ -181,7 +184,7 @@ public class TrueTypeFont {
 			FormattedChunkInfo info;
 			value = new FormattedString();
 			value.keyReference = new WeakReference<String>(newKeyString);
-			info = layoutStyle(str.toCharArray(), glyphList, 0, str.length(), 0, bidiIndexMap);
+			info = layoutStyle(strChars, glyphList, 0, str.length(), 0, bidiIndexMap);
 			value.glyphs = glyphList.toArray(new ArrangedGlyph[glyphList.size()]);
 			value.advance = info.advance;
 			value.maxHeight = info.maxHeight;
