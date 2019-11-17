@@ -73,4 +73,8 @@ public class AdaptiveTTF extends FontRenderer {
 	public String toString() {
 		return "Adaptive" + font.toString();
 	}
+	
+	public TrueTypeFont getTTFont() {
+		return font;
+	}
 }

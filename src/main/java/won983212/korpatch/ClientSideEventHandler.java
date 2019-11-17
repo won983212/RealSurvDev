@@ -29,8 +29,8 @@ public class ClientSideEventHandler {
 		if (Keyboard.getEventKeyState()) {
 			GuiTextfieldWrapper textfield = getFocusedWrapper();
 			if (textfield != null) {
-				if(lastEditing != textfield) {
-					if(currentEngine != null)
+				if (lastEditing != textfield) {
+					if (currentEngine != null)
 						currentEngine.cancelAssemble();
 					currentEngine = new KoreanInputEngine(textfield);
 					lastEditing = textfield;
@@ -39,8 +39,26 @@ public class ClientSideEventHandler {
 					if (i == Keyboard.KEY_LEFT || i == Keyboard.KEY_RIGHT || i == Keyboard.KEY_RETURN)
 						currentEngine.cancelAssemble();
 				}
-				if(currentEngine.handleKeyTyped(Keyboard.getEventCharacter(), i))
+				if (currentEngine.handleKeyTyped(Keyboard.getEventCharacter(), i))
 					e.setCanceled(true);
+			}
+		}
+	}
+
+	@SubscribeEvent
+	public void onGuiDrawPre(GuiScreenEvent.DrawScreenEvent.Pre e) {
+		if (wrappers != null) {
+			for (GuiTextfieldWrapper wrapper : wrappers) {
+				wrapper.updateUISetupByFocusing();
+			}
+		}
+	}
+
+	@SubscribeEvent
+	public void onGuiDrawPost(GuiScreenEvent.DrawScreenEvent.Post e) {
+		if (wrappers != null) {
+			for (GuiTextfieldWrapper wrapper : wrappers) {
+				wrapper.drawImeTextbox();
 			}
 		}
 	}

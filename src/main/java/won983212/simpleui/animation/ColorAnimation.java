@@ -13,6 +13,10 @@ public class ColorAnimation extends Animation<Integer> {
 		this.endColor = end;
 	}
 	
+	public void setInitialValue(int value) {
+		setRange(value, value);
+	}
+	
 	@Override
 	protected Integer getValueAt(float x) {
 		return getY(24, x) + getY(16, x) + getY(8, x) + getY(0, x);

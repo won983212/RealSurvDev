@@ -13,6 +13,10 @@ public class IntAnimation extends Animation<Integer> {
 		this.end = end;
 	}
 	
+	public void setInitialValue(int value) {
+		setRange(value, value);
+	}
+	
 	@Override
 	protected Integer getValueAt(float x) {
 		return (int)((end - start) * x) + start;

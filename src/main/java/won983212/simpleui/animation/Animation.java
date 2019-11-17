@@ -34,6 +34,14 @@ public abstract class Animation<T> {
 		return time > 0 && time < 1;
 	}
 	
+	public void playForward() {
+		play(false);
+	}
+	
+	public void playReverse() {
+		play(true);
+	}
+	
 	public void play(boolean reverse) {
 		update();
 		float time = reverse ? (1 - this.time) : this.time;
