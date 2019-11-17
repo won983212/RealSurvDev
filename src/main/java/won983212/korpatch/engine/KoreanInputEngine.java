@@ -106,7 +106,7 @@ public class KoreanInputEngine extends InputEngine {
 			return true;
 		} else if (i == Keyboard.KEY_LCONTROL) {
 			isKorean = !isKorean;
-			cancelAssemble();
+			clearAssembleCache();
 			return true;
 		}
 		return false;
@@ -172,10 +172,14 @@ public class KoreanInputEngine extends InputEngine {
 	}
 
 	public void cancelAssemble() {
+		input.setMovingCursor(input.getAnchorCursor());
+		clearAssembleCache();
+	}
+	
+	public void clearAssembleCache() {
 		cho = -1;
 		jung = -1;
 		jong = 0;
-		input.setMovingCursor(input.getAnchorCursor());
 	}
 
 	public static boolean isKorMode() {

@@ -7,12 +7,14 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.util.math.MathHelper;
 
+/**
+ *	RootPane은 GuiScreen의 중앙에 하나의 창을 만들 때 사용한다.
+ */
 public class RootPane extends UIPanel {
 	private final Minecraft mc = Minecraft.getMinecraft();
 	private final Dimension screenSize;
 	private UIPanel popupPanel;
 	private double scaledFactor = 0;
-	private boolean autoConvert = false;
 	private int nativeWndWidth = 0;
 	private int nativeWndHeight = 0;
 
@@ -40,10 +42,6 @@ public class RootPane extends UIPanel {
 			}
 		}
 		return new Point(x, y);
-	}
-
-	public void enableMouseCoordsAutoConvert() {
-		this.autoConvert = true;
 	}
 
 	/**

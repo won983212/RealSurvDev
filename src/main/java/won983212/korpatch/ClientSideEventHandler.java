@@ -6,6 +6,8 @@ import org.lwjgl.input.Keyboard;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.GuiScreenAddServer;
+import net.minecraft.client.multiplayer.ServerData;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import won983212.korpatch.engine.KoreanInputEngine;
@@ -27,6 +29,11 @@ public class ClientSideEventHandler {
 	public void onGuiKeyboard(GuiScreenEvent.KeyboardInputEvent.Pre e) {
 		int i = Keyboard.getEventKey();
 		if (Keyboard.getEventKeyState()) {
+			//TODO DebugKey
+			if(GuiScreen.isCtrlKeyDown() && i == Keyboard.KEY_T) {
+				Minecraft.getMinecraft().displayGuiScreen(new GuiScreenAddServer(e.getGui(), new ServerData("Minecraft server", "", false)));
+				return;
+			}
 			GuiTextfieldWrapper textfield = getFocusedWrapper();
 			if (textfield != null) {
 				if (lastEditing != textfield) {
@@ -37,7 +44,7 @@ public class ClientSideEventHandler {
 				}
 				if (KoreanInputEngine.isKorMode()) {
 					if (i == Keyboard.KEY_LEFT || i == Keyboard.KEY_RIGHT || i == Keyboard.KEY_RETURN)
-						currentEngine.cancelAssemble();
+						currentEngine.clearAssembleCache();
 				}
 				if (currentEngine.handleKeyTyped(Keyboard.getEventCharacter(), i))
 					e.setCanceled(true);
@@ -46,23 +53,10 @@ public class ClientSideEventHandler {
 	}
 
 	@SubscribeEvent
-	public void onGuiDrawPre(GuiScreenEvent.DrawScreenEvent.Pre e) {
-		if (wrappers != null) {
-			for (GuiTextfieldWrapper wrapper : wrappers) {
-				wrapper.updateUISetupByFocusing();
-			}
-		}
-	}
-
-	@SubscribeEvent
 	public void onGuiDrawPost(GuiScreenEvent.DrawScreenEvent.Post e) {
-		if (wrappers != null) {
-			for (GuiTextfieldWrapper wrapper : wrappers) {
-				wrapper.drawImeTextbox();
-			}
-		}
+		// TODO draw Popupmenu
 	}
-
+	
 	private GuiTextfieldWrapper getFocusedWrapper() {
 		if (wrappers != null) {
 			for (GuiTextfieldWrapper wrapper : wrappers) {
