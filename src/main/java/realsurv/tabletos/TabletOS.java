@@ -3,6 +3,7 @@ package realsurv.tabletos;
 import org.lwjgl.opengl.GL11;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.shader.Framebuffer;
 
@@ -52,16 +53,8 @@ public class TabletOS {
 		mainScreen.onKeyTyped(keyCode, typedChar);
 	}
 
-	public void mouseClicked(int mouseX, int mouseY, int mouseButton) {
-		mainScreen.onPress(mouseX, mouseY, mouseButton);
-	}
-
-	public void mouseReleased(int mouseX, int mouseY, int state) {
-		mainScreen.onRelease(mouseX, mouseY, state);
-	}
-
-	public void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
-		mainScreen.onDrag(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
+	public void handleMouseInput(GuiScreen screen) {
+		mainScreen.handleMouseInput(screen);
 	}
 
 	public void setWindowSize(int w, int h) {

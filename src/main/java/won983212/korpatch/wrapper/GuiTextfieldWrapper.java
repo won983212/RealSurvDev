@@ -1,14 +1,7 @@
 package won983212.korpatch.wrapper;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiTextField;
-import won983212.korpatch.engine.KoreanInputEngine;
-import won983212.simpleui.animation.Animation;
-import won983212.simpleui.animation.IntAnimation;
-import won983212.simpleui.font.AdaptiveTTF;
-import won983212.simpleui.font.TrueTypeFont;
+import won983212.korpatch.ui.IMEPopupViewerPane;
 
 public class GuiTextfieldWrapper implements IInputWrapper {
 	private GuiTextField textfield;
@@ -47,6 +40,10 @@ public class GuiTextfieldWrapper implements IInputWrapper {
 	@Override
 	public void setMovingCursor(int cursor) {
 		textfield.setSelectionPos(cursor);
+	}
+	
+	public void setIMEStatusBarLocation(IMEPopupViewerPane popup) {
+		popup.setRelativeLocation(textfield.x, textfield.y + textfield.height + 1);
 	}
 
 	public boolean isFocused() {

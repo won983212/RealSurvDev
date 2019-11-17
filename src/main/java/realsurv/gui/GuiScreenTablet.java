@@ -80,23 +80,10 @@ public class GuiScreenTablet extends GuiScreen {
 		super.keyTyped(typedChar, keyCode);
 		system.keyTyped(keyCode, typedChar);
 	}
-
+	
 	@Override
-	protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
-		super.mouseClicked(mouseX, mouseY, mouseButton);
-		system.mouseClicked(mouseX, mouseY, mouseButton);
+	public void handleMouseInput() throws IOException {
+		super.handleMouseInput();
+		system.handleMouseInput(this);
 	}
-
-	@Override
-	protected void mouseReleased(int mouseX, int mouseY, int state) {
-		super.mouseReleased(mouseX, mouseY, state);
-		system.mouseReleased(mouseX, mouseY, state);
-	}
-
-	@Override
-	protected void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
-		super.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
-		system.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
-	}
-
 }

@@ -15,6 +15,7 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.math.MathHelper;
 import won983212.simpleui.font.FontFactory;
 import won983212.simpleui.font.TrueTypeFont;
+import won983212.simpleui.panel.UIPanel;
 
 public abstract class UIObject {
 	private HorizontalArrange hArrange = HorizontalArrange.STRECTCH;

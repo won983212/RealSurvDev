@@ -11,6 +11,7 @@ import net.minecraft.client.multiplayer.ServerData;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import won983212.korpatch.engine.KoreanInputEngine;
+import won983212.korpatch.ui.IMEPopupViewerPane;
 import won983212.korpatch.wrapper.GuiTextfieldWrapper;
 import won983212.korpatch.wrapper.TextfieldFinder;
 
@@ -19,7 +20,8 @@ public class ClientSideEventHandler {
 	private List<GuiTextfieldWrapper> wrappers = null;
 	private GuiTextfieldWrapper lastEditing = null;
 	private KoreanInputEngine currentEngine = null;
-
+	private IMEPopupViewerPane imeStatusPopup = new IMEPopupViewerPane();
+	
 	@SubscribeEvent
 	public void onGuiInit(GuiScreenEvent.InitGuiEvent.Post e) {
 		wrappers = TextfieldFinder.getTextfieldWrappers(Minecraft.getMinecraft().currentScreen);
@@ -28,33 +30,54 @@ public class ClientSideEventHandler {
 	@SubscribeEvent
 	public void onGuiKeyboard(GuiScreenEvent.KeyboardInputEvent.Pre e) {
 		int i = Keyboard.getEventKey();
+		char c = Keyboard.getEventCharacter();
 		if (Keyboard.getEventKeyState()) {
 			//TODO DebugKey
 			if(GuiScreen.isCtrlKeyDown() && i == Keyboard.KEY_T) {
 				Minecraft.getMinecraft().displayGuiScreen(new GuiScreenAddServer(e.getGui(), new ServerData("Minecraft server", "", false)));
 				return;
 			}
+			
 			GuiTextfieldWrapper textfield = getFocusedWrapper();
+			imeStatusPopup.onKeyTyped(i, c);
+			processFocusChanged(textfield);
 			if (textfield != null) {
-				if (lastEditing != textfield) {
-					if (currentEngine != null)
-						currentEngine.cancelAssemble();
-					currentEngine = new KoreanInputEngine(textfield);
-					lastEditing = textfield;
-				}
 				if (KoreanInputEngine.isKorMode()) {
-					if (i == Keyboard.KEY_LEFT || i == Keyboard.KEY_RIGHT || i == Keyboard.KEY_RETURN)
+					if (i == Keyboard.KEY_LEFT || i == Keyboard.KEY_RIGHT || i == Keyboard.KEY_RETURN) {
 						currentEngine.clearAssembleCache();
+					}
 				}
-				if (currentEngine.handleKeyTyped(Keyboard.getEventCharacter(), i))
+				if (currentEngine.handleKeyTyped(c, i)) {
 					e.setCanceled(true);
+				}
 			}
 		}
 	}
 
 	@SubscribeEvent
+	public void onGuiMouseEvent(GuiScreenEvent.MouseInputEvent.Post e) {
+		imeStatusPopup.handleMouseInput(e.getGui());
+		processFocusChanged(getFocusedWrapper());
+	}
+	
+	@SubscribeEvent
 	public void onGuiDrawPost(GuiScreenEvent.DrawScreenEvent.Post e) {
-		// TODO draw Popupmenu
+		imeStatusPopup.render(e.getMouseX(), e.getMouseY());
+	}
+	
+	private void processFocusChanged(GuiTextfieldWrapper textfield) {
+		if (textfield != null) {
+			imeStatusPopup.setVisible(true);
+			if (lastEditing != textfield) {
+				if (currentEngine != null)
+					currentEngine.cancelAssemble();
+				currentEngine = new KoreanInputEngine(textfield);
+				textfield.setIMEStatusBarLocation(imeStatusPopup);
+				lastEditing = textfield;
+			}
+		} else {
+			imeStatusPopup.setVisible(false);
+		}
 	}
 	
 	private GuiTextfieldWrapper getFocusedWrapper() {

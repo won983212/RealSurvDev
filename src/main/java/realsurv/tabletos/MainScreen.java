@@ -10,14 +10,7 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.util.ResourceLocation;
 import won983212.simpleui.DirWeights;
 import won983212.simpleui.DrawableImage;
-import won983212.simpleui.GridPanel;
-import won983212.simpleui.GridPanel.LengthDefinition;
-import won983212.simpleui.GridPanel.LengthType;
 import won983212.simpleui.HorizontalArrange;
-import won983212.simpleui.RootPane;
-import won983212.simpleui.StackPanel;
-import won983212.simpleui.StackPanel.Orientation;
-import won983212.simpleui.UIPanel;
 import won983212.simpleui.SpriteIcon;
 import won983212.simpleui.VerticalArrange;
 import won983212.simpleui.element.UITextButton;
@@ -28,8 +21,16 @@ import won983212.simpleui.element.UIImage;
 import won983212.simpleui.element.UILabel;
 import won983212.simpleui.element.UIRectangle;
 import won983212.simpleui.element.UITextfield;
+import won983212.simpleui.panel.GridPanel;
+import won983212.simpleui.panel.StackPanel;
+import won983212.simpleui.panel.UIPanel;
+import won983212.simpleui.panel.GridPanel.LengthDefinition;
+import won983212.simpleui.panel.GridPanel.LengthType;
+import won983212.simpleui.panel.StackPanel.Orientation;
+import won983212.simpleui.rootpane.CenteredPane;
+import won983212.simpleui.rootpane.RootPane;
 
-public class MainScreen extends RootPane {
+public class MainScreen extends CenteredPane {
 	private ArrayList<DesktopAppInfo> desktopApps = new ArrayList<>();
 	private UIImage timeTexture;
 	private UILabel timeLabel;
