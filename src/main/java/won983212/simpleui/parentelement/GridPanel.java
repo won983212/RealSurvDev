@@ -1,10 +1,8 @@
-package won983212.simpleui.panel;
+package won983212.simpleui.parentelement;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.util.ArrayList;
-
-import won983212.simpleui.UIObject;
 
 public class GridPanel extends UIPanel {
 	private ArrayList<CellLength> columns = new ArrayList<CellLength>();

@@ -3,11 +3,11 @@ package won983212.simpleui.element;
 import java.awt.Dimension;
 
 import won983212.simpleui.DirWeights;
-import won983212.simpleui.UIObject;
 import won983212.simpleui.animation.Animation;
 import won983212.simpleui.animation.ColorAnimation;
 import won983212.simpleui.events.IButtonEvent;
 import won983212.simpleui.font.TrueTypeFont;
+import won983212.simpleui.parentelement.UIObject;
 
 public class UIAbstractButton extends UIObject {
 	private IButtonEvent event;
@@ -43,15 +43,17 @@ public class UIAbstractButton extends UIObject {
 	}
 
 	@Override
-	public void onPress(int x, int y, int bt) {
+	public boolean onPress(int x, int y, int bt) {
 		if(event != null)
 			event.onClicked(this, bt);
 		clicking = true;
+		return true;
 	}
 
 	@Override
-	public void onRelease(int x, int y, int bt) {
+	public boolean onRelease(int x, int y, int bt) {
 		clicking = false;
+		return true;
 	}
 
 	public boolean isClicking() {

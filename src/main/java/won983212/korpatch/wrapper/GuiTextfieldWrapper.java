@@ -43,7 +43,7 @@ public class GuiTextfieldWrapper implements IInputWrapper {
 	}
 	
 	public void setIMEStatusBarLocation(IMEPopupViewerPane popup) {
-		popup.setRelativeLocation(textfield.x, textfield.y + textfield.height + 1);
+		popup.setRelativeLocation(textfield.x, textfield.y + textfield.height + 3);
 	}
 
 	public boolean isFocused() {

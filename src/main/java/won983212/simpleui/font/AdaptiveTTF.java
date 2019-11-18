@@ -11,13 +11,13 @@ public class AdaptiveTTF extends FontRenderer {
 	private TrueTypeFont font;
 	private boolean forceDisableShadow = false;
 
-	protected AdaptiveTTF(String family, int size) {
-		this(family, size, Minecraft.getMinecraft());
+	protected AdaptiveTTF(String family, int size, boolean antialias) {
+		this(family, size, antialias, Minecraft.getMinecraft());
 	}
 
-	private AdaptiveTTF(String family, int size, Minecraft mc) {
+	private AdaptiveTTF(String family, int size, boolean antialias, Minecraft mc) {
 		super(mc.gameSettings, new ResourceLocation("textures/font/ascii.png"), mc.getTextureManager(), mc.isUnicode());
-		font = new TrueTypeFont(family, size, true);
+		font = new TrueTypeFont(family, size, antialias);
 		FONT_HEIGHT = (int) (size * 4.0 / 6.0);
 	}
 

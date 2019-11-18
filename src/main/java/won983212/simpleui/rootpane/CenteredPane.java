@@ -6,8 +6,8 @@ import java.awt.Point;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.util.math.MathHelper;
-import won983212.simpleui.UIObject;
-import won983212.simpleui.panel.UIPanel;
+import won983212.simpleui.parentelement.UIObject;
+import won983212.simpleui.parentelement.UIPanel;
 
 /**
  *	CenteredPane은 GuiScreen의 중앙에 하나의 창을 만들 때 사용한다.
@@ -17,18 +17,17 @@ public class CenteredPane extends RootPane {
 	private int nativeWndWidth = 0;
 	private int nativeWndHeight = 0;
 
+	public CenteredPane() {
+		super();
+	}
+	
 	public CenteredPane(int width, int height) {
 		super(width, height);
 	}
 
 	@Override
 	protected Point convertCoords(int x, int y, boolean checkCoordsExceed) {
-		double factor = scaledFactor;
-		if (factor <= 0) {
-			ScaledResolution sr = new ScaledResolution(mc);
-			factor = sr.getScaleFactor();
-		}
-
+		double factor = new ScaledResolution(mc).getScaleFactor();
 		x -= (nativeWndWidth - screenSize.width / factor) / 2;
 		y -= (nativeWndHeight - screenSize.height / factor) / 2;
 		x *= factor;

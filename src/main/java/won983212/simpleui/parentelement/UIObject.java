@@ -1,4 +1,4 @@
-package won983212.simpleui;
+package won983212.simpleui.parentelement;
 
 import java.awt.Dimension;
 import java.awt.Font;
@@ -13,18 +13,21 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.math.MathHelper;
+import won983212.simpleui.DirWeights;
+import won983212.simpleui.HorizontalArrange;
+import won983212.simpleui.VerticalArrange;
 import won983212.simpleui.font.FontFactory;
 import won983212.simpleui.font.TrueTypeFont;
-import won983212.simpleui.panel.UIPanel;
 
 public abstract class UIObject {
+	private static TrueTypeFont staticFont = FontFactory.makeFont(Font.SANS_SERIF, 14);
 	private HorizontalArrange hArrange = HorizontalArrange.STRECTCH;
 	private VerticalArrange vArrange = VerticalArrange.STRECTCH;
 	private Rectangle bounds = new Rectangle();
 	private Dimension minSize = new Dimension(10, 10);
 	private DirWeights margin = new DirWeights();
 	private DirWeights padding = new DirWeights();
-	private TrueTypeFont font = FontFactory.makeFont(Font.SANS_SERIF, 12);
+	private TrueTypeFont font;
 	private boolean visible = true;
 	protected int backgroundColor = 0xffffffff;
 	protected int foregroundColor = 0xff000000;
@@ -43,16 +46,24 @@ public abstract class UIObject {
 	public int layoutXSpan = 1;
 	public int layoutYSpan = 1;
 	
-	public void arrange(Rectangle available) {
+	public UIObject() {
+		font = staticFont;
+	}
+	
+	public static void setStaticFont(TrueTypeFont font) {
+		staticFont = font;
+	}
+	
+	protected void arrange(Rectangle available) {
 		setSizeByArrange(available);
 		setPositionByArrange(available);
 	}
 
-	public boolean containsRelative(int x, int y) {
+	protected boolean containsRelative(int x, int y) {
 		return x >= 0 && y >= 0 && x < bounds.width && y < bounds.height;
 	}
 
-	public Point calculateActualLocation() {
+	protected Point calculateActualLocation() {
 		UIObject obj = this;
 		Point p = new Point(0, 0);
 		while(obj != null) {
@@ -64,7 +75,7 @@ public abstract class UIObject {
 		return p;
 	}
 	
-	public Rectangle getRelativeBounds() {
+	protected Rectangle getRelativeBounds() {
 		return bounds;
 	}
 	
@@ -72,19 +83,19 @@ public abstract class UIObject {
 		return font;
 	}
 	
-	public Dimension getBoundsSize() {
+	protected Dimension getBoundsSize() {
 		return bounds.getSize();
 	}
 	
-	public Rectangle getInnerBounds() {
+	protected Rectangle getInnerBounds() {
 		return new Rectangle(0, 0, bounds.width, bounds.height);
 	}
 	
-	public Dimension getLayoutMinSize() {
+	protected Dimension getLayoutMinSize() {
 		return margin.getExpandedSize(getMeasuredMinSize());
 	}
 	
-	public Dimension getMeasuredMinSize() {
+	protected Dimension getMeasuredMinSize() {
 		if(sizeCache == null)
 			sizeCache = measureMinSize();
 		return sizeCache;
@@ -94,15 +105,15 @@ public abstract class UIObject {
 		return hArrange;
 	}
 
-	public DirWeights getMargin() {
+	protected DirWeights getMargin() {
 		return margin;
 	}
 	
-	public Dimension getMinimumSize() {
+	protected Dimension getMinimumSize() {
 		return minSize;
 	}
 	
-	public DirWeights getPadding() {
+	protected DirWeights getPadding() {
 		return padding;
 	}
 	
@@ -130,24 +141,27 @@ public abstract class UIObject {
 		return padding.getExpandedSize(minSize);
 	}
 	
-	public void onDrag(int x, int y, int bt, long time) {
+	protected boolean onDrag(int x, int y, int bt, long time) {
+		return true;
 	}
 	
-	public void onGotFocus() {
+	protected void onGotFocus() {
 		focusd = true;
 	}
 	
-	public void onKeyTyped(int i, char c) {
+	protected void onKeyTyped(int i, char c) {
 	}
 	
-	public void onLostFocus() {
+	protected void onLostFocus() {
 		focusd = false;
 	}
 	
-	public void onPress(int x, int y, int bt) {
+	protected boolean onPress(int x, int y, int bt) {
+		return true;
 	}
 
-	public void onRelease(int x, int y, int bt) {
+	protected boolean onRelease(int x, int y, int bt) {
+		return true;
 	}
 	
 	public void requestLayout() {
@@ -155,7 +169,7 @@ public abstract class UIObject {
 			parentPanel.requestLayout();
 	}
 
-	public abstract void render(int mouseX, int mouseY);
+	protected abstract void render(int mouseX, int mouseY);
 	
 	public UIObject setHorizontalArrange(HorizontalArrange arr) {
 		this.hArrange = arr;
@@ -178,7 +192,11 @@ public abstract class UIObject {
 	}
 	
 	public UIObject setFont(String family, int size) {
-		this.font = FontFactory.makeFont(family, size);
+		return setFont(FontFactory.makeFont(family, size));
+	}
+	
+	public UIObject setFont(TrueTypeFont font) {
+		this.font = font;
 		return this;
 	}
 	

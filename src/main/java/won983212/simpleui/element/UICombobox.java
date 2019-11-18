@@ -13,12 +13,12 @@ import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import won983212.simpleui.UIObject;
 import won983212.simpleui.VerticalArrange;
 import won983212.simpleui.animation.Animation;
 import won983212.simpleui.animation.ColorAnimation;
 import won983212.simpleui.events.IItemSelectedEvent;
 import won983212.simpleui.font.TrueTypeFont;
+import won983212.simpleui.parentelement.UIObject;
 
 public class UICombobox extends UIObject implements IItemSelectedEvent {
 	private ArrayList<String> items = new ArrayList<String>();
@@ -63,11 +63,12 @@ public class UICombobox extends UIObject implements IItemSelectedEvent {
 	}
 	
 	@Override
-	public void onPress(int x, int y, int bt) {
+	public boolean onPress(int x, int y, int bt) {
 		Point loc = calculateActualLocation();
 		Dimension size = getBoundsSize();
 		menu.setVisible(!menu.isVisible());
 		menu.setRelativeLocation(loc.x, loc.y + size.height);
+		return true;
 	}
 
 	public int getSelectedIndex() {

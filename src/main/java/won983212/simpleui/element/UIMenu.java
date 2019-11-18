@@ -5,12 +5,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import won983212.simpleui.HorizontalArrange;
-import won983212.simpleui.UIObject;
 import won983212.simpleui.animation.Animation;
 import won983212.simpleui.animation.IntAnimation;
 import won983212.simpleui.events.IButtonEvent;
 import won983212.simpleui.events.IItemSelectedEvent;
-import won983212.simpleui.panel.StackPanel;
+import won983212.simpleui.parentelement.StackPanel;
+import won983212.simpleui.parentelement.UIObject;
 
 public class UIMenu extends StackPanel implements IButtonEvent {
 	private ArrayList<String> items = new ArrayList<String>();

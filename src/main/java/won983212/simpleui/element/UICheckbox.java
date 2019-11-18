@@ -1,9 +1,9 @@
 package won983212.simpleui.element;
 
-import won983212.simpleui.UIObject;
 import won983212.simpleui.animation.Animation;
 import won983212.simpleui.animation.ColorAnimation;
 import won983212.simpleui.font.TrueTypeFont;
+import won983212.simpleui.parentelement.UIObject;
 
 public class UICheckbox extends UIObject {
 	private boolean checked = false;
@@ -30,8 +30,9 @@ public class UICheckbox extends UIObject {
 	}
 	
 	@Override
-	public void onPress(int x, int y, int bt) {
+	public boolean onPress(int x, int y, int bt) {
 		setChecked(!checked);
+		return true;
 	}
 	
 	@Override

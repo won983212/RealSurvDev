@@ -20,11 +20,12 @@ public class ClientSideEventHandler {
 	private List<GuiTextfieldWrapper> wrappers = null;
 	private GuiTextfieldWrapper lastEditing = null;
 	private KoreanInputEngine currentEngine = null;
-	private IMEPopupViewerPane imeStatusPopup = new IMEPopupViewerPane();
+	private IMEPopupViewerPane imeStatusPopup;
 	
 	@SubscribeEvent
 	public void onGuiInit(GuiScreenEvent.InitGuiEvent.Post e) {
 		wrappers = TextfieldFinder.getTextfieldWrappers(Minecraft.getMinecraft().currentScreen);
+		imeStatusPopup = new IMEPopupViewerPane();
 	}
 
 	@SubscribeEvent
@@ -39,8 +40,10 @@ public class ClientSideEventHandler {
 			}
 			
 			GuiTextfieldWrapper textfield = getFocusedWrapper();
-			imeStatusPopup.onKeyTyped(i, c);
+			if(imeStatusPopup != null)
+				imeStatusPopup.onKeyTyped(i, c);
 			processFocusChanged(textfield);
+			
 			if (textfield != null) {
 				if (KoreanInputEngine.isKorMode()) {
 					if (i == Keyboard.KEY_LEFT || i == Keyboard.KEY_RIGHT || i == Keyboard.KEY_RETURN) {
@@ -55,14 +58,20 @@ public class ClientSideEventHandler {
 	}
 
 	@SubscribeEvent
+	public void onGuiMouseEventPre(GuiScreenEvent.MouseInputEvent.Pre e) {
+		if(imeStatusPopup != null && imeStatusPopup.handleMouseInput(e.getGui()))
+			e.setCanceled(true);
+	}
+	
+	@SubscribeEvent
 	public void onGuiMouseEvent(GuiScreenEvent.MouseInputEvent.Post e) {
-		imeStatusPopup.handleMouseInput(e.getGui());
 		processFocusChanged(getFocusedWrapper());
 	}
 	
 	@SubscribeEvent
 	public void onGuiDrawPost(GuiScreenEvent.DrawScreenEvent.Post e) {
-		imeStatusPopup.render(e.getMouseX(), e.getMouseY());
+		if(imeStatusPopup != null)
+			imeStatusPopup.render(e.getMouseX(), e.getMouseY());
 	}
 	
 	private void processFocusChanged(GuiTextfieldWrapper textfield) {

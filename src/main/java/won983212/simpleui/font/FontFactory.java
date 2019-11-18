@@ -30,28 +30,32 @@ public class FontFactory {
 	
 	// it is used for Simple UI Font rendering. 
 	public static TrueTypeFont makeFont(String family, int size) {
-		Key key = new Key(family, size, 1);
+		return makeFont(family, size, true);
+	}
+	
+	public static TrueTypeFont makeFont(String family, int size, boolean antialias) {
+		Key key = new Key(family, size, 1, antialias);
 		TrueTypeFont f = fonts.get(key);
 		if(f != null) {
 			return f;
 		}
-		f = new TrueTypeFont(family, size, true);
+		f = new TrueTypeFont(family, size, antialias);
 		fonts.put(key, f);
 		return f;
 	}
-	
+
 	// it is used for minecraft font rendering.
-	public static AdaptiveTTF makeMinecraftFont(String family, int size) {
-		return makeMinecraftFont(family, size, 2);
+	public static AdaptiveTTF makeMinecraftFont(String family, int size, int scale) {
+		return makeMinecraftFont(family, size, scale, true);
 	}
 	
-	public static AdaptiveTTF makeMinecraftFont(String family, int size, int scale) {
-		Key key = new Key(family, size, scale);
+	public static AdaptiveTTF makeMinecraftFont(String family, int size, int scale, boolean antialias) {
+		Key key = new Key(family, size, scale, antialias);
 		AdaptiveTTF f = scaledFonts.get(key);
 		if(f != null) {
 			return f;
 		}
-		f = new AdaptiveTTF(family, size);
+		f = new AdaptiveTTF(family, size, antialias);
 		f.setFontScale(scale);
 		scaledFonts.put(key, f);
 		return f;
@@ -60,12 +64,14 @@ public class FontFactory {
 	private static class Key {
 		public String font;
 		public int size;
+		public boolean antialias;
 		private int scale;
 		
-		public Key(String family, int size, int scale) {
+		public Key(String family, int size, int scale, boolean antialias) {
 			this.font = family;
 			this.size = size;
 			this.scale = scale;
+			this.antialias = antialias;
 		}
 
 		@Override
@@ -73,6 +79,7 @@ public class FontFactory {
 			int hash = font.hashCode();
 			hash = 31 * hash + Integer.hashCode(size);
 			hash = 31 * hash + Integer.hashCode(scale);
+			hash = 31 * hash + Boolean.hashCode(antialias);
 			return hash;
 		}
 		
@@ -80,7 +87,7 @@ public class FontFactory {
 		public boolean equals(Object obj) {
 			if(obj instanceof Key) {
 				Key k = (Key) obj;
-				return k.font == font && k.size == size && k.scale == scale;
+				return k.font == font && k.size == size && k.scale == scale && k.antialias == antialias;
 			}
 			return false;
 		}

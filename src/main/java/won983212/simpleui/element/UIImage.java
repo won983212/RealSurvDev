@@ -11,7 +11,7 @@ import net.minecraft.util.ResourceLocation;
 import won983212.simpleui.DrawableImage;
 import won983212.simpleui.FullImage;
 import won983212.simpleui.SpriteIcon;
-import won983212.simpleui.UIObject;
+import won983212.simpleui.parentelement.UIObject;
 
 public class UIImage extends UIObject {
 	private DrawableImage icon = null;

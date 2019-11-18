@@ -1,11 +1,10 @@
-package won983212.simpleui.panel;
+package won983212.simpleui.parentelement;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 
 import net.minecraft.client.renderer.GlStateManager;
-import won983212.simpleui.UIObject;
 
 public class UIPanel extends UIObject {
 	protected ArrayList<UIObject> uiList = new ArrayList<UIObject>();
@@ -86,7 +85,7 @@ public class UIPanel extends UIObject {
 	}
 
 	@Override
-	public void onKeyTyped(int keyCode, char typedChar) {
+	protected void onKeyTyped(int keyCode, char typedChar) {
 		for (UIObject obj : uiList) {
 			if (obj instanceof UIPanel || focusd == obj)
 				obj.onKeyTyped(keyCode, typedChar);
@@ -94,43 +93,44 @@ public class UIPanel extends UIObject {
 	}
 
 	@Override
-	public void onPress(int mouseX, int mouseY, int mouseButton) {
+	protected boolean onPress(int mouseX, int mouseY, int mouseButton) {
 		boolean any = false;
 		for (int i = uiList.size() - 1; i >= 0; i--) {
 			UIObject obj = uiList.get(i);
 			Rectangle rect = obj.getRelativeBounds();
 			if (obj.containsRelative(mouseX - rect.x, mouseY - rect.y)) {
-				if (obj.isInteractive()) {
+				if (obj.isInteractive() && obj.onPress(mouseX - rect.x, mouseY - rect.y, mouseButton)) {
 					setFocus(obj);
 					any = true;
-					obj.onPress(mouseX - rect.x, mouseY - rect.y, mouseButton);
 					lastPressedObject = obj;
-					break;
+					return true;
 				}
 			}
 		}
-
-		if (!any)
-			setFocus(null);
+		setFocus(null);
+		return false;
 	}
 
 	@Override
-	public void onRelease(int mouseX, int mouseY, int state) {
+	protected boolean onRelease(int mouseX, int mouseY, int state) {
 		if (lastPressedObject != null) {
 			Rectangle rect = lastPressedObject.getRelativeBounds();
-			lastPressedObject.onRelease(mouseX - rect.x, mouseY - rect.y, state);
+			boolean ret = lastPressedObject.onRelease(mouseX - rect.x, mouseY - rect.y, state);
 			lastPressedObject = null;
+			return ret;
 		}
+		return false;
 	}
 
 	@Override
-	public void onDrag(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
+	protected boolean onDrag(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
 		for (UIObject obj : uiList) {
-			if (obj.isInteractive()) {
-				Rectangle rect = obj.getRelativeBounds();
-				obj.onDrag(mouseX - rect.x, mouseY - rect.y, clickedMouseButton, timeSinceLastClick);
+			Rectangle rect = obj.getRelativeBounds();
+			if (obj.isInteractive() && obj.onDrag(mouseX - rect.x, mouseY - rect.y, clickedMouseButton, timeSinceLastClick)) {
+				return true;
 			}
 		}
+		return false;
 	}
 
 	public void setFocus(UIObject obj) {

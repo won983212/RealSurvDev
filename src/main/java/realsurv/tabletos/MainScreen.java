@@ -21,12 +21,12 @@ import won983212.simpleui.element.UIImage;
 import won983212.simpleui.element.UILabel;
 import won983212.simpleui.element.UIRectangle;
 import won983212.simpleui.element.UITextfield;
-import won983212.simpleui.panel.GridPanel;
-import won983212.simpleui.panel.StackPanel;
-import won983212.simpleui.panel.UIPanel;
-import won983212.simpleui.panel.GridPanel.LengthDefinition;
-import won983212.simpleui.panel.GridPanel.LengthType;
-import won983212.simpleui.panel.StackPanel.Orientation;
+import won983212.simpleui.parentelement.GridPanel;
+import won983212.simpleui.parentelement.StackPanel;
+import won983212.simpleui.parentelement.UIPanel;
+import won983212.simpleui.parentelement.GridPanel.LengthDefinition;
+import won983212.simpleui.parentelement.GridPanel.LengthType;
+import won983212.simpleui.parentelement.StackPanel.Orientation;
 import won983212.simpleui.rootpane.CenteredPane;
 import won983212.simpleui.rootpane.RootPane;
 
@@ -37,7 +37,6 @@ public class MainScreen extends CenteredPane {
 
 	public MainScreen() {
 		super(TabletOS.WIDTH, TabletOS.HEIGHT);
-		setScaledFactor(0);
 		registerDesktopApps();
 		initializePanel();
 	}

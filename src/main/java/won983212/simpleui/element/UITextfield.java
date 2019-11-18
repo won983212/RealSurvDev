@@ -12,10 +12,10 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ChatAllowedCharacters;
 import net.minecraft.util.math.MathHelper;
 import won983212.simpleui.DirWeights;
-import won983212.simpleui.UIObject;
 import won983212.simpleui.animation.Animation;
 import won983212.simpleui.animation.ColorAnimation;
 import won983212.simpleui.font.TrueTypeFont;
+import won983212.simpleui.parentelement.UIObject;
 
 public class UITextfield extends UIObject {
 	private String hint = null;
@@ -87,12 +87,13 @@ public class UITextfield extends UIObject {
 	}
 	
 	@Override
-	public void onPress(int x, int y, int bt) {
+	public boolean onPress(int x, int y, int bt) {
 		Rectangle actBounds = getPadding().getContentRect(getInnerBounds());
 		if(x > actBounds.x && x < actBounds.x + actBounds.width) {
 			String str = getFont().trimStringToWidth(text.substring(lineOffset), x - actBounds.x, false);
 			setCursorPosition(str.length() + lineOffset);
 		}
+		return true;
 	}
 
 	@Override
