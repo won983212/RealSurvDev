@@ -3,6 +3,7 @@ package won983212.simpleui.element;
 import java.awt.Dimension;
 import java.awt.Rectangle;
 
+import net.minecraft.client.gui.Gui;
 import won983212.simpleui.font.TrueTypeFont;
 import won983212.simpleui.parentelement.UIObject;
 
@@ -23,8 +24,8 @@ public class UIRectangle extends UIObject {
 		
 		Rectangle r = getPadding().getContentRect(getInnerBounds());
 		TrueTypeFont font = getFont();
-		int x = r.x + (size.width - font.getStringWidth(label)) / 2;
-		int y = r.y + (size.height - font.getStringHeight(label)) / 2;
+		int x = r.x + (r.width - font.getStringWidth(label)) / 2;
+		int y = r.y + (r.height - font.getStringHeight(label)) / 2;
 		getFont().drawString(label, x, y, foregroundColor, showShadow);
 	}
 }

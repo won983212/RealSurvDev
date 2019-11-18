@@ -30,16 +30,17 @@ public class FontFactory {
 	
 	// it is used for Simple UI Font rendering. 
 	public static TrueTypeFont makeFont(String family, int size) {
-		return makeFont(family, size, true);
+		return makeFont(family, size, 1, true);
 	}
 	
-	public static TrueTypeFont makeFont(String family, int size, boolean antialias) {
-		Key key = new Key(family, size, 1, antialias);
+	public static TrueTypeFont makeFont(String family, int size, int scale, boolean antialias) {
+		Key key = new Key(family, size, scale, antialias);
 		TrueTypeFont f = fonts.get(key);
 		if(f != null) {
 			return f;
 		}
 		f = new TrueTypeFont(family, size, antialias);
+		f.setScaleModifier(scale);
 		fonts.put(key, f);
 		return f;
 	}
